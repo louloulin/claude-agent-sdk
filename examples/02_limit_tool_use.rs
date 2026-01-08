@@ -45,15 +45,15 @@ async fn main() -> anyhow::Result<()> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("Tool used: {}", tool.name);
                             tool_uses.push(tool.name.clone());
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -61,8 +61,8 @@ async fn main() -> anyhow::Result<()> {
                 if let Some(cost) = result.total_cost_usd {
                     println!("Cost: ${:.4}", cost);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -104,11 +104,11 @@ async fn main() -> anyhow::Result<()> {
                     ContentBlock::Text(text) => {
                         claude_response.push_str(&text.text);
                         claude_response.push('\n');
-                    }
+                    },
                     ContentBlock::ToolUse(tool) => {
                         tool_uses2.push(tool.name.clone());
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
             }
         }

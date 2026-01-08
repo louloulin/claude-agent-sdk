@@ -67,7 +67,7 @@ async fn check_bash_command(
             }
 
             HookJsonOutput::Sync(SyncHookJsonOutput::default())
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -92,7 +92,7 @@ async fn add_custom_instructions(
                 )),
                 ..Default::default()
             })
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -131,7 +131,7 @@ async fn review_tool_output(
             }
 
             HookJsonOutput::Sync(SyncHookJsonOutput::default())
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -192,7 +192,7 @@ async fn strict_approval_hook(
                 )),
                 ..Default::default()
             })
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -229,7 +229,7 @@ async fn stop_on_error_hook(
                 continue_: Some(true),
                 ..Default::default()
             })
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -281,11 +281,11 @@ async fn example_pretooluse() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -308,11 +308,11 @@ async fn example_pretooluse() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -362,11 +362,11 @@ async fn example_userpromptsubmit() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -421,11 +421,11 @@ async fn example_posttooluse() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -482,11 +482,11 @@ async fn example_decision_fields() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -509,11 +509,11 @@ async fn example_decision_fields() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -566,11 +566,11 @@ async fn example_continue_control() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 println!("\nResult ended");
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -629,28 +629,28 @@ async fn main() -> anyhow::Result<()> {
 
             example_continue_control().await?;
             println!("{}\n", "-".repeat(50));
-        }
+        },
         "PreToolUse" => {
             example_pretooluse().await?;
-        }
+        },
         "UserPromptSubmit" => {
             example_userpromptsubmit().await?;
-        }
+        },
         "PostToolUse" => {
             example_posttooluse().await?;
-        }
+        },
         "DecisionFields" => {
             example_decision_fields().await?;
-        }
+        },
         "ContinueControl" => {
             example_continue_control().await?;
-        }
+        },
         _ => {
             println!("Error: Unknown example '{}'", example_name);
             println!();
             print_usage();
             return Ok(());
-        }
+        },
     }
 
     Ok(())

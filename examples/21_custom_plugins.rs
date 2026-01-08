@@ -89,14 +89,14 @@ async fn main() -> anyhow::Result<()> {
                                 println!("Plugins loaded: {:?}", plugins);
                                 found_plugin_info = true;
                             }
-                        }
+                        },
                         Message::Assistant(msg) => {
                             for block in &msg.message.content {
                                 if let ContentBlock::Text(text) = block {
                                     println!("Claude: {}", text.text);
                                 }
                             }
-                        }
+                        },
                         Message::Result(result) => {
                             println!("\nResult:");
                             println!("  Duration: {}ms", result.duration_ms);
@@ -104,20 +104,20 @@ async fn main() -> anyhow::Result<()> {
                             if let Some(cost) = result.total_cost_usd {
                                 println!("  Cost: ${:.4}", cost);
                             }
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
 
                 if !found_plugin_info {
                     println!("Note: Plugin info not in system message (this is OK)");
                 }
-            }
+            },
             Err(e) => {
                 println!("\n⚠ Plugin query failed: {}", e);
                 println!("Note: The SDK correctly passes --plugin-dir to Claude CLI.");
                 println!("Plugin support requires Claude CLI with plugin features enabled.");
-            }
+            },
         }
     } else {
         println!("⚠ Test plugin not found at: {}", test_plugin_path);

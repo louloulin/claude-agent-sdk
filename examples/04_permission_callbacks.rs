@@ -182,7 +182,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("💬 Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n========================================");
                 println!("=== Execution Complete ===");
@@ -191,8 +191,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if let Some(cost) = result.total_cost_usd {
                     println!("Cost: ${:.4}", cost);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);

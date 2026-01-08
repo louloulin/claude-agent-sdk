@@ -1,0 +1,43 @@
+# Rustfmt 配置文件 - 稳定版本配置
+
+# 最大行宽
+max_width = 100
+
+# 硬制制表符（避免）
+hard_tabs = false
+
+# 制表符空格数
+tab_spaces = 4
+
+# 版本（使用 2024 版本）
+edition = "2024"
+
+# 使用字段初始化简写
+use_field_init_shorthand = true
+
+# 使用尝试简化
+use_try_shorthand = true
+
+# 重排序导入
+reorder_imports = true
+
+# 删除括号内的空格
+remove_nested_parens = true
+
+# 合合派生
+merge_derives = true
+
+# 格式化宏匹配器
+format_macro_matchers = true
+
+# 格式化宏体
+format_macro_bodies = true
+
+# 链接格式化
+format_code_in_doc_comments = true
+
+# 单行变体宽度
+struct_lit_single_line = true
+
+# 结构体变体宽度
+struct_variant_width = 35

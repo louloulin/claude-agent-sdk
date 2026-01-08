@@ -191,7 +191,7 @@ impl QueryFull {
                                         let _ = tx.send(response.response.data);
                                     }
                                 }
-                            }
+                            },
                             Some("control_request") => {
                                 // Handle incoming control request (e.g., hook callback, MCP message)
                                 if let Ok(request) = serde_json::from_value::<IncomingControlRequest>(
@@ -214,13 +214,13 @@ impl QueryFull {
                                         }
                                     });
                                 }
-                            }
+                            },
                             _ => {
                                 // Regular message - send to stream
                                 let _ = message_tx.send(message);
-                            }
+                            },
                         }
-                    }
+                    },
                     Err(_) => break,
                 }
             }
@@ -286,7 +286,7 @@ impl QueryFull {
                 serde_json::to_value(&hook_output).map_err(|e| {
                     ClaudeError::ControlProtocol(format!("Failed to serialize hook output: {}", e))
                 })?
-            }
+            },
             "mcp_message" => {
                 // Handle SDK MCP message
                 let server_name = request_data
@@ -307,13 +307,13 @@ impl QueryFull {
                         .await?;
 
                 json!({"mcp_response": mcp_response})
-            }
+            },
             _ => {
                 return Err(ClaudeError::ControlProtocol(format!(
                     "Unsupported control request subtype: {}",
                     subtype
                 )));
-            }
+            },
         };
 
         // Send success response

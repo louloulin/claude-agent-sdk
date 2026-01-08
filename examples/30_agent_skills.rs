@@ -64,7 +64,7 @@ fn fibonacci(n: u64) -> u64 {
                 b = temp;
             }
             b
-        }
+        },
     }
 }
 
@@ -96,10 +96,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     println!("❌ Error: {:?}", output.error);
                 }
-            }
+            },
             Err(e) => {
                 println!("❌ Execution error: {}", e);
-            }
+            },
         }
     }
 

@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
             example_user_only().await?;
             println!("{}\n", "-".repeat(50));
             example_project_and_user().await?;
-        }
+        },
         "default" => example_default().await?,
         "user_only" => example_user_only().await?,
         "project_and_user" => example_project_and_user().await?,
@@ -60,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
             println!("  user_only");
             println!("  project_and_user");
             return Ok(());
-        }
+        },
     }
 
     Ok(())
@@ -96,9 +96,9 @@ async fn example_default() -> anyhow::Result<()> {
                     }
                     break;
                 }
-            }
+            },
             Message::Result(_) => break,
-            _ => {}
+            _ => {},
         }
     }
     drop(stream);
@@ -140,9 +140,9 @@ async fn example_user_only() -> anyhow::Result<()> {
                     }
                     break;
                 }
-            }
+            },
             Message::Result(_) => break,
-            _ => {}
+            _ => {},
         }
     }
     drop(stream);
@@ -184,9 +184,9 @@ async fn example_project_and_user() -> anyhow::Result<()> {
                     }
                     break;
                 }
-            }
+            },
             Message::Result(_) => break,
-            _ => {}
+            _ => {},
         }
     }
     drop(stream);

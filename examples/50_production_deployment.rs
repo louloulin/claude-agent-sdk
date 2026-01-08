@@ -254,10 +254,10 @@ impl ShutdownSignal {
                 Ok(()) => {
                     println!("\n🛑 Received shutdown signal");
                     shutdown.store(true, Ordering::Relaxed);
-                }
+                },
                 Err(err) => {
                     eprintln!("❌ Failed to listen for shutdown signal: {}", err);
-                }
+                },
             }
         });
 
@@ -402,7 +402,7 @@ impl ProductionService {
                     .join(" ");
 
                 (true, text)
-            }
+            },
             Ok(Err(e)) => (false, format!("Error: {}", e)),
             Err(_) => (false, "Error: Request timeout".to_string()),
         };

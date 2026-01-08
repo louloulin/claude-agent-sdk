@@ -154,15 +154,15 @@ fn display_messages(messages: &[Message]) {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 if let Some(cost) = result.total_cost_usd
                     && cost > 0.0
                 {
                     println!("\nCost: ${:.4}", cost);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 }

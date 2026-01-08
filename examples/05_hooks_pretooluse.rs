@@ -51,11 +51,11 @@ async fn print_tool_info(
             println!("=====================================\n");
 
             HookJsonOutput::Sync(SyncHookJsonOutput::default())
-        }
+        },
         _ => {
             // Not a PreToolUse event
             HookJsonOutput::Sync(SyncHookJsonOutput::default())
-        }
+        },
     }
 }
 
@@ -102,7 +102,7 @@ async fn block_dangerous_bash(
 
             // Allow safe commands
             HookJsonOutput::Sync(SyncHookJsonOutput::default())
-        }
+        },
         _ => HookJsonOutput::Sync(SyncHookJsonOutput::default()),
     }
 }
@@ -157,7 +157,7 @@ async fn main() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -165,8 +165,8 @@ async fn main() -> anyhow::Result<()> {
                 if let Some(cost) = result.total_cost_usd {
                     println!("Cost: ${:.4}", cost);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

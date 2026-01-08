@@ -370,7 +370,7 @@ mod tests {
                 assert_eq!(pre_tool.session_id, "test-session");
                 assert_eq!(pre_tool.tool_name, "Bash");
                 assert_eq!(pre_tool.tool_input["command"], "echo hello");
-            }
+            },
             _ => panic!("Expected PreToolUse variant"),
         }
     }
@@ -393,7 +393,7 @@ mod tests {
                 assert_eq!(post_tool.session_id, "test-session");
                 assert_eq!(post_tool.tool_name, "Bash");
                 assert_eq!(post_tool.tool_response, "hello\n");
-            }
+            },
             _ => panic!("Expected PostToolUse variant"),
         }
     }
@@ -413,7 +413,7 @@ mod tests {
             HookInput::Stop(stop) => {
                 assert_eq!(stop.session_id, "test-session");
                 assert!(stop.stop_hook_active);
-            }
+            },
             _ => panic!("Expected Stop variant"),
         }
     }
@@ -433,7 +433,7 @@ mod tests {
             HookInput::SubagentStop(subagent) => {
                 assert_eq!(subagent.session_id, "test-session");
                 assert!(!subagent.stop_hook_active);
-            }
+            },
             _ => panic!("Expected SubagentStop variant"),
         }
     }
@@ -458,7 +458,7 @@ mod tests {
                     precompact.custom_instructions,
                     Some("Keep important details".to_string())
                 );
-            }
+            },
             _ => panic!("Expected PreCompact variant"),
         }
     }
@@ -816,7 +816,7 @@ mod tests {
         match result {
             HookJsonOutput::Sync(output) => {
                 assert_eq!(output.continue_, Some(true));
-            }
+            },
             _ => panic!("Expected sync output"),
         }
     }
@@ -854,7 +854,7 @@ mod tests {
             HookJsonOutput::Async(output) => {
                 assert!(output.async_);
                 assert_eq!(output.async_timeout, Some(5000));
-            }
+            },
             _ => panic!("Expected async output"),
         }
     }

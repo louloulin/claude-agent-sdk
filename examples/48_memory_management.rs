@@ -115,8 +115,8 @@ async fn compare_memory_usage(prompt: &str) -> anyhow::Result<()> {
                     }
                 }
                 stream_messages += 1;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -205,8 +205,8 @@ async fn process_large_dataset() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -306,8 +306,8 @@ async fn efficient_text_processing() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

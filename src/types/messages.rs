@@ -478,7 +478,7 @@ mod tests {
             Message::Assistant(assistant) => {
                 assert_eq!(assistant.session_id, Some("test-session".to_string()));
                 assert_eq!(assistant.message.model, Some("claude-sonnet-4".to_string()));
-            }
+            },
             _ => panic!("Expected Assistant variant"),
         }
     }
@@ -503,7 +503,7 @@ mod tests {
                 assert_eq!(result.duration_ms, 1500);
                 assert_eq!(result.num_turns, 3);
                 assert_eq!(result.total_cost_usd, Some(0.0042));
-            }
+            },
             _ => panic!("Expected Result variant"),
         }
     }
@@ -524,7 +524,7 @@ mod tests {
                 assert_eq!(system.subtype, "session_start");
                 assert_eq!(system.cwd, Some("/home/user".to_string()));
                 assert_eq!(system.tools.as_ref().unwrap().len(), 3);
-            }
+            },
             _ => panic!("Expected System variant"),
         }
     }
@@ -581,7 +581,7 @@ mod tests {
             ImageSource::Base64 { media_type, data } => {
                 assert_eq!(media_type, "image/jpeg");
                 assert_eq!(data, "base64data==");
-            }
+            },
             _ => panic!("Expected Base64 variant"),
         }
     }
@@ -597,7 +597,7 @@ mod tests {
         match source {
             ImageSource::Url { url } => {
                 assert_eq!(url, "https://example.com/test.gif");
-            }
+            },
             _ => panic!("Expected Url variant"),
         }
     }
@@ -639,7 +639,7 @@ mod tests {
         match block {
             UserContentBlock::Text { text } => {
                 assert_eq!(text, "Test message");
-            }
+            },
             _ => panic!("Expected Text variant"),
         }
     }
@@ -651,7 +651,7 @@ mod tests {
         match block {
             UserContentBlock::Text { text } => {
                 assert_eq!(text, "Owned message");
-            }
+            },
             _ => panic!("Expected Text variant"),
         }
     }
@@ -702,7 +702,7 @@ mod tests {
                 ImageSource::Base64 { media_type, data } => {
                     assert_eq!(media_type, "image/webp");
                     assert_eq!(data, "UklGR");
-                }
+                },
                 _ => panic!("Expected Base64 source"),
             },
             _ => panic!("Expected Image variant"),
@@ -720,7 +720,7 @@ mod tests {
         match block {
             UserContentBlock::Text { text } => {
                 assert_eq!(text, "Describe this image");
-            }
+            },
             _ => panic!("Expected Text variant"),
         }
     }
@@ -740,7 +740,7 @@ mod tests {
             UserContentBlock::Image { source } => match source {
                 ImageSource::Url { url } => {
                     assert_eq!(url, "https://example.com/diagram.png");
-                }
+                },
                 _ => panic!("Expected Url source"),
             },
             _ => panic!("Expected Image variant"),

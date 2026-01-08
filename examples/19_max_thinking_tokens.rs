@@ -60,17 +60,17 @@ async fn main() -> anyhow::Result<()> {
                             println!("{}", thinking.thinking);
                             println!("Signature: {}", thinking.signature);
                             println!();
-                        }
+                        },
                         ContentBlock::Text(text) => {
                             found_answer = true;
                             println!("=== Final Answer ===");
                             println!("{}", text.text);
                             println!();
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -83,8 +83,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("\nToken Usage:");
                     println!("{}", serde_json::to_string_pretty(usage)?);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

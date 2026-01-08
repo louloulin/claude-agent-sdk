@@ -71,13 +71,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match version_manager.compare_versions(v1, v2)? {
             std::cmp::Ordering::Greater => {
                 println!("   📈 {} > {}", v1, v2);
-            }
+            },
             std::cmp::Ordering::Less => {
                 println!("   📉 {} < {}", v1, v2);
-            }
+            },
             std::cmp::Ordering::Equal => {
                 println!("   ⚖️  {} == {}", v1, v2);
-            }
+            },
         }
     }
     println!();
@@ -133,10 +133,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     println!("   ✅ {} (当前: {}): 已是最新版", skill_id, current);
                 }
-            }
+            },
             Err(e) => {
                 println!("   ❌ {} (当前: {}): {}", skill_id, current, e);
-            }
+            },
         }
     }
     println!();
@@ -180,11 +180,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match result {
             CompatibilityResult::Compatible { .. } => {
                 println!("      ✅ {} satisfies {}", version, requirement);
-            }
+            },
             CompatibilityResult::Incompatible { .. } => {
                 println!("      ❌ {} does NOT satisfy {}", version, requirement);
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     println!();

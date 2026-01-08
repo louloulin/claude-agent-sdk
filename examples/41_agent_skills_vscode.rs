@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 println!("  ...");
             }
-        }
+        },
         Err(e) => println!("✗ Export failed: {}", e),
     }
     println!();
@@ -177,7 +177,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             for path in exported {
                 println!("  - {}", path);
             }
-        }
+        },
         Err(e) => println!("✗ Batch export failed: {}", e),
     }
     println!();
@@ -203,7 +203,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("  {}", line);
                 }
             }
-        }
+        },
         Err(e) => println!("✗ Export failed: {}", e),
     }
     println!();
@@ -234,7 +234,7 @@ For more information, visit: https://github.com/tyrchen/claude-agent-sdk-rs"
                     println!("  {}", line);
                 }
             }
-        }
+        },
         Err(e) => println!("✗ Export failed: {}", e),
     }
     println!();
@@ -327,7 +327,7 @@ Generate comprehensive API documentation following these guidelines:
             println!("  - Dependencies section");
             println!("  - Resources section (folders, tools, tests)");
             println!("  - Usage examples section");
-        }
+        },
         Err(e) => println!("✗ Export failed: {}", e),
     }
 

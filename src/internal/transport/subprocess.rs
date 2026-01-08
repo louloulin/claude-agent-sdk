@@ -241,7 +241,7 @@ impl SubprocessTransport {
                 crate::types::config::SystemPrompt::Text(text) => {
                     args.push("--system-prompt".to_string());
                     args.push(text.clone());
-                }
+                },
                 crate::types::config::SystemPrompt::Preset(preset) => {
                     // Only add append if present (uses default Claude Code prompt)
                     if let Some(ref append) = preset.append {
@@ -249,7 +249,7 @@ impl SubprocessTransport {
                         args.push(append.clone());
                     }
                     // Note: preset.preset field is ignored - CLI uses default prompt
-                }
+                },
             }
         }
 
@@ -264,12 +264,12 @@ impl SubprocessTransport {
                         args.push("--tools".to_string());
                         args.push(tool_list.join(","));
                     }
-                }
+                },
                 crate::types::config::Tools::Preset(_) => {
                     // Preset object - 'claude_code' preset maps to 'default'
                     args.push("--tools".to_string());
                     args.push("default".to_string());
-                }
+                },
             }
         }
 
@@ -622,7 +622,7 @@ impl Transport for SubprocessTransport {
                 let text_owned = text.clone();
                 self.write(&text_owned).await?;
                 self.end_input().await?;
-            }
+            },
             QueryPrompt::Content(blocks) => {
                 // Format as JSON user message for stream-json input format
                 let user_message = serde_json::json!({
@@ -637,10 +637,10 @@ impl Transport for SubprocessTransport {
                 })?;
                 self.write(&content_json).await?;
                 self.end_input().await?;
-            }
+            },
             QueryPrompt::Streaming => {
                 // Don't send initial prompt or close stdin - leave it open for streaming
-            }
+            },
         }
 
         Ok(())

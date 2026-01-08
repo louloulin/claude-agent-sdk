@@ -64,46 +64,46 @@ async fn main() -> anyhow::Result<()> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("  Text: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("  Tool: {} ({})", tool.name, tool.id);
                             println!("  Input: {}", serde_json::to_string(&tool.input)?);
-                        }
+                        },
                         ContentBlock::ToolResult(result) => {
                             println!("  Tool Result: {}", result.tool_use_id);
                             if let Some(ref content) = result.content {
                                 match content {
                                     claude_agent_sdk_rs::ToolResultContent::Text(text) => {
                                         println!("    {}", text);
-                                    }
+                                    },
                                     claude_agent_sdk_rs::ToolResultContent::Blocks(blocks) => {
                                         println!("    {} blocks", blocks.len());
-                                    }
+                                    },
                                 }
                             }
-                        }
+                        },
                         ContentBlock::Thinking(thinking) => {
                             println!("  Thinking: {} chars", thinking.thinking.len());
-                        }
+                        },
                         ContentBlock::Image(image) => match &image.source {
                             claude_agent_sdk_rs::ImageSource::Base64 { media_type, .. } => {
                                 println!("  Image (base64): {}", media_type);
-                            }
+                            },
                             claude_agent_sdk_rs::ImageSource::Url { url } => {
                                 println!("  Image (url): {}", url);
-                            }
+                            },
                         },
                     }
                 }
                 println!();
-            }
+            },
             Message::System(sys) => {
                 println!(
                     "[{}ms] Message #{}: System ({})",
                     elapsed, message_count, sys.subtype
                 );
                 println!();
-            }
+            },
             Message::Result(result) => {
                 println!("[{}ms] Message #{}: Result", elapsed, message_count);
                 println!("  Duration: {}ms", result.duration_ms);
@@ -113,13 +113,13 @@ async fn main() -> anyhow::Result<()> {
                     println!("  Cost: ${:.4}", cost);
                 }
                 println!();
-            }
+            },
             Message::StreamEvent(event) => {
                 println!("[{}ms] Message #{}: Stream Event", elapsed, message_count);
                 println!("  Session: {}", event.session_id);
                 println!();
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

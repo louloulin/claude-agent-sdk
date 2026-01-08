@@ -40,10 +40,10 @@ fn test_real_assistant_001_basic_text() {
             match &assistant.message.content[0] {
                 ContentBlock::Text(text) => {
                     assert!(!text.text.is_empty());
-                }
+                },
                 _ => panic!("Expected text block"),
             }
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -58,7 +58,7 @@ fn test_real_assistant_002_tool_use_planning() {
             assert!(assistant.uuid.is_some());
             // Has usage stats from real API
             assert!(assistant.message.usage.is_some());
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -84,7 +84,7 @@ fn test_real_assistant_003_with_tool_use() {
                     assert!(tool_use.id.starts_with("toolu_"));
                 }
             }
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -104,7 +104,7 @@ fn test_all_assistant_messages() {
 
                 // Should have content
                 assert!(!assistant.message.content.is_empty() || assistant.message.model.is_some());
-            }
+            },
             _ => panic!("Expected Assistant message in {}", path),
         }
     }
@@ -131,7 +131,7 @@ fn test_real_user_001_tool_result() {
                     .unwrap()
                     .starts_with("toolu_")
             );
-        }
+        },
         _ => panic!("Expected User message"),
     }
 }
@@ -146,7 +146,7 @@ fn test_real_user_001_error_result() {
             if content["is_error"].is_boolean() {
                 assert_eq!(content["is_error"], true);
             }
-        }
+        },
         _ => panic!("Expected User message"),
     }
 }
@@ -159,7 +159,7 @@ fn test_all_user_messages() {
         match msg {
             Message::User(_user) => {
                 // Successfully deserialized
-            }
+            },
             _ => panic!("Expected User message in {}", path),
         }
     }
@@ -183,7 +183,7 @@ fn test_real_system_001() {
             assert!(system.tools.is_some());
             let tools = system.tools.as_ref().unwrap();
             assert!(!tools.is_empty());
-        }
+        },
         _ => panic!("Expected System message"),
     }
 }
@@ -198,7 +198,7 @@ fn test_all_system_messages() {
                 assert!(!system.subtype.is_empty());
                 assert!(system.session_id.is_some());
                 assert!(system.uuid.is_some());
-            }
+            },
             _ => panic!("Expected System message in {}", path),
         }
     }
@@ -224,7 +224,7 @@ fn test_real_result_001() {
 
             let cost = result.total_cost_usd.unwrap();
             assert!(cost > 0.0);
-        }
+        },
         _ => panic!("Expected Result message"),
     }
 }
@@ -240,7 +240,7 @@ fn test_all_result_messages() {
                 assert!(result.duration_ms > 0);
                 assert!(result.duration_api_ms > 0);
                 assert!(result.num_turns > 0);
-            }
+            },
             _ => panic!("Expected Result message in {}", path),
         }
     }
@@ -266,7 +266,7 @@ fn test_real_stream_event_001_message_start() {
             assert!(event.event["message"].is_object());
             let message = &event.event["message"];
             assert_eq!(message["model"], "claude-sonnet-4-5-20250929");
-        }
+        },
         _ => panic!("Expected StreamEvent message"),
     }
 }
@@ -289,7 +289,7 @@ fn test_stream_event_types() {
                     "Event type mismatch in {}",
                     path
                 );
-            }
+            },
             _ => panic!("Expected StreamEvent in {}", path),
         }
     }
@@ -306,7 +306,7 @@ fn test_stream_event_content_deltas() {
                 // Should be valid stream event
                 assert!(!event.uuid.is_empty());
                 assert!(!event.session_id.is_empty());
-            }
+            },
             _ => panic!("Expected StreamEvent in {}", path),
         }
     }
@@ -323,7 +323,7 @@ fn test_all_stream_events() {
                 assert!(!event.uuid.is_empty());
                 assert!(!event.session_id.is_empty());
                 assert!(event.event.is_object());
-            }
+            },
             _ => panic!("Expected StreamEvent in {}", path),
         }
     }
@@ -345,7 +345,7 @@ fn test_content_block_text() {
                     return; // Found at least one
                 }
             }
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -366,7 +366,7 @@ fn test_content_block_tool_use() {
                 }
             }
             panic!("Expected to find ToolUse block");
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -391,7 +391,7 @@ fn test_usage_statistics_structure() {
             if usage["cache_read_input_tokens"].is_number() {
                 assert!(usage["cache_read_input_tokens"].as_u64().is_some());
             }
-        }
+        },
         _ => panic!("Expected Result message"),
     }
 }
@@ -405,7 +405,7 @@ fn test_cost_calculation() {
                 assert!(cost >= 0.0);
                 assert!(cost < 100.0); // Sanity check - should be small
             }
-        }
+        },
         _ => panic!("Expected Result message"),
     }
 }
@@ -469,7 +469,7 @@ fn test_message_id_format() {
                 assert!(id.starts_with("msg_"));
                 assert!(id.len() > 4);
             }
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -486,7 +486,7 @@ fn test_tool_use_id_format() {
                     return;
                 }
             }
-        }
+        },
         _ => panic!("Expected Assistant message"),
     }
 }
@@ -512,7 +512,7 @@ fn test_serialization_roundtrip_assistant() {
             assert_eq!(a1.session_id, a2.session_id);
             assert_eq!(a1.uuid, a2.uuid);
             assert_eq!(a1.message.model, a2.message.model);
-        }
+        },
         _ => panic!("Type mismatch after round-trip"),
     }
 }
@@ -530,7 +530,7 @@ fn test_serialization_roundtrip_result() {
             assert_eq!(r1.session_id, r2.session_id);
             assert_eq!(r1.duration_ms, r2.duration_ms);
             assert_eq!(r1.total_cost_usd, r2.total_cost_usd);
-        }
+        },
         _ => panic!("Type mismatch after round-trip"),
     }
 }

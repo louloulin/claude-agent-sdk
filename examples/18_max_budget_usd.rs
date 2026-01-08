@@ -49,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -67,8 +67,8 @@ async fn main() -> anyhow::Result<()> {
                         println!("⚠ Budget exceeded - conversation may have been stopped");
                     }
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

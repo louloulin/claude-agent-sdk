@@ -205,7 +205,7 @@ impl SandboxExecutor {
             Ok(Ok(mut result)) => {
                 result.execution_time_ms = execution_time.as_millis() as u64;
                 Ok(result)
-            }
+            },
             Ok(Err(e)) => Err(e),
             Err(_) => {
                 // Timeout
@@ -219,7 +219,7 @@ impl SandboxExecutor {
                     memory_used: None,
                     fuel_consumed: None,
                 })
-            }
+            },
         }
     }
 

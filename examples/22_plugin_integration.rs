@@ -74,7 +74,7 @@ async fn main() -> anyhow::Result<()> {
             println!("  • Plugin support enabled (if available)");
             println!("  • Valid plugin paths");
             return Ok(());
-        }
+        },
     }
 
     // Example task: Ask Claude to help with development
@@ -100,18 +100,18 @@ async fn main() -> anyhow::Result<()> {
                         match block {
                             claude_agent_sdk_rs::ContentBlock::Text(text) => {
                                 println!("{}", text.text);
-                            }
+                            },
                             claude_agent_sdk_rs::ContentBlock::ToolUse(tool) => {
                                 println!("  [Tool: {}]", tool.name);
-                            }
-                            _ => {}
+                            },
+                            _ => {},
                         }
                     }
                     println!();
-                }
+                },
                 Ok(Message::System(sys)) => {
                     println!("System: {}", sys.subtype);
-                }
+                },
                 Ok(Message::Result(result)) => {
                     println!("--- Result ---");
                     println!("Duration: {}ms", result.duration_ms);
@@ -121,12 +121,12 @@ async fn main() -> anyhow::Result<()> {
                         println!("Cost: ${:.4}", cost);
                     }
                     break;
-                }
+                },
                 Err(e) => {
                     println!("Error: {}", e);
                     break;
-                }
-                _ => {}
+                },
+                _ => {},
             }
         }
     }

@@ -56,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("💬 Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("🔧 Tool: {}", tool.name);
                             println!("   ID: {}", tool.id);
@@ -67,15 +67,15 @@ async fn main() -> anyhow::Result<()> {
                                 .entry(tool.name.clone())
                                 .or_default()
                                 .push(tool.input.clone());
-                        }
+                        },
                         ContentBlock::Thinking(thinking) => {
                             println!("🤔 Thinking: {}", thinking.thinking);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
                 println!();
-            }
+            },
             Message::System(sys) => {
                 if sys.subtype == "init" {
                     println!("System initialized");
@@ -84,7 +84,7 @@ async fn main() -> anyhow::Result<()> {
                     }
                     println!();
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n========================================================");
                 println!("=== Final Result ===");
@@ -108,8 +108,8 @@ async fn main() -> anyhow::Result<()> {
                 if let Some(ref result_text) = result.result {
                     println!("Result: {}", result_text);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

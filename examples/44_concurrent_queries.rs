@@ -230,11 +230,11 @@ async fn error_isolation_example() -> Result<()> {
                 Ok(messages) => {
                     println!("   ✓ Query succeeded: {}", q);
                     Some(messages)
-                }
+                },
                 Err(e) => {
                     println!("   ✗ Query failed: {} - {}", q, e);
                     None
-                }
+                },
             }
         })
         .buffer_unordered(3)
@@ -324,15 +324,15 @@ async fn concurrent_with_timeout() -> Result<()> {
                 Ok(Ok(messages)) => {
                     println!("   ✓ {} completed in {:?}", name, start.elapsed());
                     Some((name, messages))
-                }
+                },
                 Ok(Err(e)) => {
                     println!("   ✗ {} failed: {}", name, e);
                     None
-                }
+                },
                 Err(_) => {
                     println!("   ✗ {} timed out after {:?}", name, timeout);
                     None
-                }
+                },
             }
         })
         .buffer_unordered(3)

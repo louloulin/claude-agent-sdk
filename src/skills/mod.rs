@@ -130,12 +130,12 @@ impl SkillRegistry {
                         path
                     );
                     packages.push(package);
-                }
+                },
                 Err(e) => {
                     tracing::warn!("Failed to load skill package from {:?}: {}", path, e);
                     // Continue loading other files instead of failing completely
                     continue;
-                }
+                },
             }
         }
 

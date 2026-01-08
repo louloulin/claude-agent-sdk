@@ -49,15 +49,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Duration: {}ms, Cost: ${:.4}\n",
                     result.duration_ms,
                     result.total_cost_usd.unwrap_or(0.0)
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream); // Release borrow before next query
@@ -77,15 +77,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Duration: {}ms, Cost: ${:.4}\n",
                     result.duration_ms,
                     result.total_cost_usd.unwrap_or(0.0)
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream); // Release borrow before next query
@@ -103,15 +103,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Duration: {}ms, Cost: ${:.4}\n",
                     result.duration_ms,
                     result.total_cost_usd.unwrap_or(0.0)
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream); // Release borrow before disconnect

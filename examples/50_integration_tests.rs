@@ -39,11 +39,11 @@ async fn main() -> Result<()> {
             Ok(_) => {
                 println!("   ✓ PASSED\n");
                 passed += 1;
-            }
+            },
             Err(e) => {
                 println!("   ✗ FAILED: {}\n", e);
                 failed += 1;
-            }
+            },
         }
     }
 

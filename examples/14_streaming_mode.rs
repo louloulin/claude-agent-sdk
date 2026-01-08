@@ -37,21 +37,21 @@ fn display_message(msg: &Message) {
             } else if let Some(ref text) = user_msg.text {
                 println!("User: {}", text);
             }
-        }
+        },
         Message::Assistant(assistant_msg) => {
             for block in &assistant_msg.message.content {
                 if let ContentBlock::Text(text) = block {
                     println!("Claude: {}", text.text);
                 }
             }
-        }
+        },
         Message::System(_) => {
             // Ignore system messages
-        }
+        },
         Message::Result(_) => {
             println!("Result ended");
-        }
-        _ => {}
+        },
+        _ => {},
     }
 }
 
@@ -192,13 +192,13 @@ async fn example_manual_message_handling() -> Result<(), Box<dyn std::error::Err
                         }
                     }
                 }
-            }
+            },
             Message::Result(_) => {
                 display_message(&msg);
                 println!("Total languages mentioned: {}", languages_found.len());
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -260,14 +260,14 @@ async fn example_bash_command() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                 }
-            }
+            },
             Message::Assistant(assistant_msg) => {
                 // Assistant messages can contain tool use blocks
                 for block in assistant_msg.message.content {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool_use) => {
                             println!("Tool Use: {} (id: {})", tool_use.name, tool_use.id);
                             if tool_use.name == "Bash"
@@ -276,19 +276,19 @@ async fn example_bash_command() -> Result<(), Box<dyn std::error::Error>> {
                             {
                                 println!("  Command: {}", cmd_str);
                             }
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::Result(result_msg) => {
                 println!("Result ended");
                 if let Some(cost) = result_msg.total_cost_usd {
                     println!("Cost: ${:.4}", cost);
                 }
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -467,18 +467,18 @@ async fn example_error_handling() -> Result<(), Box<dyn std::error::Error>> {
             {
                 Ok(result) => {
                     result?;
-                }
+                },
                 Err(_) => {
                     println!(
                         "\nResponse timeout after 10 seconds - demonstrating graceful handling"
                     );
                     println!("Received {} messages before timeout", messages.len());
-                }
+                },
             }
-        }
+        },
         Err(e) => {
             println!("Connection error: {}", e);
-        }
+        },
     }
 
     // Always disconnect
@@ -539,7 +539,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("\n=== Running: error_handling ===\n");
             example_error_handling().await?;
             println!("{}\n", "-".repeat(50));
-        }
+        },
         "basic_streaming" => example_basic_streaming().await?,
         "multi_turn_conversation" => example_multi_turn_conversation().await?,
         "with_options" => example_with_options().await?,
@@ -559,7 +559,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  control_protocol");
             println!("  error_handling");
             std::process::exit(1);
-        }
+        },
     }
 
     Ok(())

@@ -149,10 +149,10 @@ async fn fan_out_pattern(
                                 }
                             }
                         }
-                    }
+                    },
                     Err(e) => {
                         eprintln!("  [Worker {}] ✗ Error: {}", worker_id + 1, e);
-                    }
+                    },
                 }
 
                 processed += 1;
@@ -198,11 +198,11 @@ async fn fan_in_pattern(prompts: Vec<String>) -> std::collections::HashMap<Strin
                     }
                 }
                 results.insert(prompt, responses);
-            }
+            },
             Err(e) => {
                 eprintln!("  ✗ Failed: {} ({})", prompt, e);
                 results.insert(prompt, vec![format!("Error: {}", e)]);
-            }
+            },
         }
     }
 
@@ -240,10 +240,10 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
+            },
             Err(e) => {
                 eprintln!("  {}: Error - {}", prompt, e);
-            }
+            },
         }
     }
 
@@ -305,10 +305,10 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
+            },
             Err(e) => {
                 eprintln!("  Error: {}\n", e);
-            }
+            },
         }
     }
 

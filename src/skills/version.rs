@@ -45,7 +45,7 @@ impl fmt::Display for CompatibilityResult {
                     "✅ Version {} satisfies requirement {}",
                     version, requirement
                 )
-            }
+            },
             CompatibilityResult::Incompatible {
                 version,
                 requirement,
@@ -56,10 +56,10 @@ impl fmt::Display for CompatibilityResult {
                     "❌ Version {} does not satisfy requirement {}: {}",
                     version, requirement, reason
                 )
-            }
+            },
             CompatibilityResult::ParseError { input, error } => {
                 write!(f, "❌ Failed to parse '{}': {}", input, error)
-            }
+            },
         }
     }
 }
@@ -98,7 +98,7 @@ impl VersionManager {
                     input: version.to_string(),
                     error: e.to_string(),
                 };
-            }
+            },
         };
 
         let req = match VersionReq::parse(requirement) {
@@ -108,7 +108,7 @@ impl VersionManager {
                     input: requirement.to_string(),
                     error: e.to_string(),
                 };
-            }
+            },
         };
 
         if req.matches(&version) {
@@ -249,7 +249,7 @@ mod tests {
             } => {
                 assert_eq!(version, "1.2.3");
                 assert_eq!(requirement, "^1.0.0");
-            }
+            },
             _ => panic!("Expected compatible result"),
         }
     }
@@ -267,7 +267,7 @@ mod tests {
             } => {
                 assert_eq!(version, "2.0.0");
                 assert_eq!(requirement, "^1.0.0");
-            }
+            },
             _ => panic!("Expected incompatible result"),
         }
     }
@@ -280,7 +280,7 @@ mod tests {
         match result {
             CompatibilityResult::ParseError { input, .. } => {
                 assert_eq!(input, "invalid");
-            }
+            },
             _ => panic!("Expected parse error"),
         }
     }

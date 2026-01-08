@@ -303,7 +303,7 @@ mod tests {
                 let dep1_idx = load_order.iter().position(|id| id == "dep1").unwrap();
                 let main_idx = load_order.iter().position(|id| id == "main").unwrap();
                 assert!(dep1_idx < main_idx);
-            }
+            },
             _ => panic!("Expected resolved result"),
         }
     }
@@ -323,7 +323,7 @@ mod tests {
             ResolutionResult::CircularDependency { cycle } => {
                 assert!(cycle.contains(&"skill1".to_string()));
                 assert!(cycle.contains(&"skill2".to_string()));
-            }
+            },
             _ => panic!("Expected circular dependency error"),
         }
     }
@@ -341,7 +341,7 @@ mod tests {
         match result {
             ResolutionResult::MissingDependencies { missing } => {
                 assert_eq!(missing, vec!["missing-dep".to_string()]);
-            }
+            },
             _ => panic!("Expected missing dependencies error"),
         }
     }
@@ -374,7 +374,7 @@ mod tests {
                 let c_idx = load_order.iter().position(|id| id == "c").unwrap();
                 assert!(b_idx < a_idx);
                 assert!(c_idx < a_idx);
-            }
+            },
             _ => panic!("Expected resolved result"),
         }
     }

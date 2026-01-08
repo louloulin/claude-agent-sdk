@@ -691,13 +691,13 @@ async fn test_plugin_integration() -> anyhow::Result<()> {
                                 if let Some(plugins) = sys.data.get("plugins") {
                                     println!("✓ Plugins in system message: {:?}", plugins);
                                 }
-                            }
+                            },
                             Ok(Message::Result(_)) => break,
                             Err(e) => {
                                 println!("Message error: {}", e);
                                 break;
-                            }
-                            _ => {}
+                            },
+                            _ => {},
                         }
                     }
                 })
@@ -711,11 +711,11 @@ async fn test_plugin_integration() -> anyhow::Result<()> {
             } else {
                 println!("Plugin loaded but system message format may vary");
             }
-        }
+        },
         Err(e) => {
             println!("Connection failed (this may be expected): {}", e);
             println!("SDK correctly configured plugin, CLI interaction skipped");
-        }
+        },
     }
 
     Ok(())

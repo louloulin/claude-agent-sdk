@@ -53,14 +53,14 @@ async fn main() -> anyhow::Result<()> {
                 println!("Stream Event: {:?}", event);
                 // You can access partial content as it arrives
                 // This is useful for real-time UI updates
-            }
+            },
             Message::Assistant(msg) => {
                 for block in &msg.message.content {
                     if let claude_agent_sdk_rs::ContentBlock::Text(text) = block {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -69,10 +69,10 @@ async fn main() -> anyhow::Result<()> {
                     println!("Cost: ${:.4}", cost);
                 }
                 break;
-            }
+            },
             _ => {
                 // Other messages
-            }
+            },
         }
     }
     drop(stream);

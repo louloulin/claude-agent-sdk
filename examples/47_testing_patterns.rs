@@ -177,10 +177,10 @@ async fn integration_testing_patterns() -> Result<()> {
                 if !valid_turns {
                     println!("     ⚠️  Warning: Turn count outside expected range");
                 }
-            }
+            },
             Err(e) => {
                 println!("     ✗ Test failed: {}", e);
-            }
+            },
         }
     }
 
@@ -262,10 +262,10 @@ async fn error_scenario_testing() -> Result<()> {
         match query(query_text, None).await {
             Ok(messages) => {
                 println!("     Unexpected success ({} messages)", messages.len());
-            }
+            },
             Err(e) => {
                 println!("     Expected error: {}", e);
-            }
+            },
         }
     }
 

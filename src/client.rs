@@ -477,7 +477,7 @@ impl ClaudeClient {
                         "Client not connected. Call connect() first.".to_string(),
                     ))
                 }));
-            }
+            },
         };
 
         Box::pin(async_stream::stream! {
@@ -553,7 +553,7 @@ impl ClaudeClient {
                         "Client not connected. Call connect() first.".to_string(),
                     ))
                 }));
-            }
+            },
         };
 
         Box::pin(async_stream::stream! {

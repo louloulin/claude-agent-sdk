@@ -35,12 +35,12 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
                 message_count += 1;
-            }
+            },
             Message::Result(result) if result.is_error => {
                 eprintln!("\n❌ Error result received");
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -88,12 +88,12 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
+            },
             Message::Result(result) if result.is_error => {
                 eprintln!("\n❌ Error result received");
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
 
         // Print progress every few messages
@@ -153,12 +153,12 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
+            },
             Message::Error(err) => {
                 eprintln!("❌ Error: {}", err.error.message);
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -206,12 +206,12 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }
+            },
             Message::Error(err) => {
                 eprintln!("❌ Error: {}", err.error.message);
                 break;
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

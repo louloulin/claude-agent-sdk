@@ -145,11 +145,11 @@ async fn budget_control_example() -> Result<()> {
         Ok(messages) => {
             println!("   ✓ Query completed within budget");
             println!("   Received {} messages", messages.len());
-        }
+        },
         Err(e) => {
             println!("   ✗ Query failed: {}", e);
             println!("   (Likely exceeded budget or max turns)");
-        }
+        },
     }
 
     Ok(())

@@ -143,10 +143,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if !result.stderr.is_empty() {
                     println!("  Stderr: {}", result.stderr);
                 }
-            }
+            },
             Err(e) => {
                 println!("✗ Execution failed: {}", e);
-            }
+            },
         }
     }
 
@@ -221,10 +221,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(result) => {
                 println!("✓ File execution successful");
                 println!("  Stdout: {}", result.stdout);
-            }
+            },
             Err(e) => {
                 println!("✗ File execution failed: {}", e);
-            }
+            },
         }
 
         // Clean up

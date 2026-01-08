@@ -1,0 +1,46 @@
+# Clippy 配置文件 - Lint 规则配置
+
+# 复杂度阈值
+cognitive-complexity-threshold = 30
+too-many-arguments-threshold = 7
+type-complexity-threshold = 250
+
+# 文档要求
+missing-docs-in-private-items = false
+
+# 允许 panic
+allow-expect-in-tests = true
+allow-unwrap-in-tests = true
+allow-panic-in-tests = true
+
+# 性能相关
+vec-box-size-threshold = 512
+stack-size-threshold = 512000
+
+# 代码样式
+enum-variant-name-threshold = 3
+literal-representation-threshold = 3
+
+# 禁用的 lints
+# 单行注释允许过多字符
+# doc-markdown = false
+
+# 启用的 lints
+# warn-on-all-wildcard-imports = true
+
+# 优先级
+# 允许的 lint
+allow-print = true
+allow-missing-docs = true
+
+# 警告的 lint
+warn-unused-alloc = true
+
+# 禁止的 lint
+disallow-methods = []
+
+# 最大函数行数
+# max-function-lines = 100
+
+# 最大结构体字段
+# max-struct-field-visibility = 3

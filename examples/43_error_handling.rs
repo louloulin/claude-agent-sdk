@@ -61,22 +61,22 @@ async fn handle_api_errors() -> Result<()> {
         Ok(messages) => {
             println!("   Got {} messages", messages.len());
             Ok(())
-        }
+        },
         Err(QueryError::Api(e)) => {
             // Handle API-specific errors
             eprintln!("   API Error: {}", e);
             Err(e.into())
-        }
+        },
         Err(QueryError::Transport(e)) => {
             // Handle transport/communication errors
             eprintln!("   Transport Error: {}", e);
             Err(e.into())
-        }
+        },
         Err(e) => {
             // Handle other errors
             eprintln!("   Unexpected Error: {}", e);
             Err(e.into())
-        }
+        },
     }
 }
 
@@ -196,16 +196,16 @@ async fn retry_with_backoff() -> Result<()> {
             Ok(_) => {
                 println!("   Success on attempt {}", attempt);
                 return Ok(());
-            }
+            },
             Err(e) if attempt < max_retries => {
                 let backoff = Duration::from_millis(100 * 2_u64.pow(attempt as u32));
                 println!("   Attempt {} failed, retrying in {:?}", attempt, backoff);
                 tokio::time::sleep(backoff).await;
-            }
+            },
             Err(e) => {
                 println!("   All {} attempts failed", max_retries);
                 return Err(e.into());
-            }
+            },
         }
     }
 }

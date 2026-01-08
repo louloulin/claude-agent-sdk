@@ -166,7 +166,7 @@ impl BaseOrchestrator {
                         ))
                         .await;
                     }
-                }
+                },
             }
         }
 

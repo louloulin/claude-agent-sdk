@@ -53,7 +53,7 @@ async fn calculator_handler(args: serde_json::Value) -> anyhow::Result<ToolResul
                 });
             }
             a / b
-        }
+        },
         _ => {
             return Ok(ToolResult {
                 content: vec![McpToolResultContent::Text {
@@ -61,7 +61,7 @@ async fn calculator_handler(args: serde_json::Value) -> anyhow::Result<ToolResul
                 }],
                 is_error: true,
             });
-        }
+        },
     };
 
     Ok(ToolResult {
@@ -270,15 +270,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("🔧 Using tool: {} ({})", tool.name, tool.id);
                             println!("   Input: {}", serde_json::to_string_pretty(&tool.input)?);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::User(user_msg) => {
                 // Tool results come as User messages
                 if let Some(content_blocks) = &user_msg.content {
@@ -291,14 +291,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Turns: {}, Duration: {}ms\n",
                     result.num_turns, result.duration_ms
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -318,15 +318,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("🔧 Using tool: {} ({})", tool.name, tool.id);
                             println!("   Input: {}", serde_json::to_string_pretty(&tool.input)?);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::User(user_msg) => {
                 // Tool results come as User messages
                 if let Some(content_blocks) = &user_msg.content {
@@ -339,14 +339,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Turns: {}, Duration: {}ms\n",
                     result.num_turns, result.duration_ms
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -366,15 +366,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("🔧 Using tool: {} ({})", tool.name, tool.id);
                             println!("   Input: {}", serde_json::to_string_pretty(&tool.input)?);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::User(user_msg) => {
                 // Tool results come as User messages
                 if let Some(content_blocks) = &user_msg.content {
@@ -387,14 +387,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Turns: {}, Duration: {}ms\n",
                     result.num_turns, result.duration_ms
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);
@@ -414,15 +414,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("🔧 Using tool: {} ({})", tool.name, tool.id);
                             println!("   Input: {}", serde_json::to_string_pretty(&tool.input)?);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::User(user_msg) => {
                 // Tool results come as User messages
                 if let Some(content_blocks) = &user_msg.content {
@@ -435,14 +435,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!(
                     "\n[Result] Turns: {}, Duration: {}ms\n",
                     result.num_turns, result.duration_ms
                 );
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream);

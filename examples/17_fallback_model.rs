@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
                         found_text = true;
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -62,8 +62,8 @@ async fn main() -> anyhow::Result<()> {
                 if let Some(cost) = result.total_cost_usd {
                     println!("Cost: ${:.4}", cost);
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

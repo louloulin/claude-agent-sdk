@@ -86,10 +86,10 @@ impl HotReloadWatcher {
             move |result: notify::Result<notify::Event>| match result {
                 Ok(event) => {
                     Self::handle_event(event, &sender_clone, &file_patterns);
-                }
+                },
                 Err(e) => {
                     error!("Hot reload error: {:?}", e);
-                }
+                },
             },
         )
         .map_err(|e| SkillError::Configuration(format!("Failed to create watcher: {}", e)))?;
@@ -155,16 +155,16 @@ impl HotReloadWatcher {
                 Self::load_and_send_event(path, sender, |path, skill| {
                     HotReloadEvent::SkillCreated { path, skill }
                 });
-            }
+            },
             EventKind::Modify(_) => {
                 Self::load_and_send_event(path, sender, |path, skill| {
                     HotReloadEvent::SkillModified { path, skill }
                 });
-            }
+            },
             EventKind::Remove(_) => {
                 let _ = sender.send(HotReloadEvent::SkillDeleted { path: path.clone() });
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 
@@ -182,7 +182,7 @@ impl HotReloadWatcher {
                     error: e.to_string(),
                 });
                 return;
-            }
+            },
         };
 
         let _ = sender.send(event_builder(path.to_path_buf(), skill));
@@ -210,7 +210,7 @@ impl HotReloadWatcher {
                         "YAML support not enabled".to_string(),
                     ))
                 }
-            }
+            },
             _ => Err(SkillError::Configuration(format!(
                 "Unsupported file type: {}",
                 extension
@@ -282,18 +282,18 @@ impl HotReloadManager {
             HotReloadEvent::SkillCreated { path, skill } => {
                 info!("Skill created: {:?}", path);
                 self.skills.insert(path, skill);
-            }
+            },
             HotReloadEvent::SkillModified { path, skill } => {
                 info!("Skill modified: {:?}", path);
                 self.skills.insert(path, skill);
-            }
+            },
             HotReloadEvent::SkillDeleted { path } => {
                 info!("Skill deleted: {:?}", path);
                 self.skills.remove(&path);
-            }
+            },
             HotReloadEvent::Error { path, error } => {
                 warn!("Skill error at {:?}: {}", path, error);
-            }
+            },
         }
     }
 }

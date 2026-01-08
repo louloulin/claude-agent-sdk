@@ -175,7 +175,7 @@ impl SdkMcpServer for DefaultSdkMcpServer {
                         "version": self.version
                     }
                 }))
-            }
+            },
             "tools/list" => {
                 // Return list of tools
                 let tools: Vec<_> = self
@@ -193,7 +193,7 @@ impl SdkMcpServer for DefaultSdkMcpServer {
                 Ok(serde_json::json!({
                     "tools": tools
                 }))
-            }
+            },
             "tools/call" => {
                 // Execute a tool
                 let params = &message["params"];
@@ -212,7 +212,7 @@ impl SdkMcpServer for DefaultSdkMcpServer {
                     "content": result.content,
                     "isError": result.is_error
                 }))
-            }
+            },
             _ => Err(crate::errors::ClaudeError::Transport(format!(
                 "Unknown method: {}",
                 method

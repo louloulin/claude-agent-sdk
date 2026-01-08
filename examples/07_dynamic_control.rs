@@ -52,11 +52,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n[Result] Duration: {}ms\n", result.duration_ms);
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream); // Release borrow
@@ -78,11 +78,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         println!("Claude: {}", text.text);
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n[Result] Duration: {}ms\n", result.duration_ms);
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
     drop(stream); // Release borrow

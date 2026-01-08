@@ -81,3 +81,44 @@ default = []
 yaml = ["serde_norway"]
 hot-reload = ["notify", "notify-debouncer-mini"]
 sandbox = ["wasm-sandbox"]
+
+# Performance optimization profiles
+[profile.dev]
+opt-level = 0           # No optimization for fast compilation
+debug = true            # Full debug info
+split-debuginfo = "unpacked"  # Faster linking
+
+[profile.dev.package."*"]
+opt-level = 2           # Optimize dependencies for faster builds
+
+# Release profile with maximum optimization
+[profile.release]
+opt-level = 3           # Maximum optimization
+lto = "fat"            # Link-time optimization across all codegen units
+codegen-units = 1      # Maximum optimization at cost of compilation time
+strip = true           # Remove debug symbols
+panic = "abort"        # Reduce binary size
+debug = false          # No debug info
+
+# Release profile for faster compilation
+[profile.release-lto]
+inherits = "release"
+lto = "thin"
+codegen-units = 16
+
+# Profile for benchmarking
+[profile.bench]
+inherits = "release"
+debug = true           # Keep debug info for profiling
+
+# Test profile with some optimizations
+[profile.test]
+opt-level = 1          # Some optimization for faster tests
+debug = true
+
+# Distribution profile - smallest binary size
+[profile.dist]
+inherits = "release"
+opt-level = "s"         # Optimize for size
+lto = "fat"
+strip = true

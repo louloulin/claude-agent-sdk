@@ -125,17 +125,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             println!();
             println!("   说明: 按此顺序加载可以确保所有依赖都先于依赖它们的技能加载。");
-        }
+        },
         ResolutionResult::CircularDependency { cycle } => {
             println!("   ❌ 检测到循环依赖:");
             println!("      {:?}", cycle);
-        }
+        },
         ResolutionResult::MissingDependencies { missing } => {
             println!("   ❌ 缺少以下依赖:");
             for dep in &missing {
                 println!("      - {}", dep);
             }
-        }
+        },
     }
     println!();
 
@@ -155,10 +155,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ResolutionResult::CircularDependency { cycle } => {
             println!("   ✅ 成功检测到循环依赖:");
             println!("      循环路径: {}", cycle.join(" -> "));
-        }
+        },
         _ => {
             println!("   ❌ 未能检测到循环依赖");
-        }
+        },
     }
     println!();
 
@@ -177,10 +177,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for dep in &missing {
                 println!("      - {}", dep);
             }
-        }
+        },
         _ => {
             println!("   ❌ 未能检测到缺少依赖");
-        }
+        },
     }
     println!();
 
@@ -215,10 +215,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             for (i, skill_id) in load_order.iter().enumerate() {
                 println!("      {}. {}", i + 1, skill_id);
             }
-        }
+        },
         _ => {
             println!("   ❌ 解析失败");
-        }
+        },
     }
     println!();
 

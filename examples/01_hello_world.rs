@@ -44,14 +44,14 @@ async fn main() -> anyhow::Result<()> {
                     match block {
                         ContentBlock::Text(text) => {
                             println!("Claude: {}", text.text);
-                        }
+                        },
                         ContentBlock::ToolUse(tool) => {
                             println!("Tool use: {} ({})", tool.name, tool.id);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
-            }
+            },
             Message::Result(result) => {
                 println!("\n=== Result ===");
                 println!("Duration: {}ms", result.duration_ms);
@@ -60,8 +60,8 @@ async fn main() -> anyhow::Result<()> {
                     println!("Cost: ${:.4}", cost);
                 }
                 println!("Session ID: {}", result.session_id);
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

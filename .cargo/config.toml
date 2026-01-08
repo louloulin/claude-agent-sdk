@@ -1,0 +1,66 @@
+# Cargo 配置文件 - 优化构建性能
+
+[build]
+# 使用更快的链接器
+# 需要安装: brew install mold
+# 或使用系统默认链接器
+# rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+
+# 并行编译
+jobs = 8  # 根据 CPU 核心数调整
+
+# 增量编译优化
+incremental = true
+
+[http]
+# 检查更新的频率（秒）
+check-revoke = false
+
+[net]
+# 并行网络请求
+git-fetch-with-cli = true
+
+[term]
+# 终端输出配置
+verbose = false
+color = 'auto'
+
+[env]
+# 设置编译时的优化标志
+# CARGO_BUILD_RUSTFLAGS = "-C target-cpu=native"  # 针对本地 CPU 优化
+
+[alias]
+# 便捷命令别名
+b = "build"
+br = "build --release"
+bl = "build --profile release-lto"
+t = "test"
+tr = "test --release"
+d = "doc"
+o = "objdump"
+c = "check"
+cl = "clippy"
+
+# 组合命令
+ba = "build --all-targets"
+ta = "test --all-targets"
+ca = "check --all-targets"
+
+# 文档和检查
+da = "doc --all-features --no-deps"
+cra = "check --release --all-targets"
+cf = "check --all-features"
+
+# 性能分析
+pb = "bench -- --profile-time=10"
+
+# 清理
+clean-all = ["clean", "-p", "doc"]
+
+[source.crates-io]
+# 使用国内镜像加速下载（可选）
+# replace-with = 'ustc'
+
+# 配置镜像源（中国用户）
+# [source.ustc]
+# registry = "sparse+https://mirrors.ustc.edu.cn/crates.io-index/"

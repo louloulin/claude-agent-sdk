@@ -50,7 +50,7 @@ impl CircuitBreaker {
             Ok(result) => {
                 self.failure_count.store(0, Ordering::Release);
                 Ok(result)
-            }
+            },
             Err(e) => {
                 let count = self.failure_count.fetch_add(1, Ordering::AcqRel) + 1;
                 if count >= self.threshold {
@@ -58,7 +58,7 @@ impl CircuitBreaker {
                     eprintln!("⚠️  Circuit breaker opened after {} failures", count);
                 }
                 Err(e)
-            }
+            },
         }
     }
 
@@ -92,7 +92,7 @@ where
                     println!("✅ Success on attempt {}", attempt);
                 }
                 return Ok(result);
-            }
+            },
             Err(e) => {
                 if attempt > max_retries {
                     eprintln!("❌ Max retries ({}) exceeded", max_retries);
@@ -104,7 +104,7 @@ where
 
                 // Exponential backoff with jitter
                 delay = delay * 2 + Duration::from_millis(100);
-            }
+            },
         }
     }
 }
@@ -173,7 +173,7 @@ async fn query_with_fallback(prompt: &str) -> anyhow::Result<Vec<Message>> {
             query(prompt, Some(simple_options)).await.map_err(|e2| {
                 anyhow::anyhow!("Both full and simplified queries failed: {} | {}", e, e2)
             })
-        }
+        },
     }
 }
 
@@ -217,10 +217,10 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-        }
+        },
         Err(e) => {
             eprintln!("❌ Query failed after all retries: {}\n", e);
-        }
+        },
     }
 
     // Example 2: Circuit breaker pattern
@@ -272,7 +272,7 @@ async fn main() -> anyhow::Result<()> {
         match query(prompt, None).await {
             Ok(_) => {
                 println!("  ✅ Success");
-            }
+            },
             Err(e) => {
                 let error_msg = e.to_string();
                 eprintln!("  ❌ Error: {}", error_msg);
@@ -284,7 +284,7 @@ async fn main() -> anyhow::Result<()> {
                 if recovered {
                     println!("  ✅ Recovered with fallback");
                 }
-            }
+            },
         }
 
         sleep(Duration::from_millis(200)).await;
@@ -313,10 +313,10 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-        }
+        },
         Err(e) => {
             eprintln!("❌ All attempts failed: {}", e);
-        }
+        },
     }
 
     // Summary

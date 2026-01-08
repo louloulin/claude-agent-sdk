@@ -161,7 +161,7 @@ impl ParallelOrchestrator {
                         ))
                         .await;
                     }
-                }
+                },
             }
         }
 
@@ -219,7 +219,7 @@ impl Orchestrator for ParallelOrchestrator {
                 ctx.complete_trace().await;
                 let trace = ctx.get_trace().await;
                 return Ok(OrchestratorOutput::failure(e.to_string(), trace));
-            }
+            },
         };
 
         // Complete trace
