@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Agent SDK - WASM Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0066cc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #cc0000;
+            background: #ffeeee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Claude Agent SDK - WASM Demo</h1>
+
+        <div class="input-group">
+            <label for="query">Your Query:</label>
+            <textarea id="query" rows="4" placeholder="Ask Claude something...">What is 2 + 2?</textarea>
+        </div>
+
+        <div>
+            <button id="queryBtn" onclick="runQuery()">Query Claude</button>
+            <button onclick="clearOutput()">Clear</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <div id="output" class="output" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        import init, { query } from './pkg/claude_agent_sdk_rs.js';
+
+        let wasmInitialized = false;
+
+        // Initialize WASM
+        window.addEventListener('load', async () => {
+            try {
+                await init();
+                wasmInitialized = true;
+                console.log('WASM initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize WASM:', error);
+                showError('Failed to initialize WASM: ' + error.message);
+            }
+        });
+
+        // Run query function
+        window.runQuery = async function() {
+            if (!wasmInitialized) {
+                showError('WASM not initialized yet. Please wait...');
+                return;
+            }
+
+            const queryText = document.getElementById('query').value;
+            if (!queryText.trim()) {
+                showError('Please enter a query');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                console.log('Sending query:', queryText);
+                const result = await query(queryText, null);
+                console.log('Received result:', result);
+                displayResult(result);
+            } catch (error) {
+                console.error('Query failed:', error);
+                showError('Query failed: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        function displayResult(result) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.style.display = 'block';
+
+            // Format the result
+            let formatted = '';
+            if (typeof result === 'string') {
+                formatted = result;
+            } else if (Array.isArray(result)) {
+                formatted = result.map(msg => {
+                    if (msg.type === 'assistant') {
+                        return msg.content.join('\n');
+                    }
+                    return '';
+                }).filter(Boolean).join('\n\n');
+            } else {
+                formatted = JSON.stringify(result, null, 2);
+            }
+
+            outputDiv.innerHTML = `<pre>${escapeHtml(formatted)}</pre>`;
+        }
+
+        function showError(message) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.style.display = 'block';
+            outputDiv.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+        }
+
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loading');
+            const queryBtn = document.getElementById('queryBtn');
+
+            if (show) {
+                loadingDiv.classList.add('active');
+                queryBtn.disabled = true;
+            } else {
+                loadingDiv.classList.remove('active');
+                queryBtn.disabled = false;
+            }
+        }
+
+        window.clearOutput = function() {
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('output').innerHTML = '';
+        };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

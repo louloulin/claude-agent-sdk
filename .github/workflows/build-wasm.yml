@@ -1,0 +1,116 @@
+name: Build WASM
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'src/**'
+      - 'Cargo.toml'
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Build WASM package
+        run: |
+          ./scripts/build_wasm.sh web --release
+
+      - name: Optimize WASM (optional)
+        run: |
+          if command -v wasm-opt &> /dev/null; then
+            wasm-opt pkg/claude_agent_sdk_rs_bg.wasm \
+              -O3 \
+              -o pkg/claude_agent_sdk_rs_bg_opt.wasm
+            mv pkg/claude_agent_sdk_rs_bg_opt.wasm \
+               pkg/claude_agent_sdk_rs_bg.wasm
+          fi
+
+      - name: Check bundle size
+        run: |
+          echo "WASM bundle size:"
+          ls -lh pkg/*.wasm
+
+          # Check if size is acceptable (< 5MB)
+          SIZE=$(stat -f%z pkg/claude_agent_sdk_rs_bg.wasm 2>/dev/null || stat -c%s pkg/claude_agent_sdk_rs_bg.wasm)
+          MAX_SIZE=5242880  # 5MB
+
+          if [ $SIZE -gt $MAX_SIZE ]; then
+            echo "Warning: Bundle size exceeds 5MB"
+            exit 1
+          fi
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wasm-package
+          path: pkg/
+          retention-days: 30
+
+      - name: Deploy to Vercel (example)
+        if: github.ref == 'refs/heads/main'
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./examples/wasm/react-app
+
+  test-wasm:
+    runs-on: ubuntu-latest
+    needs: build-wasm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download WASM artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: wasm-package
+          path: pkg/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install test dependencies
+        working-directory: ./examples/wasm/react-app
+        run: npm install
+
+      - name: Build test
+        working-directory: ./examples/wasm/react-app
+        run: npm run build
+
+      - name: Test WASM loading
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+
+          // Check if WASM file exists
+          const wasmPath = path.join('pkg', 'claude_agent_sdk_rs_bg.wasm');
+          if (!fs.existsSync(wasmPath)) {
+            console.error('WASM file not found');
+            process.exit(1);
+          }
+
+          const stats = fs.statSync(wasmPath);
+          console.log('WASM file size:', (stats.size / 1024 / 1024).toFixed(2), 'MB');
+          "
