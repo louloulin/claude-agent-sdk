@@ -1,7 +1,6 @@
 //! Type definitions for the Skills system
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 /// Metadata for a Skill
