@@ -234,7 +234,7 @@ impl SkillPackage {
     /// Save the skill package to a file in YAML format (requires yaml feature)
     #[cfg(feature = "yaml")]
     pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
-        let yaml = serde_yaml::to_string(self)
+        let yaml = serde_norway::to_string(self)
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
         let mut file = fs::File::create(path)?;
@@ -246,8 +246,219 @@ impl SkillPackage {
     #[cfg(feature = "yaml")]
     pub fn load_from_yaml<P: AsRef<std::path::Path>>(path: P) -> io::Result<Self> {
         let content = fs::read_to_string(path)?;
-        let package: SkillPackage = serde_yaml::from_str(&content)
+        let package: SkillPackage = serde_norway::from_str(&content)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         Ok(package)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_skill_metadata_creation() {
+        let metadata = SkillMetadata {
+            id: "test-skill".to_string(),
+            name: "Test Skill".to_string(),
+            description: "A test skill".to_string(),
+            version: "1.0.0".to_string(),
+            author: Some("Test Author".to_string()),
+            dependencies: vec!["dep1".to_string(), "dep2".to_string()],
+            tags: vec!["test".to_string(), "example".to_string()],
+        };
+
+        assert_eq!(metadata.id, "test-skill");
+        assert_eq!(metadata.name, "Test Skill");
+        assert_eq!(metadata.version, "1.0.0");
+        assert_eq!(metadata.author, Some("Test Author".to_string()));
+        assert_eq!(metadata.dependencies.len(), 2);
+        assert_eq!(metadata.tags.len(), 2);
+    }
+
+    #[test]
+    fn test_skill_resources_default() {
+        let resources = SkillResources::default();
+        assert!(resources.folders.is_empty());
+        assert!(resources.tools.is_empty());
+        assert!(resources.tests.is_empty());
+    }
+
+    #[test]
+    fn test_skill_resources_add_folder() {
+        let mut resources = SkillResources::default();
+        resources.add_folder("./test");
+        assert_eq!(resources.folders.len(), 1);
+
+        // Test duplicate prevention
+        resources.add_folder("./test");
+        assert_eq!(resources.folders.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_resources_add_tool() {
+        let mut resources = SkillResources::default();
+        resources.add_tool("search".to_string());
+        assert_eq!(resources.tools.len(), 1);
+
+        // Test duplicate prevention
+        resources.add_tool("search".to_string());
+        assert_eq!(resources.tools.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_resources_add_test() {
+        let mut resources = SkillResources::default();
+        resources.add_test("test_basic".to_string());
+        assert_eq!(resources.tests.len(), 1);
+
+        // Test duplicate prevention
+        resources.add_test("test_basic".to_string());
+        assert_eq!(resources.tests.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_package_creation() {
+        let package = SkillPackage {
+            metadata: SkillMetadata {
+                id: "test-skill".to_string(),
+                name: "Test Skill".to_string(),
+                description: "A test skill".to_string(),
+                version: "1.0.0".to_string(),
+                author: Some("Test Author".to_string()),
+                dependencies: vec![],
+                tags: vec![],
+            },
+            instructions: "Test instructions".to_string(),
+            scripts: vec![],
+            resources: SkillResources::default(),
+        };
+
+        assert_eq!(package.metadata.id, "test-skill");
+        assert_eq!(package.instructions, "Test instructions");
+        assert!(package.scripts.is_empty());
+    }
+
+    #[cfg(feature = "yaml")]
+    #[test]
+    fn test_skill_package_yaml_serialization() {
+        let package = SkillPackage {
+            metadata: SkillMetadata {
+                id: "test-skill".to_string(),
+                name: "Test Skill".to_string(),
+                description: "A test skill for YAML serialization".to_string(),
+                version: "1.0.0".to_string(),
+                author: Some("Test Author".to_string()),
+                dependencies: vec!["dep1".to_string()],
+                tags: vec!["test".to_string(), "yaml".to_string()],
+            },
+            instructions: "Test instructions for YAML".to_string(),
+            scripts: vec!["script1.sh".to_string()],
+            resources: SkillResources {
+                folders: vec!["./resources".into()],
+                tools: vec!["search".to_string()],
+                tests: vec!["test_basic".to_string()],
+            },
+        };
+
+        // Test serialization
+        let yaml = serde_norway::to_string(&package).unwrap();
+        assert!(yaml.contains("test-skill"));
+        assert!(yaml.contains("Test Skill"));
+        assert!(yaml.contains("1.0.0"));
+
+        // Test deserialization
+        let deserialized: SkillPackage = serde_norway::from_str(&yaml).unwrap();
+        assert_eq!(deserialized.metadata.id, package.metadata.id);
+        assert_eq!(deserialized.metadata.name, package.metadata.name);
+        assert_eq!(deserialized.metadata.version, package.metadata.version);
+        assert_eq!(deserialized.metadata.author, package.metadata.author);
+        assert_eq!(deserialized.metadata.dependencies, package.metadata.dependencies);
+        assert_eq!(deserialized.metadata.tags, package.metadata.tags);
+        assert_eq!(deserialized.instructions, package.instructions);
+        assert_eq!(deserialized.scripts, package.scripts);
+        assert_eq!(deserialized.resources.folders, package.resources.folders);
+        assert_eq!(deserialized.resources.tools, package.resources.tools);
+        assert_eq!(deserialized.resources.tests, package.resources.tests);
+    }
+
+    #[cfg(feature = "yaml")]
+    #[test]
+    fn test_skill_package_yaml_save_and_load() {
+        let temp_dir = std::env::temp_dir();
+        let yaml_path = temp_dir.join("test_skill.yaml");
+
+        let original_package = SkillPackage {
+            metadata: SkillMetadata {
+                id: "yaml-test-skill".to_string(),
+                name: "YAML Test Skill".to_string(),
+                description: "Testing YAML save and load".to_string(),
+                version: "2.0.0".to_string(),
+                author: Some("YAML Test Author".to_string()),
+                dependencies: vec!["yaml-dep".to_string()],
+                tags: vec!["yaml-test".to_string()],
+            },
+            instructions: "YAML test instructions".to_string(),
+            scripts: vec!["yaml_script.sh".to_string()],
+            resources: SkillResources {
+                folders: vec![temp_dir.join("yaml_resources")],
+                tools: vec!["yaml-tool".to_string()],
+                tests: vec!["yaml_test".to_string()],
+            },
+        };
+
+        // Save to YAML file
+        original_package.save_to_yaml(&yaml_path).unwrap();
+        assert!(yaml_path.exists());
+
+        // Load from YAML file
+        let loaded_package = SkillPackage::load_from_yaml(&yaml_path).unwrap();
+
+        // Verify all fields match
+        assert_eq!(loaded_package.metadata.id, original_package.metadata.id);
+        assert_eq!(loaded_package.metadata.name, original_package.metadata.name);
+        assert_eq!(loaded_package.metadata.description, original_package.metadata.description);
+        assert_eq!(loaded_package.metadata.version, original_package.metadata.version);
+        assert_eq!(loaded_package.metadata.author, original_package.metadata.author);
+        assert_eq!(loaded_package.metadata.dependencies, original_package.metadata.dependencies);
+        assert_eq!(loaded_package.metadata.tags, original_package.metadata.tags);
+        assert_eq!(loaded_package.instructions, original_package.instructions);
+        assert_eq!(loaded_package.scripts, original_package.scripts);
+
+        // Clean up
+        std::fs::remove_file(&yaml_path).unwrap();
+    }
+
+    #[cfg(feature = "yaml")]
+    #[test]
+    fn test_skill_package_yaml_with_optional_fields() {
+        let package = SkillPackage {
+            metadata: SkillMetadata {
+                id: "minimal-skill".to_string(),
+                name: "Minimal Skill".to_string(),
+                description: "Minimal test skill".to_string(),
+                version: "1.0.0".to_string(),
+                author: None,
+                dependencies: vec![],
+                tags: vec![],
+            },
+            instructions: "Minimal instructions".to_string(),
+            scripts: vec![],
+            resources: SkillResources::default(),
+        };
+
+        let yaml = serde_norway::to_string(&package).unwrap();
+        let deserialized: SkillPackage = serde_norway::from_str(&yaml).unwrap();
+
+        assert_eq!(deserialized.metadata.author, None);
+        assert!(deserialized.metadata.dependencies.is_empty());
+        assert!(deserialized.metadata.tags.is_empty());
+        assert!(deserialized.scripts.is_empty());
+    }
+
+    #[test]
+    fn test_skill_input_default() {
+        let input = SkillInput::default();
+        assert!(input.params.is_null() || input.params.as_object().map_or(true, |m| m.is_empty()));
     }
 }
