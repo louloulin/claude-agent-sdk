@@ -249,27 +249,57 @@ async fn error_isolation_example() -> Result<()> {
 
 /// Example 7: Rate-limited concurrent queries
 async fn rate_limited_concurrent() -> Result<()> {
-    use tokio::time::{Duration, interval};
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicU64, Ordering};
+    use tokio::sync::Semaphore;
+    use tokio::time::{Duration, sleep};
 
     let queries = vec!["Query 1", "Query 2", "Query 3", "Query 4", "Query 5"];
+    let queries_count = queries.len();
 
-    let rate_limit = Duration::from_millis(500); // Max 2 queries per second
-    let mut ticker = interval(rate_limit);
+    let rate_limit_ms = 500u64; // Max 2 queries per second
+    let last_call = Arc::new(AtomicU64::new(0));
+    let semaphore = Arc::new(Semaphore::new(2)); // Max 2 concurrent
 
-    println!("   Processing {} queries with rate limit", queries.len());
+    println!("   Processing {} queries with rate limit", queries_count);
 
     let results: Vec<_> = futures::stream::iter(queries)
-        .map(|q| async move {
-            ticker.tick().await; // Wait for rate limit
-            println!("   Executing: {}", q);
-            query(q, None).await
+        .map(|q| {
+            let semaphore = semaphore.clone();
+            let last_call = last_call.clone();
+            async move {
+                let _permit = semaphore.acquire().await.unwrap();
+
+                // Rate limiting logic
+                let now = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as u64;
+                let last = last_call.load(Ordering::SeqCst);
+                if last > 0 {
+                    let elapsed = now.saturating_sub(last);
+                    if elapsed < rate_limit_ms {
+                        sleep(Duration::from_millis(rate_limit_ms - elapsed)).await;
+                    }
+                }
+                last_call.store(
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis() as u64,
+                    Ordering::SeqCst,
+                );
+
+                println!("   Executing: {}", q);
+                query(q, None).await
+            }
         })
         .buffer_unordered(2) // Max 2 concurrent
         .collect()
         .await;
 
     let successful = results.iter().filter(|r| r.is_ok()).count();
-    println!("   {}/{} queries succeeded", successful, queries.len());
+    println!("   {}/{} queries succeeded", successful, queries_count);
 
     Ok(())
 }
@@ -283,6 +313,7 @@ async fn concurrent_with_timeout() -> Result<()> {
         ("Longer query", "Explain quantum computing"),
         ("Medium query", "What is Rust?"),
     ];
+    let queries_count = queries.len();
 
     let timeout = Duration::from_secs(10);
 
@@ -311,8 +342,7 @@ async fn concurrent_with_timeout() -> Result<()> {
     let completed = results.iter().filter(|r| r.is_some()).count();
     println!(
         "   {}/{} queries completed within timeout",
-        completed,
-        queries.len()
+        completed, queries_count
     );
 
     Ok(())

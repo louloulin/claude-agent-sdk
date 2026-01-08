@@ -36,8 +36,8 @@ async fn main() -> anyhow::Result<()> {
                 }
                 message_count += 1;
             }
-            Message::Error(err) => {
-                eprintln!("\n❌ Error: {}", err.error.message);
+            Message::Result(result) if result.is_error => {
+                eprintln!("\n❌ Error result received");
                 break;
             }
             _ => {}
@@ -89,8 +89,8 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
-            Message::Error(err) => {
-                eprintln!("\n❌ Error: {}", err.error.message);
+            Message::Result(result) if result.is_error => {
+                eprintln!("\n❌ Error result received");
                 break;
             }
             _ => {}

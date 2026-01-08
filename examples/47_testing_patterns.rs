@@ -104,7 +104,7 @@ async fn deterministic_testing() -> Result<()> {
 
     for (query_text, expected_keyword) in test_cases {
         let options = ClaudeAgentOptions::builder()
-            .model(Some("claude-sonnet-4-5".to_string()))
+            .model("claude-sonnet-4-5")
             .max_turns(1)
             .build();
 
@@ -279,7 +279,7 @@ async fn snapshot_testing() -> Result<()> {
     let query_text = "What is 2 + 2?";
 
     let options = ClaudeAgentOptions::builder()
-        .model(Some("claude-sonnet-4-5".to_string()))
+        .model("claude-sonnet-4-5")
         .max_turns(1)
         .temperature(Some(0.0)) // Deterministic
         .build();

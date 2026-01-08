@@ -134,7 +134,7 @@ async fn budget_control_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .max_budget_usd(0.50) // Limit to $0.50
         .max_turns(5)
-        .model(Some("claude-sonnet-4-5".to_string()))
+        .model("claude-sonnet-4-5")
         .build();
 
     println!("   Budget limit: $0.50 USD");
@@ -159,7 +159,7 @@ async fn budget_control_example() -> Result<()> {
 async fn model_selection_example() -> Result<()> {
     // Primary model with fallback
     let options = ClaudeAgentOptions::builder()
-        .model(Some("claude-opus-4-5".to_string()))
+        .model("claude-opus-4-5")
         .fallback_model(Some("claude-sonnet-4-5".to_string()))
         .max_thinking_tokens(Some(50000)) // Extended thinking
         .build();
@@ -304,7 +304,7 @@ async fn stream_config_example() -> Result<()> {
 async fn production_config_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         // Model selection
-        .model(Some("claude-sonnet-4-5".to_string()))
+        .model("claude-sonnet-4-5")
         .fallback_model(Some("claude-haiku-4-5".to_string()))
         // Cost control
         .max_budget_usd(1.00)

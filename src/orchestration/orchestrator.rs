@@ -251,7 +251,7 @@ mod tests {
         let orchestrator = BaseOrchestrator::new("Test", "Test");
 
         let agent = SimpleAgent::new("FailingAgent", "Always fails", |_input| {
-            Err(anyhow::anyhow!("Always fails"))
+            Err(anyhow::anyhow!("Always fails").into())
         });
 
         let input = AgentInput::new("Hello");

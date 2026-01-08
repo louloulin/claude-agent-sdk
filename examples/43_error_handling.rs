@@ -157,7 +157,7 @@ async fn custom_recovery_strategy() -> Result<String> {
 
     // Strategy 1: Use fallback model on failure
     let options = ClaudeAgentOptions::builder()
-        .model(Some("claude-opus-4-5".to_string()))
+        .model("claude-opus-4-5")
         .fallback_model(Some("claude-sonnet-4-5".to_string()))
         .max_turns(2)
         .build();

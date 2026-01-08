@@ -180,7 +180,7 @@ impl VersionManager {
     /// Validate that all dependencies have compatible versions
     pub fn validate_dependencies(
         &self,
-        skill_id: &str,
+        _skill_id: &str,
         dependencies: &[(String, String)], // (skill_id, version_requirement)
     ) -> Result<(), String> {
         for (dep_id, version_req) in dependencies {

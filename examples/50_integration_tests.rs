@@ -286,7 +286,7 @@ async fn test_multimodal_input() -> Result<()> {
 /// Test 12: Fallback model
 async fn test_fallback_model() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .model(Some("claude-opus-4-5".to_string()))
+        .model("claude-opus-4-5")
         .fallback_model(Some("claude-sonnet-4-5".to_string()))
         .build();
 

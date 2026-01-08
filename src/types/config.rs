@@ -43,7 +43,7 @@ pub struct ClaudeAgentOptions {
     #[builder(default, setter(into))]
     pub disallowed_tools: Vec<String>,
     /// Model to use
-    #[builder(default, setter(into, strip_option))]
+    #[builder(default, setter(strip_option, into))]
     pub model: Option<String>,
     /// Fallback model to use if primary model fails
     #[builder(default, setter(into, strip_option))]

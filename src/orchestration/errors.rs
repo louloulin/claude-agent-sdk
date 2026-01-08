@@ -8,6 +8,9 @@ pub enum OrchestrationError {
     #[error("Agent {0} failed: {1}")]
     AgentFailed(String, String),
 
+    #[error("Agent error: {0}")]
+    AgentError(anyhow::Error),
+
     #[error("Orchestrator {0} failed: {1}")]
     OrchestratorFailed(String, String),
 

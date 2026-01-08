@@ -227,7 +227,7 @@ mod tests {
             let count = call_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
             if count < 2 {
                 // Fail first two times
-                Err(anyhow::anyhow!("Temporary failure"))
+                Err(anyhow::anyhow!("Temporary failure").into())
             } else {
                 Ok(AgentOutput::new(format!("Success: {}", input.content)))
             }

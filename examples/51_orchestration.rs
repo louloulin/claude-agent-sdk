@@ -21,8 +21,8 @@ use claude_agent_sdk_rs::orchestration::{
     Agent, AgentInput, AgentOutput, Orchestrator, OrchestratorInput, ParallelOrchestrator,
     SequentialOrchestrator,
 };
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 // ============================================================================
 // Simple Agent Creators
@@ -77,7 +77,7 @@ fn create_editor() -> Box<dyn Agent> {
 }
 
 /// Create a critic agent that provides feedback
-fn create_critic(name: fn create_critic(name: &'static str, perspective: &'static str) -> impl Agent {'static str, perspective: fn create_critic(name: &'static str, perspective: &'static str) -> impl Agent {'static str) -> Box<dyn Agent> {
+fn create_critic(name: &'static str, perspective: &'static str) -> Box<dyn Agent> {
     claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         name,
         format!("Provides {} perspective", perspective),
@@ -92,7 +92,7 @@ fn create_critic(name: fn create_critic(name: &'static str, perspective: &'stati
 }
 
 /// Create an analyzer agent that evaluates different aspects
-fn create_analyzer(aspect: fn create_analyzer(aspect: &'static str) -> impl Agent {'static str) -> Box<dyn Agent> {
+fn create_analyzer(aspect: &'static str) -> Box<dyn Agent> {
     claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         format!("{}_Analyzer", aspect),
         format!("Analyzes {}", aspect),
@@ -146,8 +146,7 @@ async fn sequential_pipeline_example() -> Result<(), Box<dyn std::error::Error>>
     println!("Creating a content pipeline: Research → Write → Edit\n");
 
     // Create agents
-    let agents: Vec<Box<dyn Agent>> = vec
-![
+    let agents: Vec<Box<dyn Agent>> = vec![
         Box::new(create_researcher()),
         Box::new(create_writer()),
         Box::new(create_editor()),
@@ -164,10 +163,17 @@ async fn sequential_pipeline_example() -> Result<(), Box<dyn std::error::Error>>
     println!("Pipeline Results:");
     println!("  Success: {}", output.is_successful());
     println!("  Agents executed: {}", output.agent_outputs.len());
-    println!("  Execution time: {:?}\n", output.execution_trace.duration());
+    println!(
+        "  Execution time: {:?}\n",
+        output.execution_trace.duration()
+    );
 
     for (index, agent_output) in output.agent_outputs.iter().enumerate() {
-        println!("  Step {} - Confidence: {:.1}%", index + 1, agent_output.confidence * 100.0);
+        println!(
+            "  Step {} - Confidence: {:.1}%",
+            index + 1,
+            agent_output.confidence * 100.0
+        );
         println!("  {}", agent_output.content.lines().next().unwrap_or(""));
         println!();
     }
@@ -183,8 +189,7 @@ async fn parallel_analysis_example() -> Result<(), Box<dyn std::error::Error>> {
     println!("Analyzing from multiple perspectives in parallel\n");
 
     // Create agents with different perspectives
-    let agents: Vec<Box<dyn Agent>> = vec
-![
+    let agents: Vec<Box<dyn Agent>> = vec![
         Box::new(create_critic("Alice", "technical")),
         Box::new(create_critic("Bob", "business")),
         Box::new(create_critic("Charlie", "user-experience")),
@@ -202,7 +207,10 @@ async fn parallel_analysis_example() -> Result<(), Box<dyn std::error::Error>> {
     println!("Analysis Results:");
     println!("  Success: {}", output.is_successful());
     println!("  Parallel agents: {}", output.agent_outputs.len());
-    println!("  Execution time: {:?}\n", output.execution_trace.duration());
+    println!(
+        "  Execution time: {:?}\n",
+        output.execution_trace.duration()
+    );
 
     for agent_output in &output.agent_outputs {
         println!("  {}", agent_output.content.lines().next().unwrap_or(""));
@@ -239,7 +247,12 @@ async fn parallel_with_limit_example() -> Result<(), Box<dyn std::error::Error>>
                         break;
                     }
                     if max_clone
-                        .compare_exchange(current_max, current + 1, Ordering::SeqCst, Ordering::SeqCst)
+                        .compare_exchange(
+                            current_max,
+                            current + 1,
+                            Ordering::SeqCst,
+                            Ordering::SeqCst,
+                        )
                         .is_ok()
                     {
                         break;
@@ -264,8 +277,7 @@ async fn parallel_with_limit_example() -> Result<(), Box<dyn std::error::Error>>
     }
 
     // Create orchestrator with limit
-    let orchestrator = ParallelOrchestrator::new()
-        .with_parallel_limit(3);
+    let orchestrator = ParallelOrchestrator::new().with_parallel_limit(3);
 
     // Execute
     let input = OrchestratorInput::new("Parallel Task Batch");
@@ -275,8 +287,14 @@ async fn parallel_with_limit_example() -> Result<(), Box<dyn std::error::Error>>
     println!("Execution Results:");
     println!("  Success: {}", output.is_successful());
     println!("  Total agents: {}", output.agent_outputs.len());
-    println!("  Max concurrent: {}", max_concurrent.load(Ordering::SeqCst));
-    println!("  Execution time: {:?}\n", output.execution_trace.duration());
+    println!(
+        "  Max concurrent: {}",
+        max_concurrent.load(Ordering::SeqCst)
+    );
+    println!(
+        "  Execution time: {:?}\n",
+        output.execution_trace.duration()
+    );
 
     // Show sample outputs
     println!("Sample outputs (first 3):");
