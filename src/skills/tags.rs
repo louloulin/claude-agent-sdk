@@ -31,6 +31,7 @@ impl fmt::Display for TagOperator {
 }
 
 /// Tag filter for querying skills
+#[derive(Debug, Clone)]
 pub struct TagFilter {
     operators: Vec<TagOperator>,
 }

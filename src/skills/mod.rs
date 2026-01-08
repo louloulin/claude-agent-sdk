@@ -3,6 +3,7 @@
 pub mod dependency;
 pub mod error;
 pub mod hot_reload;
+pub mod performance;
 pub mod sandbox;
 pub mod tags;
 pub mod types;
@@ -17,6 +18,9 @@ use std::path::{Path, PathBuf};
 pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
 pub use hot_reload::{HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher};
+pub use performance::{
+    BatchOperations, IndexedSkillCollection, LruCache, PerformanceStats,
+};
 pub use sandbox::{SandboxConfig, SandboxExecutor, SandboxResult, SandboxUtils};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
