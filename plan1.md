@@ -2386,7 +2386,7 @@ hot-reload = ["notify"]
 
 ## 🎉 Agent Skills MVP 完成总结
 
-### ✅ 已完成功能 (97%) - 全部11项核心功能完成
+### ✅ 已完成功能 (100%) - 全部11项核心功能完成
 
 1. ✅ **核心 Skills 系统** - trait 系统、类型定义
 2. ✅ **持久化支持** - JSON/YAML 配置文件
@@ -2410,7 +2410,9 @@ hot-reload = ["notify"]
 - `src/skills/version.rs` - 版本管理
 - `src/skills/tags.rs` - 标签系统
 - `src/skills/hot_reload.rs` - 热加载
-
+- `src/skills/sandbox.rs` - 沙箱执行
+- `src/skills/performance.rs` - 性能优化
+- `src/skills/vscode.rs` - VS Code集成
 **示例程序** (8个):
 - `examples/30_agent_skills_simple.rs` - 简单技能
 - `examples/31_agent_skills_persistence.rs` - 持久化
@@ -2419,7 +2421,9 @@ hot-reload = ["notify"]
 - `examples/36_agent_skills_tags.rs` - 标签系统
 - `examples/37_agent_skills_yaml.rs` - YAML配置
 - `examples/38_agent_skills_hot_reload.rs` - 热加载
-
+- `examples/39_agent_skills_sandbox.rs` - 沙箱执行
+- `examples/40_agent_skills_performance.rs` - 性能优化
+- `examples/41_agent_skills_vscode.rs` - VS Code集成
 **测试覆盖**:
 - 总测试数: **175个** 单元测试
 - 新增测试: **112个** (Skills系统)
