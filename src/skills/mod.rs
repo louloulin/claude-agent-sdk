@@ -7,6 +7,7 @@ pub mod types;
 mod tests;
 
 use async_trait::async_trait;
+use std::path::{Path, PathBuf};
 
 pub use error::{SkillError, SkillOutput, SkillResult};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
@@ -51,5 +52,68 @@ impl SkillRegistry {
 
     pub fn list(&self) -> Vec<String> {
         self.skills.keys().cloned().collect()
+    }
+
+    /// Discover and load skill packages from a directory
+    ///
+    /// This method searches for `.json` files in the given directory,
+    /// attempts to load them as SkillPackages, and returns the loaded packages.
+    ///
+    /// # Arguments
+    /// * `dir` - Path to the directory containing skill package files
+    ///
+    /// # Returns
+    /// A vector of successfully loaded SkillPackages
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use claude_agent_sdk_rs::skills::SkillRegistry;
+    ///
+    /// let packages = SkillRegistry::discover_from_dir("/path/to/skills")?;
+    /// for package in packages {
+    ///     println!("Found skill: {}", package.metadata.name);
+    /// }
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
+    pub fn discover_from_dir<P: AsRef<Path>>(dir: P) -> Result<Vec<SkillPackage>, SkillError> {
+        let dir = dir.as_ref();
+
+        if !dir.exists() {
+            return Err(SkillError::Io(format!("Directory does not exist: {:?}", dir)));
+        }
+
+        if !dir.is_dir() {
+            return Err(SkillError::Io(format!("Path is not a directory: {:?}", dir)));
+        }
+
+        let entries = std::fs::read_dir(dir)
+            .map_err(|e| SkillError::Io(format!("Failed to read directory: {}", e)))?;
+
+        let mut packages = Vec::new();
+
+        for entry in entries {
+            let entry = entry.map_err(|e| SkillError::Io(format!("Failed to read directory entry: {}", e)))?;
+            let path = entry.path();
+
+            // Only process .json files
+            if path.extension().and_then(|s| s.to_str()) != Some("json") {
+                continue;
+            }
+
+            // Try to load as SkillPackage
+            match SkillPackage::load_from_file(&path) {
+                Ok(package) => {
+                    tracing::info!("Loaded skill package: {} from {:?}", package.metadata.name, path);
+                    packages.push(package);
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to load skill package from {:?}: {}", path, e);
+                    // Continue loading other files instead of failing completely
+                    continue;
+                }
+            }
+        }
+
+        Ok(packages)
     }
 }

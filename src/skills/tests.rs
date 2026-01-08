@@ -105,4 +105,61 @@ mod tests {
         let pkg = deserialized.unwrap();
         assert_eq!(pkg.metadata.id, "test-id");
     }
+
+    #[test]
+    fn test_discover_from_dir() {
+        use std::fs;
+
+        let temp_dir = std::env::temp_dir().join("skills_test_discover");
+        fs::create_dir_all(&temp_dir).unwrap();
+
+        let package1 = SkillPackage {
+            metadata: SkillMetadata {
+                id: "test1".to_string(),
+                name: "Test Skill 1".to_string(),
+                description: "First test skill".to_string(),
+                version: "1.0.0".to_string(),
+                author: None,
+                dependencies: vec![],
+                tags: vec![],
+            },
+            instructions: "Test instructions 1".to_string(),
+            scripts: vec![],
+            resources: SkillResources::default(),
+        };
+
+        let package2 = SkillPackage {
+            metadata: SkillMetadata {
+                id: "test2".to_string(),
+                name: "Test Skill 2".to_string(),
+                description: "Second test skill".to_string(),
+                version: "1.0.0".to_string(),
+                author: None,
+                dependencies: vec![],
+                tags: vec![],
+            },
+            instructions: "Test instructions 2".to_string(),
+            scripts: vec![],
+            resources: SkillResources::default(),
+        };
+
+        let file1 = temp_dir.join("skill1.json");
+        let file2 = temp_dir.join("skill2.json");
+
+        package1.save_to_file(&file1).unwrap();
+        package2.save_to_file(&file2).unwrap();
+
+        let packages = SkillRegistry::discover_from_dir(&temp_dir).unwrap();
+        assert_eq!(packages.len(), 2);
+
+        fs::remove_file(&file1).unwrap();
+        fs::remove_file(&file2).unwrap();
+        fs::remove_dir(&temp_dir).unwrap();
+    }
+
+    #[test]
+    fn test_discover_from_nonexistent_dir() {
+        let result = SkillRegistry::discover_from_dir("/nonexistent/path/that/does/not/exist");
+        assert!(result.is_err());
+    }
 }
