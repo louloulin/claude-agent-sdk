@@ -8,6 +8,7 @@ pub mod sandbox;
 pub mod tags;
 pub mod types;
 pub mod version;
+pub mod vscode;
 
 #[cfg(test)]
 mod tests;
@@ -25,6 +26,7 @@ pub use sandbox::{SandboxConfig, SandboxExecutor, SandboxResult, SandboxUtils};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 pub use version::{CompatibilityResult, VersionManager};
+pub use vscode::{export_batch_to_vscode, export_to_vscode, VsCodeExportConfig, VsCodeUtils};
 
 /// The core Skill trait
 #[async_trait]
