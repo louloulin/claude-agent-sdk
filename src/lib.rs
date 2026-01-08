@@ -237,6 +237,7 @@ pub mod client;
 pub mod errors;
 mod internal;
 pub mod mcp;
+pub mod orchestration;
 pub mod query;
 pub mod skills;
 pub mod types;
@@ -247,6 +248,12 @@ pub use errors::{ClaudeError, ImageValidationError, Result};
 pub use mcp::{
     TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest,
     TaskResult, TaskState, TaskStatus, TaskUri,
+};
+pub use orchestration::{
+    Agent, AgentInput, AgentOutput,
+    ExecutionContext, ExecutionConfig, ExecutionTrace,
+    Orchestrator, OrchestratorInput, OrchestratorOutput,
+    ParallelOrchestrator, SequentialOrchestrator,
 };
 pub use skills::{
     Skill, SkillError, SkillInput, SkillOutput, SkillPackage, SkillRegistry, SkillResources,
