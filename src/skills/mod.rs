@@ -1,5 +1,6 @@
 //! # Agent Skills System for Claude Agent SDK
 
+pub mod dependency;
 pub mod error;
 pub mod types;
 
@@ -9,6 +10,7 @@ mod tests;
 use async_trait::async_trait;
 use std::path::{Path, PathBuf};
 
+pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 
