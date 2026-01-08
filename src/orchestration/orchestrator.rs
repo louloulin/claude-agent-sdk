@@ -5,8 +5,8 @@
 
 use crate::orchestration::{
     agent::{Agent, AgentInput, AgentOutput},
-    context::{ExecutionContext, ExecutionTrace},
-    errors::{OrchestrationError, Result},
+    context::ExecutionTrace,
+    errors::Result,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

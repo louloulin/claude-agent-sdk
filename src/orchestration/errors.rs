@@ -1,6 +1,5 @@
 //! # Orchestration error types
 
-use std::fmt;
 
 /// Main error type for orchestration operations
 #[derive(Debug, thiserror::Error)]

@@ -101,9 +101,7 @@ pub fn process_user_input(input: &str) -> Result<String, Error> {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(
-            "You are a technical writer specializing in Rust documentation.".to_string(),
-        ))
+        .system_prompt("You are a technical writer specializing in Rust documentation.")
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -133,9 +131,7 @@ pub fn validate_email(email: &str) -> bool {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(
-            "You are a testing expert specializing in Rust.".to_string(),
-        ))
+        .system_prompt("You are a testing expert specializing in Rust.")
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -242,9 +238,7 @@ pub fn process_data(data: &Vec<String>) -> Vec<String> {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(
-            "You are a Rust expert focused on clean, idiomatic code.".to_string(),
-        ))
+        .system_prompt("You are a Rust expert focused on clean, idiomatic code.")
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -335,9 +329,7 @@ even when all inputs are integers.
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(
-            "You are a debugging expert helping developers fix code.".to_string(),
-        ))
+        .system_prompt("You are a debugging expert helping developers fix code.")
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -377,9 +369,7 @@ pub fn find_duplicates(strings: &[String]) -> Vec<String> {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(
-            "You are a performance optimization expert.".to_string(),
-        ))
+        .system_prompt("You are a performance optimization expert.")
         .build();
 
     let messages = query(&prompt, Some(options)).await?;

@@ -7,7 +7,7 @@ use crate::skills::{SkillError, SkillPackage};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tokio::sync::mpsc;
-use tracing::{debug, error, info, warn};
+use tracing::{info, warn};
 
 /// Configuration for hot reload behavior
 #[derive(Debug, Clone)]

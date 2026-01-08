@@ -164,10 +164,7 @@ async fn query_with_fallback(prompt: &str) -> anyhow::Result<Vec<Message>> {
             );
 
             // Simplified query with minimal options
-            let simple_options = ClaudeAgentOptions {
-                max_tokens: Some(1000),
-                ..Default::default()
-            };
+            let simple_options = ClaudeAgentOptions::builder().build();
 
             sleep(Duration::from_millis(500)).await;
             query(prompt, Some(simple_options)).await.map_err(|e2| {
@@ -195,7 +192,7 @@ async fn main() -> anyhow::Result<()> {
                 let attempt = ATTEMPT.fetch_add(1, Ordering::SeqCst);
                 if attempt < 2 {
                     eprintln!("  Simulating failure...");
-                    Err(anyhow::anyhow!("Simulated failure"))
+                    Err(anyhow::anyhow!("Simulated failure").into())
                 } else {
                     println!("  Success on attempt {}!", attempt + 1);
                     query("What is 2 + 2?", None).await
@@ -269,7 +266,7 @@ async fn main() -> anyhow::Result<()> {
     for (i, prompt) in queries.iter().enumerate() {
         println!("Query {}: {}", i + 1, prompt);
 
-        match query(prompt, None).await {
+        match query(*prompt, None).await {
             Ok(_) => {
                 println!("  ✅ Success");
             },
@@ -279,7 +276,7 @@ async fn main() -> anyhow::Result<()> {
 
                 // Try recovery
                 let recovered = query_with_fallback(prompt).await.is_ok();
-                aggregator.report(prompt, &error_msg, recovered);
+                aggregator.report(*prompt, &error_msg, recovered);
 
                 if recovered {
                     println!("  ✅ Recovered with fallback");

@@ -15,7 +15,7 @@
 use crate::orchestration::{
     Result,
     agent::{Agent, AgentInput, AgentOutput},
-    context::{AgentExecution, ExecutionContext, ExecutionTrace},
+    context::{AgentExecution, ExecutionContext},
     orchestrator::{BaseOrchestrator, Orchestrator, OrchestratorInput, OrchestratorOutput},
 };
 

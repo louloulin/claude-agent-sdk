@@ -3,12 +3,12 @@
 //! This module provides performance optimizations for large-scale skill operations,
 //! including indexing, caching, and batch processing.
 
-use crate::skills::tags::{TagFilter, TagOperator};
+use crate::skills::tags::TagFilter;
 use crate::skills::types::SkillPackage;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::time::{Duration, Instant};
-use tracing::{debug, info};
+use tracing::debug;
 
 /// Performance statistics for operations
 #[derive(Debug, Clone, Default)]

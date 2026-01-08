@@ -3,7 +3,7 @@
 //! This module provides the execution context for managing orchestration state,
 //! including agent management, state tracking, and execution traces.
 
-use crate::orchestration::{agent::AgentOutput, errors::Result};
+use crate::orchestration::agent::AgentOutput;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;

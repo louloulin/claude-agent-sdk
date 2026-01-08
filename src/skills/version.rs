@@ -1,7 +1,6 @@
 //! Semantic version management for Agent Skills
 
 use semver::{Version, VersionReq};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 

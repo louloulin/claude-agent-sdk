@@ -14,7 +14,7 @@ pub mod vscode;
 mod tests;
 
 use async_trait::async_trait;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};

@@ -330,9 +330,10 @@ async fn regression_test() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn test_full_performance_analysis() -> anyhow::Result<()> {
-    println!("\n" + "=".repeat(60));
+    let separator = "=".repeat(60);
+    println!("\n{}", separator);
     println!("🔬 Claude Agent SDK - Performance Analysis Suite");
-    println!("=".repeat(60));
+    println!("{}", separator);
 
     // Test parameters
     let iterations = 20;
@@ -361,9 +362,10 @@ async fn test_full_performance_analysis() -> anyhow::Result<()> {
     regression_test().await?;
 
     // Summary
-    println!("\n" + "=".repeat(60));
+    let separator = "=".repeat(60);
+    println!("\n{}", separator);
     println!("📊 Performance Analysis Summary");
-    println!("=".repeat(60));
+    println!("{}", separator);
 
     println!("\n🎯 Key Findings:");
     println!(
@@ -387,9 +389,10 @@ async fn test_full_performance_analysis() -> anyhow::Result<()> {
         );
     }
 
-    println!("\n" + "=".repeat(60));
+    let separator = "=".repeat(60);
+    println!("\n{}", separator);
     println!("✅ Performance Analysis Complete");
-    println!("=".repeat(60));
+    println!("{}", separator);
 
     Ok(())
 }

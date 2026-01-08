@@ -10,11 +10,11 @@
 //! - **Safe Fallback**: Graceful degradation when sandbox feature is disabled
 //! - **Flexible Configuration**: Per-execution resource limits
 
-use crate::skills::error::{SkillError, SkillResult};
+use crate::skills::error::SkillError;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::Duration;
-use tracing::{debug, info, warn};
+use tracing::warn;
 
 /// Sandbox execution configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -288,6 +288,7 @@ impl Default for SandboxExecutor {
 
 /// Fallback implementation when sandbox feature is disabled
 #[cfg(not(feature = "sandbox"))]
+#[allow(dead_code)]
 pub struct SandboxExecutor {
     config: SandboxConfig,
 }

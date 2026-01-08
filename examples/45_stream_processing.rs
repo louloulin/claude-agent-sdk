@@ -154,8 +154,8 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             },
-            Message::Error(err) => {
-                eprintln!("❌ Error: {}", err.error.message);
+            Message::Result(result) if result.is_error => {
+                eprintln!("❌ Error result received");
                 break;
             },
             _ => {},
@@ -207,8 +207,8 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             },
-            Message::Error(err) => {
-                eprintln!("❌ Error: {}", err.error.message);
+            Message::Result(result) if result.is_error => {
+                eprintln!("❌ Error result received");
                 break;
             },
             _ => {},
@@ -221,9 +221,10 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // Summary
-    println!("\n" + "=".repeat(50));
+    let separator = "=".repeat(50);
+    println!("\n{}", separator);
     println!("✅ Stream Processing Examples Completed");
-    println!("=".repeat(50));
+    println!("{}", separator);
     println!("\nKey Takeaways:");
     println!("  🎯 Real-time processing reduces perceived latency");
     println!("  💾 O(1) memory per message vs O(n) for query()");
