@@ -162,4 +162,143 @@ mod tests {
         let result = SkillRegistry::discover_from_dir("/nonexistent/path/that/does/not/exist");
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_skill_resources_add_folder() {
+        let mut resources = SkillResources::default();
+        resources.add_folder("./test_folder");
+        assert_eq!(resources.folders.len(), 1);
+        assert_eq!(resources.folders[0], std::path::PathBuf::from("./test_folder"));
+
+        // Test duplicate prevention
+        resources.add_folder("./test_folder");
+        assert_eq!(resources.folders.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_resources_add_tool() {
+        let mut resources = SkillResources::default();
+        resources.add_tool("search".to_string());
+        assert_eq!(resources.tools.len(), 1);
+        assert_eq!(resources.tools[0], "search");
+
+        // Test duplicate prevention
+        resources.add_tool("search".to_string());
+        assert_eq!(resources.tools.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_resources_add_test() {
+        let mut resources = SkillResources::default();
+        resources.add_test("test_basic".to_string());
+        assert_eq!(resources.tests.len(), 1);
+        assert_eq!(resources.tests[0], "test_basic");
+
+        // Test duplicate prevention
+        resources.add_test("test_basic".to_string());
+        assert_eq!(resources.tests.len(), 1);
+    }
+
+    #[test]
+    fn test_skill_resources_validate_folders() {
+        use std::fs;
+
+        let temp_dir = std::env::temp_dir().join("skills_validate_test");
+        fs::create_dir_all(&temp_dir).unwrap();
+
+        let resources = SkillResources {
+            folders: vec![temp_dir.clone()],
+            ..Default::default()
+        };
+
+        assert!(resources.validate_folders().is_ok());
+
+        // Test with non-existent folder
+        let resources_invalid = SkillResources {
+            folders: vec![std::path::PathBuf::from("/nonexistent/folder")],
+            ..Default::default()
+        };
+
+        assert!(resources_invalid.validate_folders().is_err());
+
+        fs::remove_dir(&temp_dir).unwrap();
+    }
+
+    #[test]
+    fn test_skill_resources_scan_folders() {
+        use std::fs::{self, File};
+
+        let temp_dir = std::env::temp_dir().join("skills_scan_test");
+        fs::create_dir_all(&temp_dir).unwrap();
+
+        // Create nested structure
+        let sub_dir = temp_dir.join("subdir");
+        fs::create_dir_all(&sub_dir).unwrap();
+
+        // Create test files
+        let file1 = temp_dir.join("file1.txt");
+        let file2 = temp_dir.join("file2.txt");
+        let file3 = sub_dir.join("file3.txt");
+
+        File::create(&file1).unwrap();
+        File::create(&file2).unwrap();
+        File::create(&file3).unwrap();
+
+        let resources = SkillResources {
+            folders: vec![temp_dir.clone()],
+            ..Default::default()
+        };
+
+        let files = resources.scan_folders().unwrap();
+        assert_eq!(files.len(), 3);
+
+        // Clean up
+        fs::remove_file(&file1).unwrap();
+        fs::remove_file(&file2).unwrap();
+        fs::remove_file(&file3).unwrap();
+        fs::remove_dir(&sub_dir).unwrap();
+        fs::remove_dir(&temp_dir).unwrap();
+    }
+
+    #[test]
+    fn test_skill_resources_scan_nonexistent_folder() {
+        let resources = SkillResources {
+            folders: vec![std::path::PathBuf::from("/nonexistent/folder")],
+            ..Default::default()
+        };
+
+        // Should return empty vec, not error
+        let files = resources.scan_folders().unwrap();
+        assert_eq!(files.len(), 0);
+    }
+
+    #[test]
+    fn test_skill_resources_multiple_folders() {
+        use std::fs::{self, File};
+
+        let temp_dir1 = std::env::temp_dir().join("skills_multi_test1");
+        let temp_dir2 = std::env::temp_dir().join("skills_multi_test2");
+        fs::create_dir_all(&temp_dir1).unwrap();
+        fs::create_dir_all(&temp_dir2).unwrap();
+
+        let file1 = temp_dir1.join("file1.txt");
+        let file2 = temp_dir2.join("file2.txt");
+
+        File::create(&file1).unwrap();
+        File::create(&file2).unwrap();
+
+        let resources = SkillResources {
+            folders: vec![temp_dir1.clone(), temp_dir2.clone()],
+            ..Default::default()
+        };
+
+        let files = resources.scan_folders().unwrap();
+        assert_eq!(files.len(), 2);
+
+        // Clean up
+        fs::remove_file(&file1).unwrap();
+        fs::remove_file(&file2).unwrap();
+        fs::remove_dir(&temp_dir1).unwrap();
+        fs::remove_dir(&temp_dir2).unwrap();
+    }
 }
