@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use std::fs;
+use std::io::{self, Write};
 
 /// Metadata for a Skill
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -55,4 +57,44 @@ pub struct SkillPackage {
     pub scripts: Vec<String>,
     #[serde(default)]
     pub resources: SkillResources,
+}
+
+impl SkillPackage {
+    /// Save the skill package to a file in JSON format
+    pub fn save_to_file<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
+        let json = serde_json::to_string_pretty(self)
+            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+        let mut file = fs::File::create(path)?;
+        file.write_all(json.as_bytes())?;
+        Ok(())
+    }
+
+    /// Load a skill package from a file
+    pub fn load_from_file<P: AsRef<std::path::Path>>(path: P) -> io::Result<Self> {
+        let content = fs::read_to_string(path)?;
+        let package: SkillPackage = serde_json::from_str(&content)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        Ok(package)
+    }
+
+    /// Save the skill package to a file in YAML format (requires yaml feature)
+    #[cfg(feature = "yaml")]
+    pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
+        let yaml = serde_yaml::to_string(self)
+            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+        let mut file = fs::File::create(path)?;
+        file.write_all(yaml.as_bytes())?;
+        Ok(())
+    }
+
+    /// Load a skill package from a YAML file (requires yaml feature)
+    #[cfg(feature = "yaml")]
+    pub fn load_from_yaml<P: AsRef<std::path::Path>>(path: P) -> io::Result<Self> {
+        let content = fs::read_to_string(path)?;
+        let package: SkillPackage = serde_yaml::from_str(&content)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        Ok(package)
+    }
 }

@@ -3,6 +3,9 @@
 pub mod error;
 pub mod types;
 
+#[cfg(test)]
+mod tests;
+
 use async_trait::async_trait;
 
 pub use error::{SkillError, SkillOutput, SkillResult};
