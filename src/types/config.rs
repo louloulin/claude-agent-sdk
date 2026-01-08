@@ -49,7 +49,7 @@ pub struct ClaudeAgentOptions {
     #[builder(default, setter(into, strip_option))]
     pub fallback_model: Option<String>,
     /// Beta features to enable
-    /// See https://docs.anthropic.com/en/api/beta-headers
+    /// See <https://docs.anthropic.com/en/api/beta-headers>
     #[builder(default, setter(into))]
     pub betas: Vec<SdkBeta>,
     /// Maximum budget in USD for the conversation
@@ -259,7 +259,7 @@ pub enum AgentModel {
 }
 
 /// SDK Beta features
-/// See https://docs.anthropic.com/en/api/beta-headers
+/// See <https://docs.anthropic.com/en/api/beta-headers>
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SdkBeta {
     /// Extended context window (1M tokens)

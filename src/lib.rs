@@ -6,7 +6,7 @@
 //!
 //! ## Features
 //!
-//! - **Simple Query API**: One-shot queries with both collecting ([`query`]) and streaming ([`query_stream`]) modes
+//! - **Simple Query API**: One-shot queries with both collecting ([`query()`]) and streaming ([`query_stream()`]) modes
 //! - **Bidirectional Streaming**: Real-time streaming communication with [`ClaudeClient`]
 //! - **Dynamic Control**: Interrupt, change permissions, switch models mid-execution
 //! - **Hooks System**: Intercept and control Claude's behavior at runtime with 6 hook types
@@ -237,11 +237,15 @@ pub mod client;
 pub mod errors;
 mod internal;
 pub mod query;
+pub mod skills;
 pub mod types;
 pub mod version;
 
 // Re-export commonly used types
 pub use errors::{ClaudeError, ImageValidationError, Result};
+pub use skills::{
+    Skill, SkillError, SkillInput, SkillOutput, SkillPackage, SkillRegistry, SkillResources,
+};
 pub use types::{
     config::*,
     hooks::*,

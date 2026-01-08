@@ -1,20 +1,23 @@
-[package]
-name = "claude-agent-sdk-rs"
+[workspace]
+members = [
+    "crates/claude-agent-core",
+    "crates/claude-agent-types",
+    "crates/claude-agent-mcp",
+    "crates/claude-agent-skills",
+    "crates/claude-agent-macros",
+]
+resolver = "2"
+
+[workspace.package]
 version = "0.6.0"
 authors = ["Tyr Chen <tyr.chen@gmail.com>"]
 edition = "2021"
 rust-version = "1.90"
 license = "MIT"
-documentation = "https://docs.rs/claude-agent-sdk-rs"
 repository = "https://github.com/tyrchen/claude-agent-sdk-rs"
 homepage = "https://github.com/tyrchen/claude-agent-sdk-rs"
-description = "Rust SDK for Claude Code CLI with bidirectional streaming, hooks, custom tools, plugin support, and Agent Skills - 100% feature parity with Python SDK"
-readme = "README.md"
-categories = ["development-tools", "api-bindings", "asynchronous"]
-keywords = ["claude", "ai", "agent", "anthropic", "llm"]
-include = ["src/**/*.rs", "Cargo.toml", "LICENSE", "README.md"]
 
-[dependencies]
+[workspace.dependencies]
 # Async runtime
 tokio = { version = "1.48", features = [
   "macros",
@@ -52,9 +55,9 @@ typed-builder = "0.23.2"
 # Macro utilities
 paste = "1.0"
 
-[dev-dependencies]
-tokio-test = "0.4"
-mockall = "0.14"
-
-[features]
-default = []
+# Internal dependencies
+claude-agent-core = { path = "crates/claude-agent-core" }
+claude-agent-types = { path = "crates/claude-agent-types" }
+claude-agent-mcp = { path = "crates/claude-agent-mcp" }
+claude-agent-skills = { path = "crates/claude-agent-skills" }
+claude-agent-macros = { path = "crates/claude-agent-macros" }
