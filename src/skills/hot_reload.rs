@@ -5,7 +5,6 @@
 
 use crate::skills::{SkillPackage, SkillError};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info, warn};
@@ -49,10 +48,7 @@ pub enum HotReloadEvent {
 pub struct HotReloadWatcher {
     config: HotReloadConfig,
     event_sender: mpsc::UnboundedSender<HotReloadEvent>,
-    _watcher: notify_debouncer_mini::Debouncer<
-        notify::RecommendedWatcher,
-        notify_debouncer_mini::FileIdMap,
-    >,
+    _watcher: notify::RecommendedWatcher,
 }
 
 #[cfg(feature = "hot-reload")]
@@ -71,7 +67,8 @@ impl HotReloadWatcher {
         config: HotReloadConfig,
         event_sender: mpsc::UnboundedSender<HotReloadEvent>,
     ) -> Result<Self, SkillError> {
-        use notify_debouncer_mini::new_debouncer;
+        use notify::EventKind;
+        use notify::Watcher;
 
         let watch_path = watch_path.as_ref();
 
@@ -83,28 +80,21 @@ impl HotReloadWatcher {
         }
 
         let sender_clone = event_sender.clone();
-        let mut debouncer = new_debouncer(
-            config.debounce_duration,
-            None,
-            move |result: notify_debouncer_mini::DebounceEventResult| {
-                match result {
-                    Ok(events) => {
-                        for event in events {
-                            Self::handle_event(event, &sender_clone, &config.file_patterns);
-                        }
-                    }
-                    Err(errors) => {
-                        for error in errors {
-                            error!("Hot reload error: {:?}", error);
-                        }
-                    }
+        let file_patterns = config.file_patterns.clone();
+
+        let mut watcher = notify::recommended_watcher(move |result: notify::Result<notify::Event>| {
+            match result {
+                Ok(event) => {
+                    Self::handle_event(event, &sender_clone, &file_patterns);
                 }
-            },
-        )
+                Err(e) => {
+                    error!("Hot reload error: {:?}", e);
+                }
+            }
+        })
         .map_err(|e| SkillError::Configuration(format!("Failed to create watcher: {}", e)))?;
 
-        debouncer
-            .watcher()
+        watcher
             .watch(watch_path, notify::RecursiveMode::Recursive)
             .map_err(|e| SkillError::Configuration(format!("Failed to watch path: {}", e)))?;
 
@@ -116,7 +106,7 @@ impl HotReloadWatcher {
         Ok(Self {
             config,
             event_sender,
-            _watcher: debouncer,
+            _watcher: watcher,
         })
     }
 
@@ -126,7 +116,13 @@ impl HotReloadWatcher {
         sender: &mpsc::UnboundedSender<HotReloadEvent>,
         patterns: &[String],
     ) {
-        let path = &event.path;
+        use notify::EventKind;
+
+        // Get the first path from the event
+        let path = match event.paths.first() {
+            Some(p) => p,
+            None => return,
+        };
 
         // Skip if not a file
         if !path.is_file() {
@@ -155,17 +151,17 @@ impl HotReloadWatcher {
 
         // Handle different event kinds
         match event.kind {
-            notify::EventKind::Create(_) => {
+            EventKind::Create(_) => {
                 Self::load_and_send_event(path, sender, |path, skill| {
                     HotReloadEvent::SkillCreated { path, skill }
                 });
             }
-            notify::EventKind::Modify(_) => {
+            EventKind::Modify(_) => {
                 Self::load_and_send_event(path, sender, |path, skill| {
                     HotReloadEvent::SkillModified { path, skill }
                 });
             }
-            notify::EventKind::Remove(_) => {
+            EventKind::Remove(_) => {
                 let _ = sender.send(HotReloadEvent::SkillDeleted {
                     path: path.clone(),
                 });
@@ -225,7 +221,7 @@ impl HotReloadWatcher {
     }
 }
 
-/// Simple hot reload manager without the watcher
+/// Simple hot reload stub without the watcher
 #[cfg(not(feature = "hot-reload"))]
 pub struct HotReloadWatcher {
     _config: HotReloadConfig,
@@ -330,14 +326,14 @@ mod tests {
 
     #[test]
     fn test_hot_reload_manager_creation() {
-        let (sender, receiver) = mpsc::unbounded_channel();
+        let (_sender, receiver) = mpsc::unbounded_channel();
         let manager = HotReloadManager::new(receiver);
         assert_eq!(manager.get_skills().len(), 0);
     }
 
     #[test]
     fn test_hot_reload_manager_no_events() {
-        let (sender, receiver) = mpsc::unbounded_channel();
+        let (_sender, receiver) = mpsc::unbounded_channel();
         let mut manager = HotReloadManager::new(receiver);
         let count = manager.process_events();
         assert_eq!(count, 0);
