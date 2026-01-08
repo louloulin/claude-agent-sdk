@@ -2,8 +2,8 @@
 name = "claude-agent-sdk-rs"
 version = "0.6.0"
 authors = ["Tyr Chen <tyr.chen@gmail.com>"]
-edition = "2021"
-rust-version = "1.90"
+edition = "2024"
+rust-version = "1.85"
 license = "MIT"
 documentation = "https://docs.rs/claude-agent-sdk-rs"
 repository = "https://github.com/tyrchen/claude-agent-sdk-rs"
