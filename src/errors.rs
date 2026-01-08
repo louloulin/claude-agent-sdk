@@ -49,6 +49,18 @@ pub enum ClaudeError {
     /// Other errors
     #[error(transparent)]
     Other(#[from] anyhow::Error),
+
+    /// Not found error
+    #[error("Not found: {0}")]
+    NotFound(String),
+
+    /// Invalid input error
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+
+    /// Internal error
+    #[error("Internal error: {0}")]
+    InternalError(String),
 }
 
 /// Error when Claude Code CLI cannot be found

@@ -53,6 +53,9 @@ tracing = "0.1"
 uuid = { version = "1.19", features = ["v4"] }
 typed-builder = "0.23.2"
 
+# Date/time handling
+chrono = { version = "0.4", features = ["serde"] }
+
 # Macro utilities
 paste = "1.0"
 

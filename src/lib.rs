@@ -236,6 +236,7 @@
 pub mod client;
 pub mod errors;
 mod internal;
+pub mod mcp;
 pub mod query;
 pub mod skills;
 pub mod types;
@@ -243,6 +244,10 @@ pub mod version;
 
 // Re-export commonly used types
 pub use errors::{ClaudeError, ImageValidationError, Result};
+pub use mcp::{
+    TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest,
+    TaskResult, TaskState, TaskStatus, TaskUri,
+};
 pub use skills::{
     Skill, SkillError, SkillInput, SkillOutput, SkillPackage, SkillRegistry, SkillResources,
 };
