@@ -3,11 +3,10 @@
 //! This example demonstrates advanced configuration options
 //! for fine-tuning Claude Agent behavior.
 
-use claude_agent_sdk_rs::{
-    query, ClaudeAgentOptions, SystemPrompt,
-    PermissionMode, SdkBeta, tools
-};
 use anyhow::Result;
+use claude_agent_sdk_rs::{
+    ClaudeAgentOptions, PermissionMode, SdkBeta, SystemPrompt, query, tools,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -52,7 +51,7 @@ async fn main() -> Result<()> {
 async fn beta_features_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .betas(vec![
-            SdkBeta::MaxTokens3,           // Increased token limits
+            SdkBeta::MaxTokens3,            // Increased token limits
             SdkBeta::ComputerTools20250124, // Enhanced computer tools
             SdkBeta::PromptCaching,         // Prompt caching
         ])
@@ -71,9 +70,7 @@ async fn beta_features_example() -> Result<()> {
 /// Example 2: Custom System Prompts
 async fn custom_system_prompts() -> Result<()> {
     // Simple system prompt
-    let simple_prompt = SystemPrompt::text(
-        "You are a helpful Rust programming assistant."
-    );
+    let simple_prompt = SystemPrompt::text("You are a helpful Rust programming assistant.");
 
     // Multi-part system prompt
     let multi_part_prompt = SystemPrompt::text(
@@ -82,7 +79,7 @@ async fn custom_system_prompts() -> Result<()> {
          1. Idiomatic Rust code\n\
          2. Performance\n\
          3. Safety\n\
-         4. Best practices"
+         4. Best practices",
     );
 
     // System prompt from file
@@ -108,11 +105,7 @@ async fn advanced_tool_config() -> Result<()> {
     let filesystem_tools = tools::preset::filesystem();
 
     // Custom tool list
-    let custom_tools = tools::custom(&[
-        "Read",
-        "Write",
-        "Bash",
-    ]);
+    let custom_tools = tools::custom(&["Read", "Write", "Bash"]);
 
     let options = ClaudeAgentOptions::builder()
         .tools(Some(coding_tools))
@@ -122,7 +115,7 @@ async fn advanced_tool_config() -> Result<()> {
             "Bash".to_string(),
         ])
         .disallowed_tools(vec![
-            "Edit".to_string(),  // Disable for safety
+            "Edit".to_string(), // Disable for safety
         ])
         .build();
 
@@ -139,7 +132,7 @@ async fn advanced_tool_config() -> Result<()> {
 /// Example 4: Budget and Cost Control
 async fn budget_control_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .max_budget_usd(0.50)  // Limit to $0.50
+        .max_budget_usd(0.50) // Limit to $0.50
         .max_turns(5)
         .model(Some("claude-sonnet-4-5".to_string()))
         .build();
@@ -168,7 +161,7 @@ async fn model_selection_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .model(Some("claude-opus-4-5".to_string()))
         .fallback_model(Some("claude-sonnet-4-5".to_string()))
-        .max_thinking_tokens(Some(50000))  // Extended thinking
+        .max_thinking_tokens(Some(50000)) // Extended thinking
         .build();
 
     println!("   Primary model: claude-opus-4-5");
@@ -185,7 +178,7 @@ async fn model_selection_example() -> Result<()> {
 async fn session_management_example() -> Result<()> {
     // Fork session for fresh start
     let options_fork = ClaudeAgentOptions::builder()
-        .fork_session(true)  // Each session starts fresh
+        .fork_session(true) // Each session starts fresh
         .build();
 
     // Resume existing session
@@ -212,9 +205,7 @@ async fn env_vars_example() -> Result<()> {
     env.insert("RUST_LOG".to_string(), "debug".to_string());
     env.insert("API_KEY".to_string(), "sk-xxx".to_string());
 
-    let options = ClaudeAgentOptions::builder()
-        .env(env)
-        .build();
+    let options = ClaudeAgentOptions::builder().env(env).build();
 
     println!("   Environment variables:");
     println!("   - RUST_LOG=debug");
@@ -295,8 +286,8 @@ async fn user_metadata_example() -> Result<()> {
 /// Example 11: Stream vs Non-Stream Configuration
 async fn stream_config_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .include_partial_messages(true)  // Include partial in stream
-        .max_buffer_size(Some(1024 * 1024))  // 1MB buffer
+        .include_partial_messages(true) // Include partial in stream
+        .max_buffer_size(Some(1024 * 1024)) // 1MB buffer
         .build();
 
     println!("   Stream configuration:");
@@ -315,14 +306,11 @@ async fn production_config_example() -> Result<()> {
         // Model selection
         .model(Some("claude-sonnet-4-5".to_string()))
         .fallback_model(Some("claude-haiku-4-5".to_string()))
-
         // Cost control
         .max_budget_usd(1.00)
         .max_turns(10)
-
         // Permissions
         .permission_mode(PermissionMode::AcceptEdits)
-
         // Tools
         .tools(Some(tools::preset::production()))
         .allowed_tools(vec![
@@ -330,22 +318,15 @@ async fn production_config_example() -> Result<()> {
             "Write".to_string(),
             "Bash".to_string(),
         ])
-
         // System prompt
         .system_prompt(Some(SystemPrompt::text(
             "You are a production assistant focused on \
-             reliability and correctness."
+             reliability and correctness.",
         )))
-
         // Beta features
-        .betas(vec![
-            SdkBeta::MaxTokens3,
-            SdkBeta::PromptCaching,
-        ])
-
+        .betas(vec![SdkBeta::MaxTokens3, SdkBeta::PromptCaching])
         // Performance
         .max_thinking_tokens(Some(20000))
-
         // Build
         .build();
 

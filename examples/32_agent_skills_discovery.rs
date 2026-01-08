@@ -24,7 +24,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         instructions: r#"You are a calculator assistant.
 When given mathematical expressions, evaluate them and provide the result.
-Support basic operations: addition, subtraction, multiplication, division."#.to_string(),
+Support basic operations: addition, subtraction, multiplication, division."#
+            .to_string(),
         scripts: vec![
             "function add(a, b) { return a + b; }".to_string(),
             "function multiply(a, b) { return a * b; }".to_string(),
@@ -52,7 +53,8 @@ Support basic operations: addition, subtraction, multiplication, division."#.to_
             tags: vec!["translation".to_string(), "text".to_string()],
         },
         instructions: r#"You are a translation assistant.
-Translate the given text to the target language while preserving meaning and tone."#.to_string(),
+Translate the given text to the target language while preserving meaning and tone."#
+            .to_string(),
         scripts: vec!["function translate(text, targetLang) { ... }".to_string()],
         resources: SkillResources::default(),
     };

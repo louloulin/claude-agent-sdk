@@ -90,7 +90,10 @@ impl DependencyResolver {
         I: IntoIterator<Item = &'a crate::skills::SkillPackage>,
     {
         for package in packages {
-            self.add_skill(package.metadata.id.clone(), package.metadata.version.clone());
+            self.add_skill(
+                package.metadata.id.clone(),
+                package.metadata.version.clone(),
+            );
         }
     }
 
@@ -268,7 +271,10 @@ mod tests {
 
         let dep_with_version = Dependency::with_version("test-skill", "^1.0.0");
         assert_eq!(dep_with_version.skill_id, "test-skill");
-        assert_eq!(dep_with_version.version_requirement, Some("^1.0.0".to_string()));
+        assert_eq!(
+            dep_with_version.version_requirement,
+            Some("^1.0.0".to_string())
+        );
     }
 
     #[test]
@@ -349,7 +355,10 @@ mod tests {
         resolver.add_skill("d", "1.0.0");
 
         let mut skills = HashMap::new();
-        skills.insert("a".to_string(), vec![Dependency::new("b"), Dependency::new("c")]);
+        skills.insert(
+            "a".to_string(),
+            vec![Dependency::new("b"), Dependency::new("c")],
+        );
         skills.insert("b".to_string(), vec![Dependency::new("d")]);
         skills.insert("c".to_string(), vec![Dependency::new("d")]);
         skills.insert("d".to_string(), vec![]);
@@ -377,7 +386,10 @@ mod tests {
         resolver.add_skill("main", "1.0.0");
 
         let mut skills = HashMap::new();
-        skills.insert("main".to_string(), vec![Dependency::with_version("dep1", "^1.0.0")]);
+        skills.insert(
+            "main".to_string(),
+            vec![Dependency::with_version("dep1", "^1.0.0")],
+        );
         skills.insert("dep1".to_string(), vec![]);
 
         assert!(resolver.validate_versions(&skills));

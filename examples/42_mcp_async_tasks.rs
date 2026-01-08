@@ -87,7 +87,10 @@ async fn basic_task_creation() -> Result<(), Box<dyn std::error::Error>> {
     // Get final status
     let status = manager.get_task_status(&task.id).await?;
     println!("  ✅ Final state: {:?}", status.state);
-    println!("  📦 Result: {:?}", manager.get_task_result(&task.id).await?);
+    println!(
+        "  📦 Result: {:?}",
+        manager.get_task_result(&task.id).await?
+    );
 
     Ok(())
 }
@@ -126,7 +129,11 @@ async fn task_with_progress() -> Result<(), Box<dyn std::error::Error>> {
 
         let status = manager.get_task_status(&task.id).await?;
         if let Some(prog) = &status.progress {
-            println!("  📊 Progress: {:.0}% - {}", prog.value * 100.0, prog.message.as_ref().unwrap());
+            println!(
+                "  📊 Progress: {:.0}% - {}",
+                prog.value * 100.0,
+                prog.message.as_ref().unwrap()
+            );
         }
 
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -138,7 +145,10 @@ async fn task_with_progress() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     println!("  ✅ Task completed!");
-    println!("  📦 Result: {:?}", manager.get_task_result(&task.id).await?);
+    println!(
+        "  📦 Result: {:?}",
+        manager.get_task_result(&task.id).await?
+    );
 
     Ok(())
 }
@@ -261,9 +271,7 @@ async fn list_and_cleanup() -> Result<(), Box<dyn std::error::Error>> {
 
         // Complete half of them
         if i % 2 == 0 {
-            manager
-                .mark_completed(&task.id, json!({"task": i}))
-                .await?;
+            manager.mark_completed(&task.id, json!({"task": i})).await?;
         }
     }
 

@@ -143,7 +143,11 @@ impl TagQueryBuilder {
     }
 
     /// Get all unique tags from a collection
-    pub fn collect_tags<T>(&self, items: &[T], tags_getter: impl Fn(&T) -> &[String]) -> HashSet<String>
+    pub fn collect_tags<T>(
+        &self,
+        items: &[T],
+        tags_getter: impl Fn(&T) -> &[String],
+    ) -> HashSet<String>
     where
         T: Sized,
     {
@@ -386,8 +390,9 @@ mod tests {
             vec!["rust".to_string(), "sdk".to_string(), "agent".to_string()]
                 .into_iter()
                 .collect();
-        let tags2: HashSet<String> =
-            vec!["rust".to_string(), "sdk".to_string()].into_iter().collect();
+        let tags2: HashSet<String> = vec!["rust".to_string(), "sdk".to_string()]
+            .into_iter()
+            .collect();
 
         assert!(filter.matches(&tags1));
         assert!(!filter.matches(&tags2));

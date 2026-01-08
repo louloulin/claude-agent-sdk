@@ -1,7 +1,7 @@
 //! Simple example of Agent Skills system
 
-use claude_agent_sdk_rs::skills::*;
 use async_trait::async_trait;
+use claude_agent_sdk_rs::skills::*;
 
 struct HelloSkill;
 

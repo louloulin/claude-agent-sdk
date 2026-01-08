@@ -122,7 +122,8 @@ impl ExecutionTrace {
 
     /// Get total duration if completed
     pub fn duration(&self) -> Option<chrono::Duration> {
-        self.duration_ms.map(|ms| chrono::Duration::milliseconds(ms as i64))
+        self.duration_ms
+            .map(|ms| chrono::Duration::milliseconds(ms as i64))
     }
 }
 
@@ -324,7 +325,10 @@ mod tests {
         ctx.set_state("key2", serde_json::json!(42)).await;
         assert_eq!(ctx.get_state("key2").await, Some(serde_json::json!(42)));
 
-        assert_eq!(ctx.remove_state("key1").await, Some(serde_json::json!("value1")));
+        assert_eq!(
+            ctx.remove_state("key1").await,
+            Some(serde_json::json!("value1"))
+        );
         assert!(ctx.get_state("key1").await.is_none());
 
         ctx.clear_state().await;

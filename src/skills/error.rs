@@ -97,7 +97,11 @@ impl fmt::Display for SkillOutput {
         if self.success {
             write!(f, "Success: {}", self.data)
         } else {
-            write!(f, "Error: {}", self.error.as_deref().unwrap_or("Unknown error"))
+            write!(
+                f,
+                "Error: {}",
+                self.error.as_deref().unwrap_or("Unknown error")
+            )
         }
     }
 }

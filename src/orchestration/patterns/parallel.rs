@@ -14,10 +14,10 @@
 //! - Performance optimization
 
 use crate::orchestration::{
+    Result,
     agent::{Agent, AgentInput, AgentOutput},
     context::{AgentExecution, ExecutionContext, ExecutionTrace},
     orchestrator::{BaseOrchestrator, Orchestrator, OrchestratorInput, OrchestratorOutput},
-    Result,
 };
 use futures::future::join_all;
 use std::sync::Arc;
@@ -91,12 +91,9 @@ impl ParallelOrchestrator {
                 }
 
                 // Execute agent with retry
-                let output = Self::execute_agent_with_retry_static(
-                    agent_ref,
-                    input_clone,
-                    self.max_retries,
-                )
-                .await;
+                let output =
+                    Self::execute_agent_with_retry_static(agent_ref, input_clone, self.max_retries)
+                        .await;
 
                 let success = output.is_successful();
 
@@ -134,10 +131,12 @@ impl ParallelOrchestrator {
 
         // If any agents failed, return error
         if !failed_agents.is_empty() {
-            return Err(crate::orchestration::errors::OrchestrationError::agent_failure(
-                failed_agents.join(", "),
-                "Execution failed",
-            ));
+            return Err(
+                crate::orchestration::errors::OrchestrationError::agent_failure(
+                    failed_agents.join(", "),
+                    "Execution failed",
+                ),
+            );
         }
 
         Ok(outputs)
@@ -199,9 +198,11 @@ impl Orchestrator for ParallelOrchestrator {
         input: OrchestratorInput,
     ) -> Result<OrchestratorOutput> {
         if agents.is_empty() {
-            return Err(crate::orchestration::errors::OrchestrationError::invalid_config(
-                "At least one agent is required",
-            ));
+            return Err(
+                crate::orchestration::errors::OrchestrationError::invalid_config(
+                    "At least one agent is required",
+                ),
+            );
         }
 
         // Create execution context
@@ -266,19 +267,28 @@ mod tests {
 
         // Create three agents that execute independently
         let agent1 = SimpleAgent::new("Agent1", "First", |input| {
-            Ok(AgentOutput::new(format!("Result 1 from: {}", input.content)))
+            Ok(AgentOutput::new(format!(
+                "Result 1 from: {}",
+                input.content
+            )))
         });
 
         let agent2 = SimpleAgent::new("Agent2", "Second", |input| {
-            Ok(AgentOutput::new(format!("Result 2 from: {}", input.content)))
+            Ok(AgentOutput::new(format!(
+                "Result 2 from: {}",
+                input.content
+            )))
         });
 
         let agent3 = SimpleAgent::new("Agent3", "Third", |input| {
-            Ok(AgentOutput::new(format!("Result 3 from: {}", input.content)))
+            Ok(AgentOutput::new(format!(
+                "Result 3 from: {}",
+                input.content
+            )))
         });
 
-        let agents: Vec<Box<dyn Agent>> = vec
-![Box::new(agent1), Box::new(agent2), Box::new(agent3)];
+        let agents: Vec<Box<dyn Agent>> =
+            vec![Box::new(agent1), Box::new(agent2), Box::new(agent3)];
 
         let input = OrchestratorInput::new("Test input");
 
@@ -319,7 +329,12 @@ mod tests {
                             break;
                         }
                         if max_clone
-                            .compare_exchange(current_max, current + 1, Ordering::SeqCst, Ordering::SeqCst)
+                            .compare_exchange(
+                                current_max,
+                                current + 1,
+                                Ordering::SeqCst,
+                                Ordering::SeqCst,
+                            )
                             .is_ok()
                         {
                             break;
@@ -395,7 +410,12 @@ mod tests {
                             break;
                         }
                         if max_clone
-                            .compare_exchange(current_max, current + 1, Ordering::SeqCst, Ordering::SeqCst)
+                            .compare_exchange(
+                                current_max,
+                                current + 1,
+                                Ordering::SeqCst,
+                                Ordering::SeqCst,
+                            )
                             .is_ok()
                         {
                             break;
@@ -420,10 +440,6 @@ mod tests {
 
         // With limit of 2, we should never have more than 2 concurrent
         let max_val = max_concurrent.load(Ordering::SeqCst);
-        assert!(
-            max_val <= 2,
-            "Expected max 2 concurrent, got {}",
-            max_val
-        );
+        assert!(max_val <= 2, "Expected max 2 concurrent, got {}", max_val);
     }
 }

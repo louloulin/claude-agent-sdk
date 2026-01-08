@@ -9,17 +9,13 @@
 //! - Deployment strategies
 
 use claude_agent_sdk_rs::{
-    query,
-    ClaudeClient,
-    Message,
-    ContentBlock,
-    types::config::ClaudeAgentOptions,
+    ClaudeClient, ContentBlock, Message, query, types::config::ClaudeAgentOptions,
 };
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 use tokio::signal;
 use tokio::time::sleep;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 
 // ============================================================================
 // Configuration Management
@@ -128,7 +124,8 @@ impl Metrics {
         } else {
             self.failed_requests.fetch_add(1, Ordering::Relaxed);
         }
-        self.total_latency_ms.fetch_add(latency_ms, Ordering::Relaxed);
+        self.total_latency_ms
+            .fetch_add(latency_ms, Ordering::Relaxed);
         self.total_tokens_used.fetch_add(tokens, Ordering::Relaxed);
     }
 
@@ -148,11 +145,7 @@ impl Metrics {
             } else {
                 0.0
             },
-            avg_latency_ms: if total > 0 {
-                total_latency / total
-            } else {
-                0
-            },
+            avg_latency_ms: if total > 0 { total_latency / total } else { 0 },
             total_tokens_used: total_tokens,
         }
     }
@@ -314,9 +307,8 @@ impl ProductionService {
 
         // Health check task
         tokio::spawn(async move {
-            let mut interval = tokio::time::interval(
-                Duration::from_secs(config.health_check_interval_seconds)
-            );
+            let mut interval =
+                tokio::time::interval(Duration::from_secs(config.health_check_interval_seconds));
 
             loop {
                 interval.tick().await;
@@ -327,11 +319,21 @@ impl ProductionService {
                 }
 
                 let status = health_checker.check().await;
-                println!("🏥 Health Check: {}", if status.is_healthy { "✅ Healthy" } else { "❌ Unhealthy" });
+                println!(
+                    "🏥 Health Check: {}",
+                    if status.is_healthy {
+                        "✅ Healthy"
+                    } else {
+                        "❌ Unhealthy"
+                    }
+                );
 
                 for check in &status.checks {
-                    println!("  {}: {}", check.name,
-                             if check.is_healthy { "✅" } else { "❌" });
+                    println!(
+                        "  {}: {}",
+                        check.name,
+                        if check.is_healthy { "✅" } else { "❌" }
+                    );
                 }
             }
         });
@@ -369,16 +371,20 @@ impl ProductionService {
 
         let result = tokio::time::timeout(
             Duration::from_secs(self.config.request_timeout_seconds),
-            query(prompt, Some(self.config.to_claude_options()))
-        ).await;
+            query(prompt, Some(self.config.to_claude_options())),
+        )
+        .await;
 
         let latency_ms = start.elapsed().as_millis() as u64;
         let (success, response) = match result {
             Ok(Ok(messages)) => {
-                let text = messages.iter()
+                let text = messages
+                    .iter()
                     .filter_map(|m| {
                         if let Message::Assistant(msg) = m {
-                            msg.message.content.iter()
+                            msg.message
+                                .content
+                                .iter()
                                 .filter_map(|b| {
                                     if let ContentBlock::Text(t) = b {
                                         Some(t.text.clone())
@@ -397,12 +403,8 @@ impl ProductionService {
 
                 (true, text)
             }
-            Ok(Err(e)) => {
-                (false, format!("Error: {}", e))
-            }
-            Err(_) => {
-                (false, "Error: Request timeout".to_string())
-            }
+            Ok(Err(e)) => (false, format!("Error: {}", e)),
+            Err(_) => (false, "Error: Request timeout".to_string()),
         };
 
         self.metrics.record_request(success, latency_ms, 0);

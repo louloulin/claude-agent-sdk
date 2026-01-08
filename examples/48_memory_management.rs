@@ -6,7 +6,7 @@
 //! - Buffer size optimization
 //! - Memory profiling and monitoring
 
-use claude_agent_sdk_rs::{query, query_stream, Message, ContentBlock};
+use claude_agent_sdk_rs::{ContentBlock, Message, query, query_stream};
 use futures::stream::StreamExt;
 use std::time::Instant;
 
@@ -14,8 +14,7 @@ use std::time::Instant;
 #[cfg(target_os = "linux")]
 fn get_memory_usage() -> usize {
     use std::fs;
-    let status = fs::read_to_string("/proc/self/status")
-        .unwrap_or_default();
+    let status = fs::read_to_string("/proc/self/status").unwrap_or_default();
     for line in status.lines() {
         if line.starts_with("VmRSS:") {
             let parts: Vec<&str> = line.split_whitespace().collect();
@@ -74,18 +73,23 @@ async fn compare_memory_usage(prompt: &str) -> anyhow::Result<()> {
     println!("  Memory used: {}", format_memory(mem_used * 1024));
     println!("  Messages: {}", messages.len());
 
-    let total_chars: usize = messages.iter()
+    let total_chars: usize = messages
+        .iter()
         .filter_map(|m| {
             if let Message::Assistant(msg) = m {
-                Some(msg.message.content.iter()
-                    .filter_map(|b| {
-                        if let ContentBlock::Text(t) = b {
-                            Some(t.text.len())
-                        } else {
-                            Some(0)
-                        }
-                    })
-                    .sum::<usize>())
+                Some(
+                    msg.message
+                        .content
+                        .iter()
+                        .filter_map(|b| {
+                            if let ContentBlock::Text(t) = b {
+                                Some(t.text.len())
+                            } else {
+                                Some(0)
+                            }
+                        })
+                        .sum::<usize>(),
+                )
             } else {
                 None
             }
@@ -132,12 +136,19 @@ async fn compare_memory_usage(prompt: &str) -> anyhow::Result<()> {
 
     // Comparison
     println!("Comparison:");
-    println!("  Time difference: {:.2}%", ((elapsed.as_secs_f64() - elapsed_stream.as_secs_f64()) / elapsed_stream.as_secs_f64()) * 100.0);
-    println!("  Memory savings: {:.2}%", if mem_used > 0 {
-        ((mem_used - mem_used_stream) as f64 / mem_used as f64) * 100.0
-    } else {
-        0.0
-    });
+    println!(
+        "  Time difference: {:.2}%",
+        ((elapsed.as_secs_f64() - elapsed_stream.as_secs_f64()) / elapsed_stream.as_secs_f64())
+            * 100.0
+    );
+    println!(
+        "  Memory savings: {:.2}%",
+        if mem_used > 0 {
+            ((mem_used - mem_used_stream) as f64 / mem_used as f64) * 100.0
+        } else {
+            0.0
+        }
+    );
 
     Ok(())
 }
@@ -169,7 +180,13 @@ async fn process_large_dataset() -> anyhow::Result<()> {
                     if let ContentBlock::Text(text) = block {
                         // Categorize items without storing all text
                         let text_lower = text.text.to_lowercase();
-                        for category in ["code quality", "performance", "security", "testing", "documentation"] {
+                        for category in [
+                            "code quality",
+                            "performance",
+                            "security",
+                            "testing",
+                            "documentation",
+                        ] {
                             if text_lower.contains(category) {
                                 *categories.entry(category).or_insert(0) += 1;
                                 total_items += 1;
@@ -180,7 +197,11 @@ async fn process_large_dataset() -> anyhow::Result<()> {
                         // Print progress every few items
                         if total_items % 10 == 0 {
                             let elapsed = start.elapsed();
-                            println!("  Processed {} items ({:.1} items/s)", total_items, total_items as f64 / elapsed.as_secs_f64());
+                            println!(
+                                "  Processed {} items ({:.1} items/s)",
+                                total_items,
+                                total_items as f64 / elapsed.as_secs_f64()
+                            );
                         }
                     }
                 }
@@ -197,7 +218,10 @@ async fn process_large_dataset() -> anyhow::Result<()> {
     println!("  Total items: {}", total_items);
     println!("  Time: {:.2}s", elapsed.as_secs_f64());
     println!("  Memory used: {}", format_memory(mem_used * 1024));
-    println!("  Throughput: {:.1} items/s\n", total_items as f64 / elapsed.as_secs_f64());
+    println!(
+        "  Throughput: {:.1} items/s\n",
+        total_items as f64 / elapsed.as_secs_f64()
+    );
 
     println!("Categories:");
     for (category, count) in &categories {
@@ -239,7 +263,12 @@ async fn optimize_buffer_size() -> anyhow::Result<()> {
         }
 
         let elapsed = start.elapsed();
-        println!("Buffer size {}: {:.2}s ({} items)", buffer_size, elapsed.as_secs_f64(), count);
+        println!(
+            "Buffer size {}: {:.2}s ({} items)",
+            buffer_size,
+            elapsed.as_secs_f64(),
+            count
+        );
     }
 
     Ok(())
@@ -249,7 +278,8 @@ async fn optimize_buffer_size() -> anyhow::Result<()> {
 async fn efficient_text_processing() -> anyhow::Result<()> {
     println!("\n💾 Memory-Efficient Text Processing\n");
 
-    let prompt = "Explain the following in detail: memory management in Rust, Go, Python, and JavaScript";
+    let prompt =
+        "Explain the following in detail: memory management in Rust, Go, Python, and JavaScript";
 
     let mut stream = query_stream(prompt, None).await?;
 
@@ -297,9 +327,7 @@ async fn main() -> anyhow::Result<()> {
     println!("{}", "=".repeat(50));
 
     // Example 1: Memory comparison
-    compare_memory_usage(
-        "Explain the differences between Rust and Go in 3 paragraphs"
-    ).await?;
+    compare_memory_usage("Explain the differences between Rust and Go in 3 paragraphs").await?;
 
     // Example 2: Large dataset processing
     process_large_dataset().await?;

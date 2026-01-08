@@ -3,7 +3,7 @@
 //! This module provides file system monitoring capabilities to automatically
 //! reload skill configurations when they change on disk.
 
-use crate::skills::{SkillPackage, SkillError};
+use crate::skills::{SkillError, SkillPackage};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -82,16 +82,16 @@ impl HotReloadWatcher {
         let sender_clone = event_sender.clone();
         let file_patterns = config.file_patterns.clone();
 
-        let mut watcher = notify::recommended_watcher(move |result: notify::Result<notify::Event>| {
-            match result {
+        let mut watcher = notify::recommended_watcher(
+            move |result: notify::Result<notify::Event>| match result {
                 Ok(event) => {
                     Self::handle_event(event, &sender_clone, &file_patterns);
                 }
                 Err(e) => {
                     error!("Hot reload error: {:?}", e);
                 }
-            }
-        })
+            },
+        )
         .map_err(|e| SkillError::Configuration(format!("Failed to create watcher: {}", e)))?;
 
         watcher
@@ -135,12 +135,12 @@ impl HotReloadWatcher {
             None => return,
         };
 
-        let matches_pattern = patterns.iter().any(|pattern| {
-            match pattern.strip_prefix('*') {
+        let matches_pattern = patterns
+            .iter()
+            .any(|pattern| match pattern.strip_prefix('*') {
                 Some(ext) => file_name.ends_with(ext),
                 None => file_name == *pattern,
-            }
-        });
+            });
 
         if !matches_pattern {
             debug!("Skipping file (pattern mismatch): {:?}", path);
@@ -162,9 +162,7 @@ impl HotReloadWatcher {
                 });
             }
             EventKind::Remove(_) => {
-                let _ = sender.send(HotReloadEvent::SkillDeleted {
-                    path: path.clone(),
-                });
+                let _ = sender.send(HotReloadEvent::SkillDeleted { path: path.clone() });
             }
             _ => {}
         }

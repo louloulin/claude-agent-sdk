@@ -36,10 +36,21 @@ pub enum CompatibilityResult {
 impl fmt::Display for CompatibilityResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CompatibilityResult::Compatible { version, requirement } => {
-                write!(f, "✅ Version {} satisfies requirement {}", version, requirement)
+            CompatibilityResult::Compatible {
+                version,
+                requirement,
+            } => {
+                write!(
+                    f,
+                    "✅ Version {} satisfies requirement {}",
+                    version, requirement
+                )
             }
-            CompatibilityResult::Incompatible { version, requirement, reason } => {
+            CompatibilityResult::Incompatible {
+                version,
+                requirement,
+                reason,
+            } => {
                 write!(
                     f,
                     "❌ Version {} does not satisfy requirement {}: {}",
@@ -68,7 +79,11 @@ impl VersionManager {
     }
 
     /// Add a skill version
-    pub fn add_version(&mut self, skill_id: impl Into<String>, version: &str) -> Result<(), String> {
+    pub fn add_version(
+        &mut self,
+        skill_id: impl Into<String>,
+        version: &str,
+    ) -> Result<(), String> {
         let version = Version::parse(version).map_err(|e| e.to_string())?;
         self.available.insert(skill_id.into(), version);
         Ok(())
@@ -82,7 +97,7 @@ impl VersionManager {
                 return CompatibilityResult::ParseError {
                     input: version.to_string(),
                     error: e.to_string(),
-                }
+                };
             }
         };
 
@@ -92,7 +107,7 @@ impl VersionManager {
                 return CompatibilityResult::ParseError {
                     input: requirement.to_string(),
                     error: e.to_string(),
-                }
+                };
             }
         };
 
@@ -105,17 +120,16 @@ impl VersionManager {
             CompatibilityResult::Incompatible {
                 version: version.to_string(),
                 requirement: requirement.to_string(),
-                reason: format!("Version {} does not match requirement {}", version, requirement),
+                reason: format!(
+                    "Version {} does not match requirement {}",
+                    version, requirement
+                ),
             }
         }
     }
 
     /// Find the best compatible version for a requirement
-    pub fn find_compatible_version(
-        &self,
-        skill_id: &str,
-        requirement: &str,
-    ) -> Option<String> {
+    pub fn find_compatible_version(&self, skill_id: &str, requirement: &str) -> Option<String> {
         let available_version = self.available.get(skill_id)?;
 
         let req = VersionReq::parse(requirement).ok()?;
@@ -156,7 +170,10 @@ impl VersionManager {
         if let Some(available_version) = self.available.get(skill_id) {
             Ok(available_version > &current_version)
         } else {
-            Err(format!("No available version found for skill: {}", skill_id))
+            Err(format!(
+                "No available version found for skill: {}",
+                skill_id
+            ))
         }
     }
 
@@ -226,7 +243,10 @@ mod tests {
         let result = manager.check_requirement("1.2.3", "^1.0.0");
 
         match result {
-            CompatibilityResult::Compatible { version, requirement } => {
+            CompatibilityResult::Compatible {
+                version,
+                requirement,
+            } => {
                 assert_eq!(version, "1.2.3");
                 assert_eq!(requirement, "^1.0.0");
             }
@@ -240,7 +260,11 @@ mod tests {
         let result = manager.check_requirement("2.0.0", "^1.0.0");
 
         match result {
-            CompatibilityResult::Incompatible { version, requirement, .. } => {
+            CompatibilityResult::Incompatible {
+                version,
+                requirement,
+                ..
+            } => {
                 assert_eq!(version, "2.0.0");
                 assert_eq!(requirement, "^1.0.0");
             }
@@ -270,10 +294,7 @@ mod tests {
             manager.find_compatible_version("skill1", "^1.0.0"),
             Some("1.5.0".to_string())
         );
-        assert_eq!(
-            manager.find_compatible_version("skill1", "^2.0.0"),
-            None
-        );
+        assert_eq!(manager.find_compatible_version("skill1", "^2.0.0"), None);
         assert_eq!(manager.find_compatible_version("skill2", "^1.0.0"), None);
     }
 
@@ -343,7 +364,11 @@ mod tests {
         assert!(manager.validate_dependencies("skill1", &deps).is_ok());
 
         let incompatible_deps = vec![("dep1".to_string(), "^2.0.0".to_string())];
-        assert!(manager.validate_dependencies("skill1", &incompatible_deps).is_err());
+        assert!(
+            manager
+                .validate_dependencies("skill1", &incompatible_deps)
+                .is_err()
+        );
     }
 
     #[test]
@@ -380,7 +405,9 @@ mod tests {
 
         // Prerelease comparison
         assert_eq!(
-            manager.compare_versions("1.0.0-alpha", "1.0.0-beta").unwrap(),
+            manager
+                .compare_versions("1.0.0-alpha", "1.0.0-beta")
+                .unwrap(),
             std::cmp::Ordering::Less
         );
     }

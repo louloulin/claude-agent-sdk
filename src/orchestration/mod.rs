@@ -64,11 +64,8 @@ pub mod patterns;
 
 // Re-export commonly used types
 pub use agent::{Agent, AgentInput, AgentOutput};
-pub use context::{ExecutionContext, ExecutionConfig, ExecutionTrace};
+pub use context::{ExecutionConfig, ExecutionContext, ExecutionTrace};
 pub use errors::{OrchestrationError, Result};
 pub use orchestrator::{Orchestrator, OrchestratorInput, OrchestratorOutput};
 
-pub use patterns::{
-    sequential::SequentialOrchestrator,
-    parallel::ParallelOrchestrator,
-};
+pub use patterns::{parallel::ParallelOrchestrator, sequential::SequentialOrchestrator};

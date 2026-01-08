@@ -93,7 +93,7 @@ impl SandboxConfig {
         Self {
             timeout: Duration::from_secs(10),
             max_memory: Some(32 * 1024 * 1024), // 32 MB
-            max_fuel: Some(500_000),             // 500K instructions
+            max_fuel: Some(500_000),            // 500K instructions
             allow_network: false,
             allow_filesystem: false,
             working_directory: None,
@@ -104,8 +104,8 @@ impl SandboxConfig {
     pub fn permissive() -> Self {
         Self {
             timeout: Duration::from_secs(300), // 5 minutes
-            max_memory: None,                   // Unlimited
-            max_fuel: None,                     // Unlimited
+            max_memory: None,                  // Unlimited
+            max_fuel: None,                    // Unlimited
             allow_network: true,
             allow_filesystem: true,
             working_directory: Some("/tmp".to_string()),
@@ -180,7 +180,11 @@ impl SandboxExecutor {
     ///
     /// # Returns
     /// A `SandboxResult` containing the execution output and metadata
-    pub async fn execute(&self, script: &str, args: Option<Vec<String>>) -> Result<SandboxResult, SkillError> {
+    pub async fn execute(
+        &self,
+        script: &str,
+        args: Option<Vec<String>>,
+    ) -> Result<SandboxResult, SkillError> {
         let start_time = std::time::Instant::now();
 
         info!(
@@ -242,7 +246,11 @@ impl SandboxExecutor {
     }
 
     /// Internal script execution implementation
-    async fn execute_script(&self, script: &str, _args: Option<Vec<String>>) -> Result<SandboxResult, SkillError> {
+    async fn execute_script(
+        &self,
+        script: &str,
+        _args: Option<Vec<String>>,
+    ) -> Result<SandboxResult, SkillError> {
         debug!("Executing script ({} bytes)", script.len());
 
         // Note: This is a simplified implementation for demonstration
@@ -255,7 +263,9 @@ impl SandboxExecutor {
 
         // For now, we'll provide a safe fallback that validates and parses
         // but doesn't actually execute arbitrary code
-        warn!("Sandbox feature is enabled but using safe fallback (WASM compilation not yet implemented)");
+        warn!(
+            "Sandbox feature is enabled but using safe fallback (WASM compilation not yet implemented)"
+        );
 
         Ok(SandboxResult {
             stdout: "Sandbox execution (safe fallback mode)".to_string(),
@@ -291,7 +301,11 @@ impl SandboxExecutor {
     }
 
     /// Execute in fallback mode (safe but not isolated)
-    pub async fn execute(&self, _script: &str, _args: Option<Vec<String>>) -> Result<SandboxResult, SkillError> {
+    pub async fn execute(
+        &self,
+        _script: &str,
+        _args: Option<Vec<String>>,
+    ) -> Result<SandboxResult, SkillError> {
         warn!("Attempting sandbox execution without 'sandbox' feature enabled");
         Err(SkillError::Configuration(
             "Sandbox feature is disabled. Enable with --features sandbox".to_string(),

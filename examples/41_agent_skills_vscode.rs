@@ -4,7 +4,9 @@
 //! which is compatible with Claude Code and VS Code integration.
 
 use claude_agent_sdk_rs::skills::types::{SkillMetadata, SkillPackage, SkillResources};
-use claude_agent_sdk_rs::skills::vscode::{export_to_vscode, export_batch_to_vscode, VsCodeExportConfig, VsCodeUtils};
+use claude_agent_sdk_rs::skills::vscode::{
+    VsCodeExportConfig, VsCodeUtils, export_batch_to_vscode, export_to_vscode,
+};
 use std::path::PathBuf;
 use uuid::Uuid;
 
@@ -25,11 +27,14 @@ fn create_skill(name: &str, description: &str, tags: Vec<&str>) -> SkillPackage 
         ),
         scripts: vec![
             "#!/bin/bash\necho 'Running {} script'".replace("{}", name),
-            "fn main() {\n    println!(\"{} in Rust\");\n}".replace("{}", name)
+            "fn main() {\n    println!(\"{} in Rust\");\n}".replace("{}", name),
         ],
         resources: {
             let mut res = SkillResources::default();
-            res.folders.push(PathBuf::from(format!("./resources/{}", name.to_lowercase().replace(" ", "-"))));
+            res.folders.push(PathBuf::from(format!(
+                "./resources/{}",
+                name.to_lowercase().replace(" ", "-")
+            )));
             res.tools.push(format!("{}-tool", name.to_lowercase()));
             res
         },
@@ -80,7 +85,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             "✗"
         };
-        println!("  {} \"{}\": valid={}, expected={}", status, name, is_valid, should_be_valid);
+        println!(
+            "  {} \"{}\": valid={}, expected={}",
+            status, name, is_valid, should_be_valid
+        );
     }
     println!();
 
@@ -88,11 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("3. Description Validation");
     println!("------------------------");
     let long_desc = "x".repeat(201);
-    let descriptions = vec![
-        "A valid skill description",
-        long_desc.as_str(),
-        "",
-    ];
+    let descriptions = vec!["A valid skill description", long_desc.as_str(), ""];
 
     for desc in descriptions {
         let result = VsCodeUtils::validate_description(desc);
@@ -149,9 +153,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("6. Batch Export to Directory");
     println!("----------------------------");
     let skills = vec![
-        create_skill("Python Expert", "Python programming help", vec!["python", "programming"]),
-        create_skill("Web Developer", "Web development assistance", vec!["web", "javascript", "html"]),
-        create_skill("Data Analyst", "Data analysis and visualization", vec!["data", "analysis"]),
+        create_skill(
+            "Python Expert",
+            "Python programming help",
+            vec!["python", "programming"],
+        ),
+        create_skill(
+            "Web Developer",
+            "Web development assistance",
+            vec!["web", "javascript", "html"],
+        ),
+        create_skill(
+            "Data Analyst",
+            "Data analysis and visualization",
+            vec!["data", "analysis"],
+        ),
     ];
 
     let output_dir = PathBuf::from("/tmp/skills_export");
@@ -238,7 +254,10 @@ For more information, visit: https://github.com/tyrchen/claude-agent-sdk-rs"
     for (input, expected) in edge_cases {
         let normalized = VsCodeUtils::normalize_name(input);
         let match_status = if normalized == expected { "✓" } else { "✗" };
-        println!("  {} \"{}\" -> \"{}\" (expected: \"{}\")", match_status, input, normalized, expected);
+        println!(
+            "  {} \"{}\" -> \"{}\" (expected: \"{}\")",
+            match_status, input, normalized, expected
+        );
     }
     println!();
 
@@ -251,11 +270,16 @@ For more information, visit: https://github.com/tyrchen/claude-agent-sdk-rs"
         metadata: SkillMetadata {
             id: Uuid::new_v4().to_string(),
             name: "API Documentation Generator".to_string(),
-            description: "Automatically generates comprehensive API documentation from code".to_string(),
+            description: "Automatically generates comprehensive API documentation from code"
+                .to_string(),
             version: "2.1.0".to_string(),
             author: Some("Documentation Team".to_string()),
             dependencies: vec!["rust-doc".to_string(), "markdown-parser".to_string()],
-            tags: vec!["documentation".to_string(), "api".to_string(), "generator".to_string()],
+            tags: vec![
+                "documentation".to_string(),
+                "api".to_string(),
+                "generator".to_string(),
+            ],
         },
         instructions: r#"
 Generate comprehensive API documentation following these guidelines:
@@ -268,7 +292,8 @@ Generate comprehensive API documentation following these guidelines:
 "#
         .to_string(),
         scripts: vec![
-            "#!/bin/bash\n# Generate docs from Rust source code\ncargo doc --no-deps --open".to_string()
+            "#!/bin/bash\n# Generate docs from Rust source code\ncargo doc --no-deps --open"
+                .to_string(),
         ],
         resources: {
             let mut res = SkillResources::default();

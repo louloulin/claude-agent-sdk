@@ -3,16 +3,14 @@
 //! This example demonstrates end-to-end integration testing
 //! for the Claude Agent SDK.
 
-use claude_agent_sdk_rs::{
-    query, query_stream, ClaudeClient, ClaudeAgentOptions,
-    PermissionMode, Message, ContentBlock,
-    tool, create_sdk_mcp_server, McpServerConfig,
-    ToolResult, McpToolResultContent
-};
 use anyhow::Result;
-use std::sync::Arc;
-use serde_json::json;
+use claude_agent_sdk_rs::{
+    ClaudeAgentOptions, ClaudeClient, ContentBlock, McpServerConfig, McpToolResultContent, Message,
+    PermissionMode, ToolResult, create_sdk_mcp_server, query, query_stream, tool,
+};
 use futures::stream::StreamExt;
+use serde_json::json;
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -71,9 +69,7 @@ async fn test_basic_query() -> Result<()> {
 
     assert!(!messages.is_empty(), "Should receive messages");
 
-    let has_response = messages.iter().any(|m| {
-        matches!(m, Message::Assistant(_))
-    });
+    let has_response = messages.iter().any(|m| matches!(m, Message::Assistant(_)));
 
     assert!(has_response, "Should have assistant response");
     Ok(())
@@ -164,12 +160,12 @@ async fn test_bidirectional_client() -> Result<()> {
 /// Test 5: Error handling
 async fn test_error_handling() -> Result<()> {
     // Test with invalid configuration
-    let result = query("", None).await;  // Empty query
+    let result = query("", None).await; // Empty query
 
     // Should either succeed or fail gracefully
     match result {
         Ok(_) => Ok(()),
-        Err(_) => Ok(()),  // Error is acceptable
+        Err(_) => Ok(()), // Error is acceptable
     }
 }
 
@@ -186,7 +182,7 @@ async fn test_permission_system() -> Result<()> {
 
 /// Test 7: Hooks system
 async fn test_hooks() -> Result<()> {
-    use claude_agent_sdk_rs::{Hook, HookMatcher, HookInput, HookContext, HookJSONOutput};
+    use claude_agent_sdk_rs::{Hook, HookContext, HookInput, HookJSONOutput, HookMatcher};
     use std::collections::HashMap;
 
     async fn test_hook(
@@ -203,12 +199,10 @@ async fn test_hooks() -> Result<()> {
         vec![HookMatcher {
             matcher: Some("Read".to_string()),
             hooks: vec![Hook::new(test_hook)],
-        }]
+        }],
     );
 
-    let options = ClaudeAgentOptions::builder()
-        .hooks(Some(hooks))
-        .build();
+    let options = ClaudeAgentOptions::builder().hooks(Some(hooks)).build();
 
     let _messages = query("Read README.md", Some(options)).await?;
     Ok(())
@@ -217,7 +211,7 @@ async fn test_hooks() -> Result<()> {
 /// Test 8: Budget control
 async fn test_budget_control() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .max_budget_usd(0.01)  // Very small budget
+        .max_budget_usd(0.01) // Very small budget
         .max_turns(2)
         .build();
 
@@ -258,16 +252,10 @@ async fn test_session_management() -> Result<()> {
 async fn test_concurrent_operations() -> Result<()> {
     use futures::stream::{self, StreamExt, TryStreamExt};
 
-    let queries = vec![
-        "What is 2 + 2?",
-        "What is 3 + 3?",
-        "What is 4 + 4?",
-    ];
+    let queries = vec!["What is 2 + 2?", "What is 3 + 3?", "What is 4 + 4?"];
 
     let results: Vec<_> = stream::iter(queries)
-        .map(|q| async move {
-            query(q, None).await
-        })
+        .map(|q| async move { query(q, None).await })
         .buffer_unordered(3)
         .try_collect()
         .await?;
@@ -278,7 +266,7 @@ async fn test_concurrent_operations() -> Result<()> {
 
 /// Test 11: Multimodal input
 async fn test_multimodal_input() -> Result<()> {
-    use claude_agent_sdk_rs::{query_with_content, UserContentBlock};
+    use claude_agent_sdk_rs::{UserContentBlock, query_with_content};
 
     let base64_data = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
 
@@ -287,8 +275,9 @@ async fn test_multimodal_input() -> Result<()> {
             UserContentBlock::text("What color is this image?"),
             UserContentBlock::image_base64("image/png", base64_data)?,
         ],
-        None
-    ).await?;
+        None,
+    )
+    .await?;
 
     assert!(!messages.is_empty(), "Should handle multimodal input");
     Ok(())
@@ -332,7 +321,7 @@ async fn test_system_prompts() -> Result<()> {
 
     let options = ClaudeAgentOptions::builder()
         .system_prompt(Some(SystemPrompt::text(
-            "You are a helpful assistant focused on brevity."
+            "You are a helpful assistant focused on brevity.",
         )))
         .build();
 
@@ -371,9 +360,7 @@ async fn test_environment_variables() -> Result<()> {
     let mut env = HashMap::new();
     env.insert("TEST_VAR".to_string(), "test_value".to_string());
 
-    let options = ClaudeAgentOptions::builder()
-        .env(env)
-        .build();
+    let options = ClaudeAgentOptions::builder().env(env).build();
 
     let _messages = query("What is the value of TEST_VAR?", Some(options)).await?;
     Ok(())
@@ -381,16 +368,12 @@ async fn test_environment_variables() -> Result<()> {
 
 /// Test 19: Fork session
 async fn test_fork_session() -> Result<()> {
-    let options = ClaudeAgentOptions::builder()
-        .fork_session(true)
-        .build();
+    let options = ClaudeAgentOptions::builder().fork_session(true).build();
 
     let _messages = query("What is 2 + 2?", Some(options)).await?;
 
     // Fork session should not remember previous context
-    let options2 = ClaudeAgentOptions::builder()
-        .fork_session(true)
-        .build();
+    let options2 = ClaudeAgentOptions::builder().fork_session(true).build();
 
     let _messages2 = query("What did I ask before?", Some(options2)).await?;
 
@@ -399,9 +382,7 @@ async fn test_fork_session() -> Result<()> {
 
 /// Test 20: Max turns enforcement
 async fn test_max_turns_enforcement() -> Result<()> {
-    let options = ClaudeAgentOptions::builder()
-        .max_turns(Some(1))
-        .build();
+    let options = ClaudeAgentOptions::builder().max_turns(Some(1)).build();
 
     let messages = query("What is 2 + 2?", Some(options)).await?;
 
@@ -436,7 +417,10 @@ async fn test_performance_assertions() -> Result<()> {
     let elapsed = start.elapsed();
 
     // Should complete within reasonable time
-    assert!(elapsed.as_secs() < 30, "Query should complete within 30 seconds");
+    assert!(
+        elapsed.as_secs() < 30,
+        "Query should complete within 30 seconds"
+    );
 
     println!("   Performance: {:?}", elapsed);
     Ok(())

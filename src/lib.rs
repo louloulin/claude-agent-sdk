@@ -246,14 +246,13 @@ pub mod version;
 // Re-export commonly used types
 pub use errors::{ClaudeError, ImageValidationError, Result};
 pub use mcp::{
-    TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest,
-    TaskResult, TaskState, TaskStatus, TaskUri,
+    TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest, TaskResult,
+    TaskState, TaskStatus, TaskUri,
 };
 pub use orchestration::{
-    Agent, AgentInput, AgentOutput,
-    ExecutionContext, ExecutionConfig, ExecutionTrace,
-    Orchestrator, OrchestratorInput, OrchestratorOutput,
-    ParallelOrchestrator, SequentialOrchestrator,
+    Agent, AgentInput, AgentOutput, ExecutionConfig, ExecutionContext, ExecutionTrace,
+    Orchestrator, OrchestratorInput, OrchestratorOutput, ParallelOrchestrator,
+    SequentialOrchestrator,
 };
 pub use skills::{
     Skill, SkillError, SkillInput, SkillOutput, SkillPackage, SkillRegistry, SkillResources,

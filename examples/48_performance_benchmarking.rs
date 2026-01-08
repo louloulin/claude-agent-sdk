@@ -3,9 +3,9 @@
 //! This example demonstrates how to benchmark and measure
 //! the performance of the Claude Agent SDK.
 
-use claude_agent_sdk_rs::{query, query_stream, ClaudeAgentOptions, Message};
-use std::time::Instant;
 use anyhow::Result;
+use claude_agent_sdk_rs::{ClaudeAgentOptions, Message, query, query_stream};
+use std::time::Instant;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -92,8 +92,10 @@ async fn benchmark_memory_usage() -> Result<()> {
 
     let avg_time = total_time / iterations;
     println!("   Average time per query: {:?}", avg_time);
-    println!("   Estimated throughput: {:.2} queries/second",
-             1000.0 / avg_time.as_millis() as f64);
+    println!(
+        "   Estimated throughput: {:.2} queries/second",
+        1000.0 / avg_time.as_millis() as f64
+    );
 
     Ok(())
 }
@@ -163,9 +165,7 @@ async fn benchmark_concurrent() -> Result<()> {
         let start = Instant::now();
 
         let results: Vec<_> = futures::stream::iter(queries)
-            .map(|q| async move {
-                query(&q, None).await
-            })
+            .map(|q| async move { query(&q, None).await })
             .buffer_unordered(concurrent)
             .try_collect()
             .await?;
@@ -183,16 +183,22 @@ async fn benchmark_concurrent() -> Result<()> {
 async fn benchmark_scaling() -> Result<()> {
     let query_sizes = vec![
         ("Short", "What is 2 + 2?"),
-        ("Medium", "Explain the concept of ownership in Rust programming language, including how it relates to borrowing and lifetimes"),
-        ("Long", &format!(
-            "Provide a comprehensive explanation of:\n\
+        (
+            "Medium",
+            "Explain the concept of ownership in Rust programming language, including how it relates to borrowing and lifetimes",
+        ),
+        (
+            "Long",
+            &format!(
+                "Provide a comprehensive explanation of:\n\
              1. Rust ownership system\n\
              2. Borrowing and references\n\
              3. Lifetimes and their impact\n\
              4. Smart pointers (Box, Rc, Arc)\n\
              5. Thread safety and Send/Sync traits\n\
              Include examples for each concept."
-        )),
+            ),
+        ),
     ];
 
     for (name, query_text) in query_sizes {
@@ -212,9 +218,7 @@ async fn benchmark_scaling() -> Result<()> {
 
 /// Helper: Calculate average duration
 fn average_duration(durations: &[std::time::Duration]) -> std::time::Duration {
-    let total_nanos: u128 = durations.iter()
-        .map(|d| d.as_nanos())
-        .sum();
+    let total_nanos: u128 = durations.iter().map(|d| d.as_nanos()).sum();
 
     let avg_nanos = total_nanos / durations.len() as u128;
     std::time::Duration::from_nanos(avg_nanos as u64)
@@ -270,7 +274,10 @@ async fn statistical_analysis() -> Result<()> {
 
     let mut latencies = Vec::new();
 
-    println!("   Running {} iterations for statistical analysis...", iterations);
+    println!(
+        "   Running {} iterations for statistical analysis...",
+        iterations
+    );
 
     for _ in 0..iterations {
         let start = Instant::now();
@@ -323,12 +330,14 @@ fn median(values: &mut [u128]) -> f64 {
 }
 
 fn std_deviation(values: &[u128], mean: f64) -> f64 {
-    let variance = values.iter()
+    let variance = values
+        .iter()
         .map(|&x| {
             let diff = x as f64 - mean;
             diff * diff
         })
-        .sum::<f64>() / values.len() as f64;
+        .sum::<f64>()
+        / values.len() as f64;
 
     variance.sqrt()
 }

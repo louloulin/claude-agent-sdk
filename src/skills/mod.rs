@@ -19,14 +19,12 @@ use std::path::{Path, PathBuf};
 pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
 pub use hot_reload::{HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher};
-pub use performance::{
-    BatchOperations, IndexedSkillCollection, LruCache, PerformanceStats,
-};
+pub use performance::{BatchOperations, IndexedSkillCollection, LruCache, PerformanceStats};
 pub use sandbox::{SandboxConfig, SandboxExecutor, SandboxResult, SandboxUtils};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 pub use version::{CompatibilityResult, VersionManager};
-pub use vscode::{export_batch_to_vscode, export_to_vscode, VsCodeExportConfig, VsCodeUtils};
+pub use vscode::{VsCodeExportConfig, VsCodeUtils, export_batch_to_vscode, export_to_vscode};
 
 /// The core Skill trait
 #[async_trait]
@@ -95,11 +93,17 @@ impl SkillRegistry {
         let dir = dir.as_ref();
 
         if !dir.exists() {
-            return Err(SkillError::Io(format!("Directory does not exist: {:?}", dir)));
+            return Err(SkillError::Io(format!(
+                "Directory does not exist: {:?}",
+                dir
+            )));
         }
 
         if !dir.is_dir() {
-            return Err(SkillError::Io(format!("Path is not a directory: {:?}", dir)));
+            return Err(SkillError::Io(format!(
+                "Path is not a directory: {:?}",
+                dir
+            )));
         }
 
         let entries = std::fs::read_dir(dir)
@@ -108,7 +112,8 @@ impl SkillRegistry {
         let mut packages = Vec::new();
 
         for entry in entries {
-            let entry = entry.map_err(|e| SkillError::Io(format!("Failed to read directory entry: {}", e)))?;
+            let entry = entry
+                .map_err(|e| SkillError::Io(format!("Failed to read directory entry: {}", e)))?;
             let path = entry.path();
 
             // Only process .json files
@@ -119,7 +124,11 @@ impl SkillRegistry {
             // Try to load as SkillPackage
             match SkillPackage::load_from_file(&path) {
                 Ok(package) => {
-                    tracing::info!("Loaded skill package: {} from {:?}", package.metadata.name, path);
+                    tracing::info!(
+                        "Loaded skill package: {} from {:?}",
+                        package.metadata.name,
+                        path
+                    );
                     packages.push(package);
                 }
                 Err(e) => {

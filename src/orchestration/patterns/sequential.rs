@@ -13,10 +13,10 @@
 //! - Content generation and refinement
 
 use crate::orchestration::{
+    Result,
     agent::{Agent, AgentInput, AgentOutput},
     context::{AgentExecution, ExecutionContext, ExecutionTrace},
     orchestrator::{BaseOrchestrator, Orchestrator, OrchestratorInput, OrchestratorOutput},
-    Result,
 };
 
 /// Sequential orchestrator that executes agents one after another
@@ -84,10 +84,12 @@ impl SequentialOrchestrator {
                     .with_metadata("previous_agent", agent.name());
             } else {
                 exec_record.fail(output.content.clone());
-                return Err(crate::orchestration::errors::OrchestrationError::agent_failure(
-                    agent.name(),
-                    output.content,
-                ));
+                return Err(
+                    crate::orchestration::errors::OrchestrationError::agent_failure(
+                        agent.name(),
+                        output.content,
+                    ),
+                );
             }
 
             // Add to trace if enabled
@@ -122,9 +124,11 @@ impl Orchestrator for SequentialOrchestrator {
         input: OrchestratorInput,
     ) -> Result<OrchestratorOutput> {
         if agents.is_empty() {
-            return Err(crate::orchestration::errors::OrchestrationError::invalid_config(
-                "At least one agent is required",
-            ));
+            return Err(
+                crate::orchestration::errors::OrchestrationError::invalid_config(
+                    "At least one agent is required",
+                ),
+            );
         }
 
         // Create execution context
@@ -165,35 +169,20 @@ mod tests {
         let orchestrator = SequentialOrchestrator::new();
 
         // Create three simple agents
-        let agent1 = SimpleAgent::new(
-            "Agent1",
-            "First agent",
-            |input| {
-                Ok(AgentOutput::new(format!("Step 1: {}", input.content))
-                    .with_metadata("step", "1"))
-            },
-        );
+        let agent1 = SimpleAgent::new("Agent1", "First agent", |input| {
+            Ok(AgentOutput::new(format!("Step 1: {}", input.content)).with_metadata("step", "1"))
+        });
 
-        let agent2 = SimpleAgent::new(
-            "Agent2",
-            "Second agent",
-            |input| {
-                Ok(AgentOutput::new(format!("Step 2: {}", input.content))
-                    .with_metadata("step", "2"))
-            },
-        );
+        let agent2 = SimpleAgent::new("Agent2", "Second agent", |input| {
+            Ok(AgentOutput::new(format!("Step 2: {}", input.content)).with_metadata("step", "2"))
+        });
 
-        let agent3 = SimpleAgent::new(
-            "Agent3",
-            "Third agent",
-            |input| {
-                Ok(AgentOutput::new(format!("Step 3: {}", input.content))
-                    .with_metadata("step", "3"))
-            },
-        );
+        let agent3 = SimpleAgent::new("Agent3", "Third agent", |input| {
+            Ok(AgentOutput::new(format!("Step 3: {}", input.content)).with_metadata("step", "3"))
+        });
 
-        let agents: Vec<Box<dyn Agent>> = vec
-![Box::new(agent1), Box::new(agent2), Box::new(agent3)];
+        let agents: Vec<Box<dyn Agent>> =
+            vec![Box::new(agent1), Box::new(agent2), Box::new(agent3)];
 
         let input = OrchestratorInput::new("Initial input");
 
@@ -202,15 +191,15 @@ mod tests {
         assert!(output.is_successful());
         assert_eq!(output.agent_outputs.len(), 3);
         assert_eq!(output.agent_outputs[0].content, "Step 1: Initial input");
-        assert_eq!(output.agent_outputs[1].content, "Step 2: Step 1: Initial input");
+        assert_eq!(
+            output.agent_outputs[1].content,
+            "Step 2: Step 1: Initial input"
+        );
         assert_eq!(
             output.agent_outputs[2].content,
             "Step 3: Step 2: Step 1: Initial input"
         );
-        assert_eq!(
-            output.result,
-            "Step 3: Step 2: Step 1: Initial input"
-        );
+        assert_eq!(output.result, "Step 3: Step 2: Step 1: Initial input");
     }
 
     #[tokio::test]
@@ -244,8 +233,7 @@ mod tests {
             }
         });
 
-        let agents: Vec<Box<dyn Agent>> = vec
-![Box::new(agent)];
+        let agents: Vec<Box<dyn Agent>> = vec![Box::new(agent)];
         let input = OrchestratorInput::new("Test");
 
         let output = orchestrator.orchestrate(agents, input).await.unwrap();

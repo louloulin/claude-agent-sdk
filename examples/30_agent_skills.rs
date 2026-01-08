@@ -4,8 +4,8 @@
 //! (Anthropic's open standard announced 2025-12-18) to create
 //! modular, reusable AI capabilities.
 
-use claude_agent_sdk_rs::skills::*;
 use async_trait::async_trait;
+use claude_agent_sdk_rs::skills::*;
 
 /// A simple skill that calculates Fibonacci numbers
 struct FibonacciSkill;
@@ -26,7 +26,9 @@ impl Skill for FibonacciSkill {
             .ok_or_else(|| SkillError::Validation("Missing 'n' parameter".to_string()))?;
 
         if n > 93 {
-            return Err(SkillError::Validation("n must be <= 93 to avoid overflow".to_string()));
+            return Err(SkillError::Validation(
+                "n must be <= 93 to avoid overflow".to_string(),
+            ));
         }
 
         let result = fibonacci(n);

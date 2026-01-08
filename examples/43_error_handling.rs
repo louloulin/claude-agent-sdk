@@ -3,8 +3,8 @@
 //! This example demonstrates comprehensive error handling patterns
 //! when working with the Claude Agent SDK.
 
-use claude_agent_sdk_rs::{query, ClaudeAgentOptions, QueryError, Message};
 use anyhow::Result;
+use claude_agent_sdk_rs::{ClaudeAgentOptions, Message, QueryError, query};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,7 +34,10 @@ async fn main() -> Result<()> {
     // Example 4: Handle tool execution errors
     println!("\n4. Tool Error Handling:");
     match handle_tool_errors().await {
-        Ok(messages) => println!("   ✓ Tools executed successfully, {} messages", messages.len()),
+        Ok(messages) => println!(
+            "   ✓ Tools executed successfully, {} messages",
+            messages.len()
+        ),
         Err(e) => println!("   ✗ Tool execution failed: {}", e),
     }
 
@@ -51,9 +54,7 @@ async fn main() -> Result<()> {
 
 /// Example 1: Handle API-level errors
 async fn handle_api_errors() -> Result<()> {
-    let options = ClaudeAgentOptions::builder()
-        .max_turns(3)
-        .build();
+    let options = ClaudeAgentOptions::builder().max_turns(3).build();
 
     // This might fail due to network issues, API errors, etc.
     match query("What is 2 + 2?", Some(options)).await {
@@ -86,14 +87,18 @@ async fn handle_timeout() -> Result<()> {
     // In a real scenario, you might use tokio::time::timeout
     let timeout_duration = Duration::from_secs(30);
 
-    println!("   Setting timeout to {} seconds", timeout_duration.as_secs());
+    println!(
+        "   Setting timeout to {} seconds",
+        timeout_duration.as_secs()
+    );
 
     // For this example, we just demonstrate the pattern
     // In production, you would wrap the query in tokio::time::timeout
     let _ = tokio::time::timeout(
         timeout_duration,
-        query("Quick question: What's the capital of France?", None)
-    ).await
+        query("Quick question: What's the capital of France?", None),
+    )
+    .await
     .map_err(|_| anyhow::anyhow!("Query timed out after {:?}", timeout_duration))??;
 
     Ok(())
@@ -148,7 +153,7 @@ async fn handle_tool_errors() -> Result<Vec<Message>> {
 
 /// Example 5: Custom error recovery strategies
 async fn custom_recovery_strategy() -> Result<String> {
-    use claude_agent_sdk_rs::{fallback_model, ClaudeAgentOptions};
+    use claude_agent_sdk_rs::{ClaudeAgentOptions, fallback_model};
 
     // Strategy 1: Use fallback model on failure
     let options = ClaudeAgentOptions::builder()
@@ -226,9 +231,7 @@ impl std::fmt::Display for AppError {
 impl std::error::Error for AppError {}
 
 async fn structured_error_handling() -> Result<(), AppError> {
-    query("Test", None)
-        .await
-        .map_err(AppError::QueryFailed)?;
+    query("Test", None).await.map_err(AppError::QueryFailed)?;
 
     // Validate response
     // ...

@@ -62,7 +62,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Add skills
     collection.add(create_skill("rust-sdk", vec!["rust", "sdk", "api"]));
     collection.add(create_skill("python-sdk", vec!["python", "sdk", "api"]));
-    collection.add(create_skill("web-framework", vec!["rust", "web", "framework"]));
+    collection.add(create_skill(
+        "web-framework",
+        vec!["rust", "web", "framework"],
+    ));
     collection.add(create_skill("cli-tool", vec!["rust", "cli", "tool"]));
 
     println!("Total skills: {}", collection.len());
@@ -107,7 +110,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let results2 = collection.query(&filter);
     let duration2 = start.elapsed();
-    println!("Second query: {} results in {:?}", results2.len(), duration2);
+    println!(
+        "Second query: {} results in {:?}",
+        results2.len(),
+        duration2
+    );
     println!();
 
     // Example 5: Batch Operations
@@ -149,7 +156,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Operations: {}", stats.operations);
     println!("Total time: {:?}", stats.total_duration);
-    println!("Average time per operation: {:?}", stats.avg_time_per_operation());
+    println!(
+        "Average time per operation: {:?}",
+        stats.avg_time_per_operation()
+    );
     println!("Cache hit rate: {:.2}%", stats.cache_hit_rate() * 100.0);
     println!("Throughput: {:.2} items/sec", stats.throughput());
     println!();
@@ -157,12 +167,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Example 7: Batch Filtering
     println!("7. Batch Filtering");
     println!("------------------");
-    let all_skills = large_collection.all().into_iter().cloned().collect::<Vec<_>>();
+    let all_skills = large_collection
+        .all()
+        .into_iter()
+        .cloned()
+        .collect::<Vec<_>>();
 
     let rust_skills = BatchOperations::filter_skills(&all_skills, |s| {
         s.metadata.tags.contains(&"rust".to_string())
     });
-    println!("Rust skills: {} out of {}", rust_skills.len(), all_skills.len());
+    println!(
+        "Rust skills: {} out of {}",
+        rust_skills.len(),
+        all_skills.len()
+    );
     println!();
 
     // Example 8: Batch Partitioning
@@ -253,7 +271,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut small_collection = IndexedSkillCollection::new();
 
     for i in 0..50 {
-        let tags = if i % 2 == 0 { vec!["even"] } else { vec!["odd"] };
+        let tags = if i % 2 == 0 {
+            vec!["even"]
+        } else {
+            vec!["odd"]
+        };
         small_collection.add(create_skill(&format!("skill-{}", i), tags));
     }
 

@@ -3,9 +3,9 @@
 //! This example demonstrates how to run multiple queries concurrently
 //! for improved performance and parallel processing.
 
-use claude_agent_sdk_rs::{query, query_stream, ClaudeAgentOptions, Message};
-use futures::stream::{StreamExt, TryStreamExt};
 use anyhow::Result;
+use claude_agent_sdk_rs::{ClaudeAgentOptions, Message, query, query_stream};
+use futures::stream::{StreamExt, TryStreamExt};
 use std::time::Instant;
 
 #[tokio::main]
@@ -43,15 +43,21 @@ async fn main() -> Result<()> {
     // Performance comparison
     println!("=== Performance Comparison ===");
     println!("Sequential:    {:?}", sequential_time);
-    println!("Concurrent:    {:?} ({:.1}x faster)",
-             concurrent_time,
-             sequential_time.as_secs_f64() / concurrent_time.as_secs_f64());
-    println!("TaskPool:      {:?} ({:.1}x faster)",
-             taskpool_time,
-             sequential_time.as_secs_f64() / taskpool_time.as_secs_f64());
-    println!("Streaming:     {:?} ({:.1}x faster)",
-             stream_time,
-             sequential_time.as_secs_f64() / stream_time.as_secs_f64());
+    println!(
+        "Concurrent:    {:?} ({:.1}x faster)",
+        concurrent_time,
+        sequential_time.as_secs_f64() / concurrent_time.as_secs_f64()
+    );
+    println!(
+        "TaskPool:      {:?} ({:.1}x faster)",
+        taskpool_time,
+        sequential_time.as_secs_f64() / taskpool_time.as_secs_f64()
+    );
+    println!(
+        "Streaming:     {:?} ({:.1}x faster)",
+        stream_time,
+        sequential_time.as_secs_f64() / stream_time.as_secs_f64()
+    );
 
     Ok(())
 }
@@ -151,8 +157,8 @@ async fn run_concurrent_streams() -> Result<()> {
         "Explain Rust ownership",
     ];
 
-    let streams = futures::stream::iter(questions).map(|q| {
-        async move {
+    let streams = futures::stream::iter(questions)
+        .map(|q| async move {
             let start = Instant::now();
             let mut stream = query_stream(q, None).await?;
             let mut count = 0;
@@ -162,11 +168,14 @@ async fn run_concurrent_streams() -> Result<()> {
                 count += 1;
             }
 
-            println!("   Stream completed in {:?}, {} messages",
-                     start.elapsed(), count);
+            println!(
+                "   Stream completed in {:?}, {} messages",
+                start.elapsed(),
+                count
+            );
             Ok::<(), anyhow::Error>(())
-        }
-    }).buffer_unordered(3); // Process up to 3 streams concurrently
+        })
+        .buffer_unordered(3); // Process up to 3 streams concurrently
 
     streams.try_collect::<Vec<_>>().await?;
     Ok(())
@@ -187,12 +196,10 @@ async fn batch_processing_example() -> Result<()> {
     println!("   Processing {} items concurrently", data.len());
 
     let results: Vec<_> = futures::stream::iter(data)
-        .map(|(item, category)| {
-            async move {
-                let question = format!("What is {}? It's a {}", item, category);
-                let messages = query(&question, None).await?;
-                Ok::<(String, String), anyhow::Error>((item.to_string(), category.to_string()))
-            }
+        .map(|(item, category)| async move {
+            let question = format!("What is {}? It's a {}", item, category);
+            let messages = query(&question, None).await?;
+            Ok::<(String, String), anyhow::Error>((item.to_string(), category.to_string()))
         })
         .buffer_unordered(3)
         .try_collect()
@@ -242,15 +249,9 @@ async fn error_isolation_example() -> Result<()> {
 
 /// Example 7: Rate-limited concurrent queries
 async fn rate_limited_concurrent() -> Result<()> {
-    use tokio::time::{interval, Duration};
+    use tokio::time::{Duration, interval};
 
-    let queries = vec![
-        "Query 1",
-        "Query 2",
-        "Query 3",
-        "Query 4",
-        "Query 5",
-    ];
+    let queries = vec!["Query 1", "Query 2", "Query 3", "Query 4", "Query 5"];
 
     let rate_limit = Duration::from_millis(500); // Max 2 queries per second
     let mut ticker = interval(rate_limit);
@@ -308,7 +309,11 @@ async fn concurrent_with_timeout() -> Result<()> {
         .await;
 
     let completed = results.iter().filter(|r| r.is_some()).count();
-    println!("   {}/{} queries completed within timeout", completed, queries.len());
+    println!(
+        "   {}/{} queries completed within timeout",
+        completed,
+        queries.len()
+    );
 
     Ok(())
 }

@@ -3,11 +3,10 @@
 //! This example demonstrates practical applications of the Claude Agent SDK
 //! in common real-world scenarios.
 
-use claude_agent_sdk_rs::{
-    query, ClaudeClient, ClaudeAgentOptions,
-    PermissionMode, Message, ContentBlock
-};
 use anyhow::Result;
+use claude_agent_sdk_rs::{
+    ClaudeAgentOptions, ClaudeClient, ContentBlock, Message, PermissionMode, query,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -68,9 +67,7 @@ pub fn calculate_sum(numbers: &[i32]) -> i32 {
         code_to_review
     );
 
-    let options = ClaudeAgentOptions::builder()
-        .max_turns(3)
-        .build();
+    let options = ClaudeAgentOptions::builder().max_turns(3).build();
 
     let messages = query(&prompt, Some(options)).await?;
 
@@ -104,7 +101,9 @@ pub fn process_user_input(input: &str) -> Result<String, Error> {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some("You are a technical writer specializing in Rust documentation.".to_string()))
+        .system_prompt(Some(
+            "You are a technical writer specializing in Rust documentation.".to_string(),
+        ))
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -134,7 +133,9 @@ pub fn validate_email(email: &str) -> bool {
     );
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some("You are a testing expert specializing in Rust.".to_string()))
+        .system_prompt(Some(
+            "You are a testing expert specializing in Rust.".to_string(),
+        ))
         .build();
 
     let messages = query(&prompt, Some(options)).await?;
@@ -242,7 +243,7 @@ pub fn process_data(data: &Vec<String>) -> Vec<String> {
 
     let options = ClaudeAgentOptions::builder()
         .system_prompt(Some(
-            "You are a Rust expert focused on clean, idiomatic code.".to_string()
+            "You are a Rust expert focused on clean, idiomatic code.".to_string(),
         ))
         .build();
 
@@ -289,7 +290,7 @@ struct NewUser {
         .allowed_tools(vec![
             "Read".to_string(),
             "Write".to_string(),
-            "Bash".to_string()
+            "Bash".to_string(),
         ])
         .permission_mode(PermissionMode::BypassPermissions)
         .build();
@@ -335,7 +336,7 @@ even when all inputs are integers.
 
     let options = ClaudeAgentOptions::builder()
         .system_prompt(Some(
-            "You are a debugging expert helping developers fix code.".to_string()
+            "You are a debugging expert helping developers fix code.".to_string(),
         ))
         .build();
 
@@ -377,7 +378,7 @@ pub fn find_duplicates(strings: &[String]) -> Vec<String> {
 
     let options = ClaudeAgentOptions::builder()
         .system_prompt(Some(
-            "You are a performance optimization expert.".to_string()
+            "You are a performance optimization expert.".to_string(),
         ))
         .build();
 

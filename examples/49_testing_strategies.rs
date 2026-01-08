@@ -8,10 +8,7 @@
 //! - Deterministic testing with seeds
 
 use claude_agent_sdk_rs::{
-    query,
-    ClaudeClient,
-    Message,
-    ContentBlock,
+    ClaudeClient, ContentBlock, Message, query,
     types::{
         config::ClaudeAgentOptions,
         hooks::Hooks,
@@ -74,7 +71,8 @@ impl ToolExecutor for MockCalculatorTool {
         Ok(serde_json::json!({
             "result": 42,
             "call_count": *count
-        }).to_string())
+        })
+        .to_string())
     }
 }
 
@@ -162,10 +160,16 @@ async fn test_mock_tool_execution() -> anyhow::Result<()> {
     let tool = MockCalculatorTool::new();
     let initial_count = tool.call_count();
 
-    let result = tool.execute(serde_json::json!({"operation": "add"})).await?;
+    let result = tool
+        .execute(serde_json::json!({"operation": "add"}))
+        .await?;
 
     assert!(result.contains("42"), "Mock tool should return 42");
-    assert_eq!(tool.call_count(), initial_count + 1, "Call count should increment");
+    assert_eq!(
+        tool.call_count(),
+        initial_count + 1,
+        "Call count should increment"
+    );
 
     Ok(())
 }
@@ -178,10 +182,7 @@ async fn test_mock_tool_execution() -> anyhow::Result<()> {
 async fn test_multi_turn_conversation() -> anyhow::Result<()> {
     let _timer = TestTimer::new("multi-turn conversation");
 
-    let client = ClaudeClient::new(
-        vec!["Remember the number 5".to_string()],
-        None,
-    )?;
+    let client = ClaudeClient::new(vec!["Remember the number 5".to_string()], None)?;
 
     let messages = client.execute().await?;
     assert!(!messages.is_empty(), "First query should return messages");
@@ -326,7 +327,8 @@ async fn benchmark_query_performance() -> anyhow::Result<()> {
         println!("    Iteration {}: {:.2}ms", i + 1, elapsed.as_millis());
     }
 
-    let avg_time: std::time::Duration = times.iter().sum::<std::time::Duration>() / times.len() as u32;
+    let avg_time: std::time::Duration =
+        times.iter().sum::<std::time::Duration>() / times.len() as u32;
     let min_time = times.iter().min().unwrap();
     let max_time = times.iter().max().unwrap();
 

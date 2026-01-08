@@ -34,7 +34,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Timeout: {:?}", restrictive.timeout);
     println!("Max Memory: {:?}", restrictive.max_memory);
     println!("Max Fuel: {:?}", restrictive.max_fuel);
-    println!("Safe for untrusted code: {}", SandboxUtils::is_safe_config(&restrictive));
+    println!(
+        "Safe for untrusted code: {}",
+        SandboxUtils::is_safe_config(&restrictive)
+    );
     println!();
 
     // Example 3: Permissive configuration for trusted skills
@@ -46,7 +49,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Max Fuel: {:?}", permissive.max_fuel);
     println!("Network Access: {}", permissive.allow_network);
     println!("Filesystem Access: {}", permissive.allow_filesystem);
-    println!("Safe for untrusted code: {}", SandboxUtils::is_safe_config(&permissive));
+    println!(
+        "Safe for untrusted code: {}",
+        SandboxUtils::is_safe_config(&permissive)
+    );
     println!();
 
     // Example 4: Custom configuration using builder pattern
@@ -63,7 +69,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Max Memory: {:?}", custom.max_memory);
     println!("Max Fuel: {:?}", custom.max_fuel);
     println!("Network: {}", custom.allow_network);
-    println!("Filesystem: {} (dir: {:?})", custom.allow_filesystem, custom.working_directory);
+    println!(
+        "Filesystem: {} (dir: {:?})",
+        custom.allow_filesystem, custom.working_directory
+    );
     println!();
 
     // Example 5: Script validation
@@ -97,7 +106,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let large_script = "x".repeat(100 * 1024);
     let estimated = SandboxUtils::estimate_memory_requirement(&large_script);
-    println!("Large script estimated memory: {} bytes ({} MB)", estimated, estimated / (1024 * 1024));
+    println!(
+        "Large script estimated memory: {} bytes ({} MB)",
+        estimated,
+        estimated / (1024 * 1024)
+    );
     println!();
 
     // Example 7: Recommended configuration based on script size
@@ -241,7 +254,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Memory limit: {:?} (16 MB)", memory_limited.max_memory);
 
     let fuel_limited = SandboxConfig::new().with_max_fuel(100_000); // 100K instructions
-    println!("Fuel limit: {:?} (100K instructions)", fuel_limited.max_fuel);
+    println!(
+        "Fuel limit: {:?} (100K instructions)",
+        fuel_limited.max_fuel
+    );
 
     let unlimited = SandboxConfig {
         timeout: Duration::from_secs(30),

@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo test --test performance_analysis -- --nocapture --test-threads=1
 
-use claude_agent_sdk_rs::{query, query_stream, Message, ContentBlock};
+use claude_agent_sdk_rs::{ContentBlock, Message, query, query_stream};
 use futures::stream::StreamExt;
-use std::time::{Duration, Instant};
 use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 struct PerformanceMetrics {
@@ -112,7 +112,10 @@ async fn benchmark_stream_latency(prompt: &str, iterations: usize) -> Performanc
 }
 
 /// Compare query() vs query_stream()
-async fn compare_query_methods(prompt: &str, iterations: usize) -> HashMap<String, PerformanceMetrics> {
+async fn compare_query_methods(
+    prompt: &str,
+    iterations: usize,
+) -> HashMap<String, PerformanceMetrics> {
     let mut results = HashMap::new();
 
     println!("\n🔬 Comparing: query() vs query_stream()");
@@ -133,9 +136,15 @@ async fn compare_query_methods(prompt: &str, iterations: usize) -> HashMap<Strin
     let stream_avg = results.get("query_stream()").unwrap().avg_time.as_millis();
 
     if query_avg > stream_avg {
-        println!("  query_stream() is {:.2}% faster", ((query_avg - stream_avg) as f64 / query_avg as f64) * 100.0);
+        println!(
+            "  query_stream() is {:.2}% faster",
+            ((query_avg - stream_avg) as f64 / query_avg as f64) * 100.0
+        );
     } else if stream_avg > query_avg {
-        println!("  query() is {:.2}% faster", ((stream_avg - query_avg) as f64 / stream_avg as f64) * 100.0);
+        println!(
+            "  query() is {:.2}% faster",
+            ((stream_avg - query_avg) as f64 / stream_avg as f64) * 100.0
+        );
     } else {
         println!("  Both methods have similar performance");
     }
@@ -144,7 +153,11 @@ async fn compare_query_methods(prompt: &str, iterations: usize) -> HashMap<Strin
 }
 
 /// Benchmark concurrent queries
-async fn benchmark_concurrent_queries(prompt: &str, concurrency_levels: Vec<usize>, iterations: usize) -> HashMap<usize, PerformanceMetrics> {
+async fn benchmark_concurrent_queries(
+    prompt: &str,
+    concurrency_levels: Vec<usize>,
+    iterations: usize,
+) -> HashMap<usize, PerformanceMetrics> {
     let mut results = HashMap::new();
 
     println!("\n🔬 Benchmarking: Concurrent Queries");
@@ -157,9 +170,7 @@ async fn benchmark_concurrent_queries(prompt: &str, concurrency_levels: Vec<usiz
         for _ in 0..iterations {
             let start = Instant::now();
 
-            let futures: Vec<_> = (0..concurrency)
-                .map(|_| query(prompt, None))
-                .collect();
+            let futures: Vec<_> = (0..concurrency).map(|_| query(prompt, None)).collect();
 
             let _results = futures::future::join_all(futures).await;
 
@@ -167,10 +178,7 @@ async fn benchmark_concurrent_queries(prompt: &str, concurrency_levels: Vec<usiz
             total_times.push(elapsed);
         }
 
-        let metrics = PerformanceMetrics::new(
-            format!("Concurrent({})", concurrency),
-            total_times
-        );
+        let metrics = PerformanceMetrics::new(format!("Concurrent({})", concurrency), total_times);
 
         metrics.print();
         results.insert(concurrency, metrics);
@@ -196,22 +204,29 @@ async fn analyze_memory_usage(prompt: &str) -> anyhow::Result<()> {
 
         println!("  query():");
         println!("    Time: {:.2}ms", elapsed_query.as_millis());
-        println!("    Memory delta: {} KB",
-                 mem_after_query.saturating_sub(mem_before));
+        println!(
+            "    Memory delta: {} KB",
+            mem_after_query.saturating_sub(mem_before)
+        );
 
         // Calculate response size
-        let total_chars: usize = messages.iter()
+        let total_chars: usize = messages
+            .iter()
             .filter_map(|m| {
                 if let Message::Assistant(msg) = m {
-                    Some(msg.message.content.iter()
-                        .filter_map(|b| {
-                            if let ContentBlock::Text(t) = b {
-                                Some(t.text.len())
-                            } else {
-                                Some(0)
-                            }
-                        })
-                        .sum::<usize>())
+                    Some(
+                        msg.message
+                            .content
+                            .iter()
+                            .filter_map(|b| {
+                                if let ContentBlock::Text(t) = b {
+                                    Some(t.text.len())
+                                } else {
+                                    Some(0)
+                                }
+                            })
+                            .sum::<usize>(),
+                    )
                 } else {
                     None
                 }
@@ -242,8 +257,10 @@ async fn analyze_memory_usage(prompt: &str) -> anyhow::Result<()> {
 
         println!("  query_stream():");
         println!("    Time: {:.2}ms", elapsed_stream.as_millis());
-        println!("    Memory delta: {} KB",
-                 mem_after_stream.saturating_sub(mem_before_stream));
+        println!(
+            "    Memory delta: {} KB",
+            mem_after_stream.saturating_sub(mem_before_stream)
+        );
         println!("    Response size: {} characters", total_chars_stream);
     }
 
@@ -289,11 +306,13 @@ async fn regression_test() -> anyhow::Result<()> {
 
         let passed = elapsed.as_millis() <= max_time_ms;
 
-        println!("  {}: {} ({}ms / {}ms)",
-                 if passed { "✅" } else { "❌" },
-                 test_name,
-                 elapsed.as_millis(),
-                 max_time_ms);
+        println!(
+            "  {}: {} ({}ms / {}ms)",
+            if passed { "✅" } else { "❌" },
+            test_name,
+            elapsed.as_millis(),
+            max_time_ms
+        );
 
         if !passed {
             all_passed = false;
@@ -331,13 +350,9 @@ async fn test_full_performance_analysis() -> anyhow::Result<()> {
     let comparison = compare_query_methods(test_prompt, 10).await;
 
     // 4. Concurrent queries
-    let concurrency_levels = vec
-![1, 2, 4];
-    let concurrent_results = benchmark_concurrent_queries(
-        "What is 2 + 2?",
-        concurrency_levels,
-        5
-    ).await;
+    let concurrency_levels = vec![1, 2, 4];
+    let concurrent_results =
+        benchmark_concurrent_queries("What is 2 + 2?", concurrency_levels, 5).await;
 
     // 5. Memory usage
     analyze_memory_usage("Explain memory management in programming").await?;
@@ -351,12 +366,25 @@ async fn test_full_performance_analysis() -> anyhow::Result<()> {
     println!("=".repeat(60));
 
     println!("\n🎯 Key Findings:");
-    println!("  • query() avg: {:.2}ms", comparison.get("query()").unwrap().avg_time.as_millis());
-    println!("  • query_stream() avg: {:.2}ms", comparison.get("query_stream()").unwrap().avg_time.as_millis());
+    println!(
+        "  • query() avg: {:.2}ms",
+        comparison.get("query()").unwrap().avg_time.as_millis()
+    );
+    println!(
+        "  • query_stream() avg: {:.2}ms",
+        comparison
+            .get("query_stream()")
+            .unwrap()
+            .avg_time
+            .as_millis()
+    );
 
     println!("\n⚡ Concurrent Performance:");
     for (level, metrics) in &concurrent_results {
-        println!("  • {}: {:.2} ops/sec", level, metrics.throughput_ops_per_sec);
+        println!(
+            "  • {}: {:.2} ops/sec",
+            level, metrics.throughput_ops_per_sec
+        );
     }
 
     println!("\n" + "=".repeat(60));

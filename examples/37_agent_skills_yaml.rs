@@ -4,7 +4,7 @@
 //!
 //! 运行: cargo run --example 37_agent_skills_yaml --features yaml
 
-use claude_agent_sdk_rs::skills::{SkillPackage, SkillMetadata, SkillResources};
+use claude_agent_sdk_rs::skills::{SkillMetadata, SkillPackage, SkillResources};
 use std::path::PathBuf;
 
 fn main() {
@@ -81,7 +81,10 @@ Provide structured feedback with:
         },
     };
 
-    println!("   ✅ 创建技能: {} (v{})", skill.metadata.name, skill.metadata.version);
+    println!(
+        "   ✅ 创建技能: {} (v{})",
+        skill.metadata.name, skill.metadata.version
+    );
     println!("   📦 标签: {:?}", skill.metadata.tags);
     println!("   🔧 依赖: {:?}", skill.metadata.dependencies);
     println!();
@@ -119,7 +122,10 @@ Provide structured feedback with:
     assert_eq!(skill.metadata.name, loaded_skill.metadata.name);
     assert_eq!(skill.metadata.version, loaded_skill.metadata.version);
     assert_eq!(skill.metadata.author, loaded_skill.metadata.author);
-    assert_eq!(skill.metadata.dependencies, loaded_skill.metadata.dependencies);
+    assert_eq!(
+        skill.metadata.dependencies,
+        loaded_skill.metadata.dependencies
+    );
     assert_eq!(skill.metadata.tags, loaded_skill.metadata.tags);
     assert_eq!(skill.instructions, loaded_skill.instructions);
     assert_eq!(skill.scripts, loaded_skill.scripts);
@@ -171,7 +177,8 @@ Provide structured feedback with:
 
     println!("   📄 YAML 大小: {} bytes", yaml_size);
     println!("   📄 JSON 大小: {} bytes", json_size);
-    println!("   📊 大小差异: {:+} bytes ({:.1}%)",
+    println!(
+        "   📊 大小差异: {:+} bytes ({:.1}%)",
         yaml_size as i64 - json_size as i64,
         ((yaml_size as f64 - json_size as f64) / json_size as f64) * 100.0
     );

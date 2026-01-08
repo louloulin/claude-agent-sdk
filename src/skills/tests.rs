@@ -19,7 +19,10 @@ impl Skill for TestSkill {
     }
 
     async fn execute(&self, input: SkillInput) -> SkillResult {
-        Ok(SkillOutput::ok(format!("Executed with params: {:?}", input.params)))
+        Ok(SkillOutput::ok(format!(
+            "Executed with params: {:?}",
+            input.params
+        )))
     }
 
     fn validate(&self) -> std::result::Result<(), SkillError> {
@@ -168,7 +171,10 @@ mod tests {
         let mut resources = SkillResources::default();
         resources.add_folder("./test_folder");
         assert_eq!(resources.folders.len(), 1);
-        assert_eq!(resources.folders[0], std::path::PathBuf::from("./test_folder"));
+        assert_eq!(
+            resources.folders[0],
+            std::path::PathBuf::from("./test_folder")
+        );
 
         // Test duplicate prevention
         resources.add_folder("./test_folder");

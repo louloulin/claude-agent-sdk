@@ -3,8 +3,8 @@
 //! This module provides performance optimizations for large-scale skill operations,
 //! including indexing, caching, and batch processing.
 
-use crate::skills::types::SkillPackage;
 use crate::skills::tags::{TagFilter, TagOperator};
+use crate::skills::types::SkillPackage;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::time::{Duration, Instant};
@@ -220,11 +220,7 @@ impl IndexedSkillCollection {
         }
 
         let added = self.skills.len() - initial_count;
-        debug!(
-            "Added {} skills in {:?}",
-            added,
-            start.elapsed()
-        );
+        debug!("Added {} skills in {:?}", added, start.elapsed());
     }
 
     /// Get a skill by name (O(1))
@@ -251,7 +247,8 @@ impl IndexedSkillCollection {
         }
 
         // Perform query and collect indices first
-        let indices: Vec<usize> = self.skills
+        let indices: Vec<usize> = self
+            .skills
             .iter()
             .enumerate()
             .filter(|(_, skill)| {
@@ -304,12 +301,18 @@ pub struct BatchOperations;
 
 impl BatchOperations {
     /// Batch filter skills
-    pub fn filter_skills(skills: &[SkillPackage], predicate: impl Fn(&SkillPackage) -> bool) -> Vec<SkillPackage> {
+    pub fn filter_skills(
+        skills: &[SkillPackage],
+        predicate: impl Fn(&SkillPackage) -> bool,
+    ) -> Vec<SkillPackage> {
         skills.iter().filter(|s| predicate(s)).cloned().collect()
     }
 
     /// Batch map skills
-    pub fn map_skills(skills: Vec<SkillPackage>, mapper: impl Fn(SkillPackage) -> SkillPackage) -> Vec<SkillPackage> {
+    pub fn map_skills(
+        skills: Vec<SkillPackage>,
+        mapper: impl Fn(SkillPackage) -> SkillPackage,
+    ) -> Vec<SkillPackage> {
         skills.into_iter().map(mapper).collect()
     }
 
@@ -319,7 +322,11 @@ impl BatchOperations {
         predicate: impl Fn(&SkillPackage) -> bool,
         mapper: impl Fn(SkillPackage) -> SkillPackage,
     ) -> Vec<SkillPackage> {
-        skills.into_iter().filter(|s| predicate(s)).map(mapper).collect()
+        skills
+            .into_iter()
+            .filter(|s| predicate(s))
+            .map(mapper)
+            .collect()
     }
 
     /// Partition skills into two groups
@@ -448,8 +455,14 @@ mod tests {
         collection.add(create_test_skill("skill1", vec!["tag1"]));
         collection.add(create_test_skill("skill2", vec!["tag2"]));
 
-        assert_eq!(collection.get_by_name("skill1").unwrap().metadata.name, "skill1");
-        assert_eq!(collection.get_by_name("skill2").unwrap().metadata.name, "skill2");
+        assert_eq!(
+            collection.get_by_name("skill1").unwrap().metadata.name,
+            "skill1"
+        );
+        assert_eq!(
+            collection.get_by_name("skill2").unwrap().metadata.name,
+            "skill2"
+        );
         assert!(collection.get_by_name("skill3").is_none());
     }
 

@@ -3,12 +3,11 @@
 //! This example demonstrates various testing patterns
 //! when working with the Claude Agent SDK.
 
-use claude_agent_sdk_rs::{
-    query, ClaudeAgentOptions, Message,
-    tool, create_sdk_mcp_server, McpServerConfig,
-    ToolResult, McpToolResultContent
-};
 use anyhow::Result;
+use claude_agent_sdk_rs::{
+    ClaudeAgentOptions, McpServerConfig, McpToolResultContent, Message, ToolResult,
+    create_sdk_mcp_server, query, tool,
+};
 use serde_json::json;
 
 #[tokio::main]
@@ -113,10 +112,14 @@ async fn deterministic_testing() -> Result<()> {
 
         // Check response contains expected keyword
         let response_text = extract_response_text(&messages);
-        let contains = response_text.to_lowercase().contains(&expected_keyword.to_lowercase());
+        let contains = response_text
+            .to_lowercase()
+            .contains(&expected_keyword.to_lowercase());
 
-        println!("   Query: '{}' -> Contains '{}': {}",
-                 query_text, expected_keyword, contains);
+        println!(
+            "   Query: '{}' -> Contains '{}': {}",
+            query_text, expected_keyword, contains
+        );
 
         if !contains {
             println!("   ⚠️  Warning: Expected keyword not found");
@@ -166,8 +169,8 @@ async fn integration_testing_patterns() -> Result<()> {
         match query(&test.query, Some(options)).await {
             Ok(messages) => {
                 let turn_count = messages.len() as u32;
-                let valid_turns = turn_count >= test.min_turns as usize &&
-                                 turn_count <= test.max_turns as usize;
+                let valid_turns =
+                    turn_count >= test.min_turns as usize && turn_count <= test.max_turns as usize;
 
                 println!("     Turn count: {} (valid: {})", turn_count, valid_turns);
 
@@ -188,11 +191,7 @@ async fn integration_testing_patterns() -> Result<()> {
 /// Example 4: Property-based testing
 async fn property_based_testing() -> Result<()> {
     // Test properties that should always hold
-    let test_inputs = vec![
-        "What is 2 + 2?",
-        "What is 5 + 3?",
-        "What is 10 + 15?",
-    ];
+    let test_inputs = vec!["What is 2 + 2?", "What is 5 + 3?", "What is 10 + 15?"];
 
     // Property: Response should not be empty
     println!("   Testing property: Non-empty responses");
@@ -282,7 +281,7 @@ async fn snapshot_testing() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .model(Some("claude-sonnet-4-5".to_string()))
         .max_turns(1)
-        .temperature(Some(0.0))  // Deterministic
+        .temperature(Some(0.0)) // Deterministic
         .build();
 
     let messages = query(query_text, Some(options)).await?;
@@ -395,7 +394,10 @@ async fn custom_assertions() -> Result<()> {
     let numbers = vec!["1", "2", "3", "4", "5"];
     let all_present = numbers.iter().all(|n| response.contains(n));
 
-    println!("   Custom assertion: All numbers present -> {}", all_present);
+    println!(
+        "   Custom assertion: All numbers present -> {}",
+        all_present
+    );
 
     if !all_present {
         println!("   Missing numbers:");

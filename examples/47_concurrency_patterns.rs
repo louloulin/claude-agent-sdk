@@ -6,7 +6,7 @@
 //! - Batch processing with controlled concurrency
 //! - Fan-out/fan-in patterns
 
-use claude_agent_sdk_rs::{query, Message, ContentBlock};
+use claude_agent_sdk_rs::{ContentBlock, Message, query};
 use futures::stream::{self, StreamExt};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -34,7 +34,12 @@ async fn parallel_queries(
                 let elapsed = prompt_start.elapsed();
                 match &result {
                     Ok(_) => println!("  ✓ Completed in {:.2}s: {}", elapsed.as_secs_f64(), prompt),
-                    Err(e) => eprintln!("  ✗ Failed in {:.2}s: {} ({})", elapsed.as_secs_f64(), prompt, e),
+                    Err(e) => eprintln!(
+                        "  ✗ Failed in {:.2}s: {} ({})",
+                        elapsed.as_secs_f64(),
+                        prompt,
+                        e
+                    ),
                 }
 
                 (prompt, result)
@@ -45,8 +50,12 @@ async fn parallel_queries(
         .await;
 
     let total_elapsed = start_time.elapsed();
-    println!("\n📊 Total time: {:.2}s ({} queries, {} concurrent)",
-             total_elapsed.as_secs_f64(), results.len(), max_concurrency);
+    println!(
+        "\n📊 Total time: {:.2}s ({} queries, {} concurrent)",
+        total_elapsed.as_secs_f64(),
+        results.len(),
+        max_concurrency
+    );
 
     results
 }
@@ -59,7 +68,10 @@ async fn batch_process<T, F>(
 ) -> Vec<(T, anyhow::Result<String>)>
 where
     T: Send + 'static + Clone + std::fmt::Display,
-    F: Fn(T) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<String>> + Send>> + Send + Sync + 'static,
+    F: Fn(T) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<String>> + Send>>
+        + Send
+        + Sync
+        + 'static,
 {
     let processor = Arc::new(processor);
 
@@ -104,7 +116,11 @@ async fn fan_out_pattern(
     prompts: Vec<String>,
     num_workers: usize,
 ) -> Vec<(String, Result<String, anyhow::Error>)> {
-    println!("🚀 Fan-out: Distributing {} queries to {} workers\n", prompts.len(), num_workers);
+    println!(
+        "🚀 Fan-out: Distributing {} queries to {} workers\n",
+        prompts.len(),
+        num_workers
+    );
 
     let start_time = Instant::now();
     let prompts_per_worker = prompts.len().div_ceil(num_workers);
@@ -125,9 +141,11 @@ async fn fan_out_pattern(
                         if let Some(Message::Assistant(msg)) = messages.first() {
                             for block in &msg.message.content {
                                 if let ContentBlock::Text(text) = block {
-                                    println!("  [Worker {}] ✓ Result: {}",
-                                             worker_id + 1,
-                                             text.text.chars().take(50).collect::<String>());
+                                    println!(
+                                        "  [Worker {}] ✓ Result: {}",
+                                        worker_id + 1,
+                                        text.text.chars().take(50).collect::<String>()
+                                    );
                                 }
                             }
                         }
@@ -158,10 +176,11 @@ async fn fan_out_pattern(
 }
 
 /// Fan-in: Aggregate results from multiple sources
-async fn fan_in_pattern(
-    prompts: Vec<String>,
-) -> std::collections::HashMap<String, Vec<String>> {
-    println!("🎯 Fan-in: Aggregating results from {} queries\n", prompts.len());
+async fn fan_in_pattern(prompts: Vec<String>) -> std::collections::HashMap<String, Vec<String>> {
+    println!(
+        "🎯 Fan-in: Aggregating results from {} queries\n",
+        prompts.len()
+    );
 
     let mut results = std::collections::HashMap::new();
 
@@ -234,30 +253,25 @@ async fn main() -> anyhow::Result<()> {
     println!("📦 Example 2: Batch Processing");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
-    let items = vec
-!["apple", "banana", "cherry", "date", "elderberry"];
-    let results = batch_process(
-        items,
-        2,
-        |item| {
-            Box::pin(async move {
-                let prompt = format!("Describe {} in one sentence", item);
-                let messages = query(&prompt, None).await?;
+    let items = vec!["apple", "banana", "cherry", "date", "elderberry"];
+    let results = batch_process(items, 2, |item| {
+        Box::pin(async move {
+            let prompt = format!("Describe {} in one sentence", item);
+            let messages = query(&prompt, None).await?;
 
-                for msg in messages {
-                    if let Message::Assistant(assistant) = msg {
-                        for block in assistant.message.content {
-                            if let ContentBlock::Text(text) = block {
-                                return Ok(text.text.clone());
-                            }
+            for msg in messages {
+                if let Message::Assistant(assistant) = msg {
+                    for block in assistant.message.content {
+                        if let ContentBlock::Text(text) = block {
+                            return Ok(text.text.clone());
                         }
                     }
                 }
+            }
 
-                Ok("No response".to_string())
-            })
-        },
-    )
+            Ok("No response".to_string())
+        })
+    })
     .await;
 
     println!("Results:");
@@ -299,14 +313,16 @@ async fn main() -> anyhow::Result<()> {
     }
 
     let elapsed = start_time.elapsed();
-    println!("Total time: {:.2}s (should be ~2s for 4 queries at 2 req/sec)\n", elapsed.as_secs_f64());
+    println!(
+        "Total time: {:.2}s (should be ~2s for 4 queries at 2 req/sec)\n",
+        elapsed.as_secs_f64()
+    );
 
     // Example 4: Fan-out pattern
     println!("🚀 Example 4: Fan-Out Pattern");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
-    let prompts = vec
-![
+    let prompts = vec![
         "What is Rust? One sentence.".to_string(),
         "What is Go? One sentence.".to_string(),
         "What is Python? One sentence.".to_string(),

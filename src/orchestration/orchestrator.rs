@@ -5,7 +5,7 @@
 
 use crate::orchestration::{
     agent::{Agent, AgentInput, AgentOutput},
-    context::{ExecutionTrace, ExecutionContext},
+    context::{ExecutionContext, ExecutionTrace},
     errors::{OrchestrationError, Result},
 };
 use serde::{Deserialize, Serialize};
@@ -85,10 +85,7 @@ impl OrchestratorOutput {
     }
 
     /// Create a failed output
-    pub fn failure(
-        error: impl Into<String>,
-        execution_trace: ExecutionTrace,
-    ) -> Self {
+    pub fn failure(error: impl Into<String>, execution_trace: ExecutionTrace) -> Self {
         Self {
             result: String::new(),
             agent_outputs: Vec::new(),
@@ -212,8 +209,7 @@ mod tests {
         use crate::orchestration::context::ExecutionTrace;
 
         let trace = ExecutionTrace::new();
-        let outputs = vec
-![AgentOutput::new("result1")];
+        let outputs = vec![AgentOutput::new("result1")];
 
         let success = OrchestratorOutput::success("Final result", outputs, trace.clone());
         assert!(success.is_successful());
@@ -227,10 +223,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_base_orchestrator() {
-        let orchestrator = BaseOrchestrator::new(
-            "TestOrchestrator",
-            "A test orchestrator",
-        );
+        let orchestrator = BaseOrchestrator::new("TestOrchestrator", "A test orchestrator");
 
         assert_eq!(orchestrator.name(), "TestOrchestrator");
         assert_eq!(orchestrator.description(), "A test orchestrator");
@@ -240,14 +233,14 @@ mod tests {
     async fn test_execute_agent_with_retry_success() {
         let orchestrator = BaseOrchestrator::new("Test", "Test");
 
-        let agent = SimpleAgent::new(
-            "TestAgent",
-            "Test",
-            |input| Ok(AgentOutput::new(format!("Processed: {}", input.content))),
-        );
+        let agent = SimpleAgent::new("TestAgent", "Test", |input| {
+            Ok(AgentOutput::new(format!("Processed: {}", input.content)))
+        });
 
         let input = AgentInput::new("Hello");
-        let output = orchestrator.execute_agent_with_retry(&agent, input, 3).await;
+        let output = orchestrator
+            .execute_agent_with_retry(&agent, input, 3)
+            .await;
 
         assert!(output.is_successful());
         assert_eq!(output.content, "Processed: Hello");
@@ -257,14 +250,14 @@ mod tests {
     async fn test_execute_agent_with_retry_failure() {
         let orchestrator = BaseOrchestrator::new("Test", "Test");
 
-        let agent = SimpleAgent::new(
-            "FailingAgent",
-            "Always fails",
-            |_input| Err(anyhow::anyhow!("Always fails")),
-        );
+        let agent = SimpleAgent::new("FailingAgent", "Always fails", |_input| {
+            Err(anyhow::anyhow!("Always fails"))
+        });
 
         let input = AgentInput::new("Hello");
-        let output = orchestrator.execute_agent_with_retry(&agent, input, 2).await;
+        let output = orchestrator
+            .execute_agent_with_retry(&agent, input, 2)
+            .await;
 
         assert!(!output.is_successful());
         assert!(output.content.contains("failed after"));

@@ -151,11 +151,7 @@ where
     F: Fn(AgentInput) -> Result<AgentOutput> + Send + Sync,
 {
     /// Create a new simple agent
-    pub fn new(
-        name: impl Into<String>,
-        description: impl Into<String>,
-        handler: F,
-    ) -> Self {
+    pub fn new(name: impl Into<String>, description: impl Into<String>, handler: F) -> Self {
         Self {
             name: name.into(),
             description: description.into(),
@@ -214,11 +210,9 @@ mod tests {
 
     #[test]
     fn test_simple_agent() {
-        let agent = SimpleAgent::new(
-            "TestAgent",
-            "A test agent",
-            |input| Ok(AgentOutput::new(format!("Processed: {}", input.content))),
-        );
+        let agent = SimpleAgent::new("TestAgent", "A test agent", |input| {
+            Ok(AgentOutput::new(format!("Processed: {}", input.content)))
+        });
 
         assert_eq!(agent.name(), "TestAgent");
         assert_eq!(agent.description(), "A test agent");
@@ -226,14 +220,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_simple_agent_execute() {
-        let agent = SimpleAgent::new(
-            "TestAgent",
-            "A test agent",
-            |input| {
-                Ok(AgentOutput::new(format!("Echo: {}", input.content))
-                    .with_confidence(0.9))
-            },
-        );
+        let agent = SimpleAgent::new("TestAgent", "A test agent", |input| {
+            Ok(AgentOutput::new(format!("Echo: {}", input.content)).with_confidence(0.9))
+        });
 
         let input = AgentInput::new("Hello");
         let output = agent.execute(input).await.unwrap();

@@ -162,7 +162,10 @@ pub struct TaskProgress {
 impl TaskProgress {
     /// Create new progress
     pub fn new(value: f64) -> Self {
-        assert!((0.0..=1.0).contains(&value), "Progress must be between 0.0 and 1.0");
+        assert!(
+            (0.0..=1.0).contains(&value),
+            "Progress must be between 0.0 and 1.0"
+        );
         Self {
             value,
             message: None,
@@ -705,14 +708,16 @@ mod tests {
         let handle = manager.create_task(request).await.unwrap();
 
         // Complete the task
-        manager
-            .mark_completed(&handle.id, json!({}))
-            .await
-            .unwrap();
+        manager.mark_completed(&handle.id, json!({})).await.unwrap();
 
         // Try to transition from terminal state
         assert!(manager.mark_working(&handle.id).await.is_err());
-        assert!(manager.update_progress(&handle.id, TaskProgress::new(0.5)).await.is_err());
+        assert!(
+            manager
+                .update_progress(&handle.id, TaskProgress::new(0.5))
+                .await
+                .is_err()
+        );
     }
 
     #[tokio::test]
@@ -758,10 +763,7 @@ mod tests {
         };
 
         let handle = manager.create_task(request).await.unwrap();
-        manager
-            .mark_completed(&handle.id, json!({}))
-            .await
-            .unwrap();
+        manager.mark_completed(&handle.id, json!({})).await.unwrap();
 
         // Cleanup tasks older than 1 second (should be none immediately)
         let cleaned = manager

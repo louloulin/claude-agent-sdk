@@ -6,23 +6,18 @@
 //! - Error aggregation and reporting
 //! - Graceful degradation
 
-use claude_agent_sdk_rs::{
-    query,
-    Message,
-    ContentBlock,
-    types::config::ClaudeAgentOptions,
-};
+use claude_agent_sdk_rs::{ContentBlock, Message, query, types::config::ClaudeAgentOptions};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio::time::sleep;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 
 /// Circuit breaker state
 #[derive(Debug, Clone, Copy)]
 enum CircuitState {
-    Closed,    // Normal operation
-    Open,      // Failing, reject requests
-    HalfOpen,  // Testing if service recovered
+    Closed,   // Normal operation
+    Open,     // Failing, reject requests
+    HalfOpen, // Testing if service recovered
 }
 
 /// Circuit breaker for fault tolerance
@@ -47,9 +42,7 @@ impl CircuitBreaker {
     {
         // Check circuit state
         if self.state.load(Ordering::Acquire) {
-            return Err(/* circuit open error */ unsafe {
-                std::mem::zeroed()
-            });
+            return Err(/* circuit open error */ unsafe { std::mem::zeroed() });
         }
 
         // Execute function
@@ -130,9 +123,7 @@ struct ErrorReport {
 
 impl ErrorAggregator {
     fn new() -> Self {
-        Self {
-            errors: Vec::new(),
-        }
+        Self { errors: Vec::new() }
     }
 
     fn report(&mut self, operation: &str, error: &str, recovered: bool) {
@@ -167,7 +158,10 @@ async fn query_with_fallback(prompt: &str) -> anyhow::Result<Vec<Message>> {
     match result {
         Ok(messages) => Ok(messages),
         Err(e) => {
-            eprintln!("⚠️  Full query failed: {}, trying simplified approach...", e);
+            eprintln!(
+                "⚠️  Full query failed: {}, trying simplified approach...",
+                e
+            );
 
             // Simplified query with minimal options
             let simple_options = ClaudeAgentOptions {
@@ -302,7 +296,8 @@ async fn main() -> anyhow::Result<()> {
     println!("🎯 Example 4: Graceful Degradation");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
-    let complex_query = "Explain quantum computing in detail with examples, applications, and future prospects";
+    let complex_query =
+        "Explain quantum computing in detail with examples, applications, and future prospects";
 
     println!("Attempting complex query...");
     match query_with_fallback(complex_query).await {

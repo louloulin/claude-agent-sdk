@@ -1,9 +1,9 @@
 //! Type definitions for the Skills system
 
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::fs;
 use std::io::{self, Write};
+use std::path::PathBuf;
 
 /// Metadata for a Skill
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -234,8 +234,8 @@ impl SkillPackage {
     /// Save the skill package to a file in YAML format (requires yaml feature)
     #[cfg(feature = "yaml")]
     pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
-        let yaml = serde_norway::to_string(self)
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+        let yaml =
+            serde_norway::to_string(self).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(yaml.as_bytes())?;
@@ -373,7 +373,10 @@ mod tests {
         assert_eq!(deserialized.metadata.name, package.metadata.name);
         assert_eq!(deserialized.metadata.version, package.metadata.version);
         assert_eq!(deserialized.metadata.author, package.metadata.author);
-        assert_eq!(deserialized.metadata.dependencies, package.metadata.dependencies);
+        assert_eq!(
+            deserialized.metadata.dependencies,
+            package.metadata.dependencies
+        );
         assert_eq!(deserialized.metadata.tags, package.metadata.tags);
         assert_eq!(deserialized.instructions, package.instructions);
         assert_eq!(deserialized.scripts, package.scripts);
@@ -417,10 +420,22 @@ mod tests {
         // Verify all fields match
         assert_eq!(loaded_package.metadata.id, original_package.metadata.id);
         assert_eq!(loaded_package.metadata.name, original_package.metadata.name);
-        assert_eq!(loaded_package.metadata.description, original_package.metadata.description);
-        assert_eq!(loaded_package.metadata.version, original_package.metadata.version);
-        assert_eq!(loaded_package.metadata.author, original_package.metadata.author);
-        assert_eq!(loaded_package.metadata.dependencies, original_package.metadata.dependencies);
+        assert_eq!(
+            loaded_package.metadata.description,
+            original_package.metadata.description
+        );
+        assert_eq!(
+            loaded_package.metadata.version,
+            original_package.metadata.version
+        );
+        assert_eq!(
+            loaded_package.metadata.author,
+            original_package.metadata.author
+        );
+        assert_eq!(
+            loaded_package.metadata.dependencies,
+            original_package.metadata.dependencies
+        );
         assert_eq!(loaded_package.metadata.tags, original_package.metadata.tags);
         assert_eq!(loaded_package.instructions, original_package.instructions);
         assert_eq!(loaded_package.scripts, original_package.scripts);

@@ -31,6 +31,6 @@
 pub mod tasks;
 
 pub use tasks::{
-    TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest,
-    TaskResult, TaskState, TaskStatus, TaskUri,
+    TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest, TaskResult,
+    TaskState, TaskStatus, TaskUri,
 };

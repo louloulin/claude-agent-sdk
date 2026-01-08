@@ -97,10 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut skills_graph = HashMap::new();
 
     // data-processor -> utils
-    skills_graph.insert(
-        "data-processor".to_string(),
-        vec![Dependency::new("utils")],
-    );
+    skills_graph.insert("data-processor".to_string(), vec![Dependency::new("utils")]);
 
     // utils -> logger
     skills_graph.insert("utils".to_string(), vec![Dependency::new("logger")]);
@@ -145,18 +142,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 5. 演示循环依赖检测
     println!("5️⃣  演示循环依赖检测");
     let mut circular_graph = HashMap::new();
-    circular_graph.insert(
-        "skill-a".to_string(),
-        vec![Dependency::new("skill-b")],
-    );
-    circular_graph.insert(
-        "skill-b".to_string(),
-        vec![Dependency::new("skill-c")],
-    );
-    circular_graph.insert(
-        "skill-c".to_string(),
-        vec![Dependency::new("skill-a")],
-    );
+    circular_graph.insert("skill-a".to_string(), vec![Dependency::new("skill-b")]);
+    circular_graph.insert("skill-b".to_string(), vec![Dependency::new("skill-c")]);
+    circular_graph.insert("skill-c".to_string(), vec![Dependency::new("skill-a")]);
 
     let mut resolver_circular = DependencyResolver::new();
     resolver_circular.add_skill("skill-a", "1.0.0");
@@ -177,10 +165,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 6. 演示缺少依赖检测
     println!("6️⃣  演示缺少依赖检测");
     let mut incomplete_graph = HashMap::new();
-    incomplete_graph.insert(
-        "my-skill".to_string(),
-        vec![Dependency::new("missing-dep")],
-    );
+    incomplete_graph.insert("my-skill".to_string(), vec![Dependency::new("missing-dep")]);
 
     let mut resolver_incomplete = DependencyResolver::new();
     resolver_incomplete.add_skill("my-skill", "1.0.0");

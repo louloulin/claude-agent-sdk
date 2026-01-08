@@ -5,8 +5,8 @@
 //! 运行: cargo run --example 38_agent_skills_hot_reload --features hot-reload
 
 use claude_agent_sdk_rs::skills::{
-    HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher, SkillPackage,
-    SkillMetadata,
+    HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher, SkillMetadata,
+    SkillPackage,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -118,7 +118,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     modified_skill.metadata.version = "1.1.0".to_string();
     modified_skill.metadata.description = "Processes data efficiently (updated)".to_string();
     modified_skill.save_to_file(&skill1_path)?;
-    println!("   ✅ 修改技能: {} -> v{}", modified_skill.metadata.name, modified_skill.metadata.version);
+    println!(
+        "   ✅ 修改技能: {} -> v{}",
+        modified_skill.metadata.name, modified_skill.metadata.version
+    );
 
     // 处理事件
     sleep(Duration::from_millis(200)).await;
@@ -151,10 +154,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 8. 列出所有技能
     println!("8️⃣  当前加载的技能");
     for skill in manager.get_skills() {
-        println!("   📦 {} (v{}) - {}",
-            skill.metadata.name,
-            skill.metadata.version,
-            skill.metadata.description
+        println!(
+            "   📦 {} (v{}) - {}",
+            skill.metadata.name, skill.metadata.version, skill.metadata.description
         );
     }
     println!();

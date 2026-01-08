@@ -1,7 +1,7 @@
 //! Advanced stream processing example demonstrating memory-efficient handling
 //! of large conversations and real-time message processing.
 
-use claude_agent_sdk_rs::{query_stream, Message, ContentBlock};
+use claude_agent_sdk_rs::{ContentBlock, Message, query_stream};
 use futures::stream::StreamExt;
 use std::time::{Duration, Instant};
 use tokio::time::sleep;
@@ -17,7 +17,8 @@ async fn main() -> anyhow::Result<()> {
     let mut stream = query_stream(
         "Count from 1 to 10, but take a breath between each number",
         None,
-    ).await?;
+    )
+    .await?;
 
     let mut message_count = 0;
     let start_time = Instant::now();
@@ -44,7 +45,11 @@ async fn main() -> anyhow::Result<()> {
     }
 
     let elapsed = start_time.elapsed();
-    println!("\n✅ Processed {} messages in {:.2}s\n", message_count, elapsed.as_secs_f64());
+    println!(
+        "\n✅ Processed {} messages in {:.2}s\n",
+        message_count,
+        elapsed.as_secs_f64()
+    );
 
     // Example 2: Stream with backpressure handling
     println!("📊 Example 2: Stream with Backpressure Control");
@@ -53,7 +58,8 @@ async fn main() -> anyhow::Result<()> {
     let mut stream = query_stream(
         "List 20 Python best practices with brief explanations",
         None,
-    ).await?;
+    )
+    .await?;
 
     let mut item_count = 0;
     let start_time = Instant::now();
@@ -70,7 +76,7 @@ async fn main() -> anyhow::Result<()> {
                         let words: Vec<&str> = text.text.split_whitespace().collect();
                         for (i, word) in words.iter().enumerate() {
                             if i % 5 == 0 {
-                                print!("\n  ");  // New line every 5 words
+                                print!("\n  "); // New line every 5 words
                             }
                             print!("{} ", word);
                             item_count += 1;
@@ -94,14 +100,21 @@ async fn main() -> anyhow::Result<()> {
         if item_count % 100 == 0 {
             let elapsed = start_time.elapsed();
             let rate = item_count as f64 / elapsed.as_secs_f64();
-            println!("\n  📈 Progress: {} items ({:.1} items/s)", item_count, rate);
+            println!(
+                "\n  📈 Progress: {} items ({:.1} items/s)",
+                item_count, rate
+            );
         }
     }
 
     let elapsed = start_time.elapsed();
     let rate = item_count as f64 / elapsed.as_secs_f64();
-    println!("\n✅ Processed {} items in {:.2}s ({:.1} items/s)\n",
-             item_count, elapsed.as_secs_f64(), rate);
+    println!(
+        "\n✅ Processed {} items in {:.2}s ({:.1} items/s)\n",
+        item_count,
+        elapsed.as_secs_f64(),
+        rate
+    );
 
     // Example 3: Stream filtering and transformation
     println!("🔍 Example 3: Stream Filtering and Transformation");
@@ -127,10 +140,14 @@ async fn main() -> anyhow::Result<()> {
                         // Filter: Only keep blocks with substantial content
                         if text.text.len() > 20 {
                             // Transform: Add numbering
-                            let transformed = format!("[{}] {}", filtered_content.len() + 1, text.text);
+                            let transformed =
+                                format!("[{}] {}", filtered_content.len() + 1, text.text);
                             filtered_content.push(transformed);
-                            println!("  ✓ Captured block {} ({} chars)",
-                                     filtered_content.len(), text.text.len());
+                            println!(
+                                "  ✓ Captured block {} ({} chars)",
+                                filtered_content.len(),
+                                text.text.len()
+                            );
                         } else {
                             println!("  ⊘ Skipped short block ({} chars)", text.text.len());
                         }
@@ -148,8 +165,10 @@ async fn main() -> anyhow::Result<()> {
     println!("\n📊 Filtering Summary:");
     println!("  Total blocks: {}", total_blocks);
     println!("  Filtered blocks: {}", filtered_content.len());
-    println!("  Filter rate: {:.1}%",
-             (filtered_content.len() as f64 / total_blocks as f64) * 100.0);
+    println!(
+        "  Filter rate: {:.1}%",
+        (filtered_content.len() as f64 / total_blocks as f64) * 100.0
+    );
 
     // Example 4: Memory-efficient stream aggregation
     println!("\n💾 Example 4: Memory-Efficient Aggregation");
@@ -158,7 +177,8 @@ async fn main() -> anyhow::Result<()> {
     let mut stream = query_stream(
         "Generate 5 tips for each: Python, JavaScript, Rust, and Go programming",
         None,
-    ).await?;
+    )
+    .await?;
 
     // Aggregate by language without storing all messages
     let mut tips_by_language = std::collections::HashMap::new();
@@ -180,7 +200,8 @@ async fn main() -> anyhow::Result<()> {
 
                         // Count tips for current language
                         if !current_language.is_empty() {
-                            *tips_by_language.entry(current_language.clone())
+                            *tips_by_language
+                                .entry(current_language.clone())
                                 .or_insert(0) += 1;
                         }
                     }

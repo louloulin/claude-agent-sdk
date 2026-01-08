@@ -103,7 +103,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("   ✅ SkillPackage 创建完成");
     println!("      ID: {}", skill_package.metadata.id);
-    println!("      资源文件夹: {} 个", skill_package.resources.folders.len());
+    println!(
+        "      资源文件夹: {} 个",
+        skill_package.resources.folders.len()
+    );
     println!("      工具: {} 个", skill_package.resources.tools.len());
     println!("      测试: {} 个", skill_package.resources.tests.len());
     println!();
@@ -133,7 +136,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     resources_test.add_folder("test");
     resources_test.add_folder("test");
     println!("   ✅ 尝试添加同一文件夹两次");
-    println!("      实际文件夹数量: {} (防止了重复)", resources_test.folders.len());
+    println!(
+        "      实际文件夹数量: {} (防止了重复)",
+        resources_test.folders.len()
+    );
     println!();
 
     // 清理

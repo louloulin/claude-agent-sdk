@@ -118,7 +118,12 @@ impl VsCodeUtils {
             ));
         }
 
-        if !name.chars().next().map(|c| c.is_alphabetic()).unwrap_or(false) {
+        if !name
+            .chars()
+            .next()
+            .map(|c| c.is_alphabetic())
+            .unwrap_or(false)
+        {
             return Err(SkillError::Validation(
                 "Name must start with a letter".to_string(),
             ));
@@ -130,10 +135,11 @@ impl VsCodeUtils {
             ));
         }
 
-        if !name.chars().all(|c| c.is_lowercase() || c.is_numeric() || c == '-') {
-            return Err(SkillError::Validation(
-                "Name must be lowercase".to_string(),
-            ));
+        if !name
+            .chars()
+            .all(|c| c.is_lowercase() || c.is_numeric() || c == '-')
+        {
+            return Err(SkillError::Validation("Name must be lowercase".to_string()));
         }
 
         Ok(())
@@ -142,7 +148,9 @@ impl VsCodeUtils {
     /// Validate description length (should be concise)
     pub fn validate_description(description: &str) -> Result<(), SkillError> {
         if description.is_empty() {
-            return Err(SkillError::Validation("Description cannot be empty".to_string()));
+            return Err(SkillError::Validation(
+                "Description cannot be empty".to_string(),
+            ));
         }
 
         if description.len() > 200 {
@@ -286,13 +294,11 @@ pub fn export_to_vscode<P: AsRef<Path>>(
     }
 
     // Write to file
-    let mut file = fs::File::create(output_path).map_err(|e| {
-        SkillError::Io(format!("Failed to create SKILL.md file: {}", e))
-    })?;
+    let mut file = fs::File::create(output_path)
+        .map_err(|e| SkillError::Io(format!("Failed to create SKILL.md file: {}", e)))?;
 
-    file.write_all(content.as_bytes()).map_err(|e| {
-        SkillError::Io(format!("Failed to write SKILL.md file: {}", e))
-    })?;
+    file.write_all(content.as_bytes())
+        .map_err(|e| SkillError::Io(format!("Failed to write SKILL.md file: {}", e)))?;
 
     Ok(())
 }
@@ -307,9 +313,8 @@ pub fn export_batch_to_vscode<P: AsRef<Path>>(
 
     // Create output directory if it doesn't exist
     if !output_dir.exists() {
-        fs::create_dir_all(output_dir).map_err(|e| {
-            SkillError::Io(format!("Failed to create output directory: {}", e))
-        })?;
+        fs::create_dir_all(output_dir)
+            .map_err(|e| SkillError::Io(format!("Failed to create output directory: {}", e)))?;
     }
 
     let mut exported = Vec::new();
@@ -366,7 +371,10 @@ mod tests {
     #[test]
     fn test_normalize_name_special_chars() {
         assert_eq!(VsCodeUtils::normalize_name("Test@#$API"), "testapi");
-        assert_eq!(VsCodeUtils::normalize_name("  multiple  spaces  "), "multiple-spaces");
+        assert_eq!(
+            VsCodeUtils::normalize_name("  multiple  spaces  "),
+            "multiple-spaces"
+        );
         assert_eq!(VsCodeUtils::normalize_name("Test___API"), "test-api");
     }
 

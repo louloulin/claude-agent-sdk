@@ -7,8 +7,8 @@
 //! - Concurrent request handling
 //! - Tool execution overhead
 
-use claude_agent_sdk_rs::{query, query_stream, Message, ContentBlock};
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use claude_agent_sdk_rs::{ContentBlock, Message, query, query_stream};
+use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use futures::stream::StreamExt;
 use std::time::Duration;
 
@@ -48,7 +48,9 @@ fn bench_streaming_query(c: &mut Criterion) {
         b.to_async(tokio::runtime::Runtime::new().unwrap())
             .iter(|| {
                 let stream_future = async {
-                    let mut stream = query_stream(black_box("What is 2 + 2?"), None).await.unwrap();
+                    let mut stream = query_stream(black_box("What is 2 + 2?"), None)
+                        .await
+                        .unwrap();
                     while let Some(_) = stream.next().await {
                         // Consume stream
                     }
@@ -73,7 +75,9 @@ fn bench_query_comparison(c: &mut Criterion) {
         b.to_async(tokio::runtime::Runtime::new().unwrap())
             .iter(|| {
                 let stream_future = async {
-                    let mut stream = query_stream(black_box("List 10 programming languages"), None).await.unwrap();
+                    let mut stream = query_stream(black_box("List 10 programming languages"), None)
+                        .await
+                        .unwrap();
                     while let Some(_) = stream.next().await {
                         // Consume stream
                     }
@@ -91,19 +95,23 @@ fn bench_concurrent_queries(c: &mut Criterion) {
     group.measurement_time(Duration::from_secs(30));
 
     for concurrency in [1, 2, 4, 8].iter() {
-        group.bench_with_input(BenchmarkId::from_parameter(concurrency), concurrency, |b, &concurrency| {
-            b.to_async(tokio::runtime::Runtime::new().unwrap())
-                .iter(|| {
-                    let futures: Vec<_> = (0..concurrency)
-                        .map(|_| query(black_box("What is 2 + 2?"), None))
-                        .collect();
+        group.bench_with_input(
+            BenchmarkId::from_parameter(concurrency),
+            concurrency,
+            |b, &concurrency| {
+                b.to_async(tokio::runtime::Runtime::new().unwrap())
+                    .iter(|| {
+                        let futures: Vec<_> = (0..concurrency)
+                            .map(|_| query(black_box("What is 2 + 2?"), None))
+                            .collect();
 
-                    async move {
-                        let results = futures::future::join_all(futures).await;
-                        black_box(results);
-                    }
-                });
-        });
+                        async move {
+                            let results = futures::future::join_all(futures).await;
+                            black_box(results);
+                        }
+                    });
+            },
+        );
     }
 
     group.finish();
@@ -118,7 +126,7 @@ fn bench_memory_patterns(c: &mut Criterion) {
             .iter(|| {
                 query(
                     black_box("Explain quantum computing in great detail with examples"),
-                    None
+                    None,
                 )
             });
     });
@@ -129,8 +137,10 @@ fn bench_memory_patterns(c: &mut Criterion) {
                 let stream_future = async {
                     let mut stream = query_stream(
                         black_box("Explain quantum computing in great detail with examples"),
-                        None
-                    ).await.unwrap();
+                        None,
+                    )
+                    .await
+                    .unwrap();
                     while let Some(_) = stream.next().await {
                         // Consume stream
                     }

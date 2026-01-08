@@ -18,7 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         instructions: r#"You are a calculator. 
 When given mathematical expressions, evaluate them and return the result.
-Support basic operations: +, -, *, /"#.to_string(),
+Support basic operations: +, -, *, /"#
+            .to_string(),
         scripts: vec![
             "function add(a, b) { return a + b; }".to_string(),
             "function subtract(a, b) { return a - b; }".to_string(),
@@ -43,7 +44,15 @@ Support basic operations: +, -, *, /"#.to_string(),
     println!("   Version: {}", loaded_package.metadata.version);
     println!("   Author: {:?}", loaded_package.metadata.author);
     println!("   Tags: {:?}", loaded_package.metadata.tags);
-    println!("   Instructions: {}", loaded_package.instructions.chars().take(50).collect::<String>() + "...");
+    println!(
+        "   Instructions: {}",
+        loaded_package
+            .instructions
+            .chars()
+            .take(50)
+            .collect::<String>()
+            + "..."
+    );
     println!("   Scripts: {} script(s)", loaded_package.scripts.len());
     println!("   Tools: {:?}", loaded_package.resources.tools);
 

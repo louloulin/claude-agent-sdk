@@ -29,7 +29,12 @@ fn main() {
 
     // 1. 标签规范化
     println!("1️⃣  标签规范化");
-    let raw_tags = vec!["  Rust SDK  ", "Data-Processing", "web_API", "Machine Learning"];
+    let raw_tags = vec![
+        "  Rust SDK  ",
+        "Data-Processing",
+        "web_API",
+        "Machine Learning",
+    ];
     println!("   原始标签: {:?}", raw_tags);
     let normalized: Vec<String> = raw_tags
         .iter()
@@ -68,7 +73,11 @@ fn main() {
         Skill::new(
             "skill2",
             "Web Scraper",
-            vec!["python".to_string(), "web".to_string(), "scraper".to_string()],
+            vec![
+                "python".to_string(),
+                "web".to_string(),
+                "scraper".to_string(),
+            ],
         ),
         Skill::new(
             "skill3",
@@ -87,7 +96,11 @@ fn main() {
         Skill::new(
             "skill5",
             "Data Validator",
-            vec!["rust".to_string(), "data".to_string(), "validation".to_string()],
+            vec![
+                "rust".to_string(),
+                "data".to_string(),
+                "validation".to_string(),
+            ],
         ),
     ];
 
@@ -110,10 +123,7 @@ fn main() {
 
     // 6. 复杂标签过滤
     println!("6️⃣  复杂标签过滤 (AND 逻辑)");
-    let complex_filter = TagFilter::new()
-        .has("rust")
-        .has("data")
-        .not_has("web");
+    let complex_filter = TagFilter::new().has("rust").has("data").not_has("web");
     println!("   过滤条件: 包含 'rust' AND 'data' AND NOT 'web'");
     for skill in &skills {
         let tags: HashSet<String> = skill.tags.iter().cloned().collect();
@@ -181,10 +191,11 @@ fn main() {
 
     // 12. 查询构建器 - 多标签查询
     println!("1️⃣2️⃣  查询构建器 - 多标签查询 (AND)");
-    let multi_tag_skills =
-        builder.with_all_tags(&skills, &["rust".to_string(), "data".to_string()], |skill| {
-            &skill.tags
-        });
+    let multi_tag_skills = builder.with_all_tags(
+        &skills,
+        &["rust".to_string(), "data".to_string()],
+        |skill| &skill.tags,
+    );
     println!("   查询: 同时包含 'rust' AND 'data' 的技能");
     for skill in multi_tag_skills {
         println!("      📦 {} ({:?})", skill.name, skill.tags);
@@ -214,9 +225,18 @@ fn main() {
     // 15. 标签工具 - 相似度计算
     println!("1️⃣5️⃣  标签工具 - 标签相似度 (Jaccard Index)");
     let comparisons = vec![
-        (vec!["rust".to_string(), "sdk".to_string()], vec!["rust".to_string(), "sdk".to_string()]),
-        (vec!["rust".to_string(), "sdk".to_string()], vec!["rust".to_string(), "agent".to_string()]),
-        (vec!["rust".to_string(), "data".to_string()], vec!["python".to_string(), "ml".to_string()]),
+        (
+            vec!["rust".to_string(), "sdk".to_string()],
+            vec!["rust".to_string(), "sdk".to_string()],
+        ),
+        (
+            vec!["rust".to_string(), "sdk".to_string()],
+            vec!["rust".to_string(), "agent".to_string()],
+        ),
+        (
+            vec!["rust".to_string(), "data".to_string()],
+            vec!["python".to_string(), "ml".to_string()],
+        ),
         (vec!["rust".to_string()], vec![]),
     ];
 
