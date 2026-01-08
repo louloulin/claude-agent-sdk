@@ -2,7 +2,9 @@
 
 pub mod dependency;
 pub mod error;
+pub mod tags;
 pub mod types;
+pub mod version;
 
 #[cfg(test)]
 mod tests;
@@ -12,7 +14,9 @@ use std::path::{Path, PathBuf};
 
 pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
+pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
+pub use version::{CompatibilityResult, VersionManager};
 
 /// The core Skill trait
 #[async_trait]
