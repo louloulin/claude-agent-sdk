@@ -4,7 +4,8 @@
 //! when working with the Claude Agent SDK.
 
 use anyhow::Result;
-use claude_agent_sdk_rs::{ClaudeAgentOptions, Message, QueryError, query};
+use claude_agent_sdk_rs::{ClaudeAgentOptions, ClaudeError, Message, query};
+use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -62,15 +63,10 @@ async fn handle_api_errors() -> Result<()> {
             println!("   Got {} messages", messages.len());
             Ok(())
         },
-        Err(QueryError::Api(e)) => {
+        Err(ClaudeError::Transport(e)) => {
             // Handle API-specific errors
             eprintln!("   API Error: {}", e);
-            Err(e.into())
-        },
-        Err(QueryError::Transport(e)) => {
-            // Handle transport/communication errors
-            eprintln!("   Transport Error: {}", e);
-            Err(e.into())
+            Err(anyhow::anyhow!("API Error: {}", e))
         },
         Err(e) => {
             // Handle other errors
@@ -123,8 +119,6 @@ async fn handle_permission_denied() -> Result<()> {
 
 /// Example 4: Handle tool execution errors
 async fn handle_tool_errors() -> Result<Vec<Message>> {
-    use claude_agent_sdk_rs::{ClaudeAgentOptions, tools};
-
     let options = ClaudeAgentOptions::builder()
         .allowed_tools(vec![
             "Read".to_string(),
@@ -153,12 +147,10 @@ async fn handle_tool_errors() -> Result<Vec<Message>> {
 
 /// Example 5: Custom error recovery strategies
 async fn custom_recovery_strategy() -> Result<String> {
-    use claude_agent_sdk_rs::{ClaudeAgentOptions, fallback_model};
-
     // Strategy 1: Use fallback model on failure
     let options = ClaudeAgentOptions::builder()
         .model("claude-opus-4-5")
-        .fallback_model(Some("claude-sonnet-4-5".to_string()))
+        .fallback_model("claude-sonnet-4-5")
         .max_turns(2)
         .build();
 
@@ -213,7 +205,7 @@ async fn retry_with_backoff() -> Result<()> {
 /// Example 7: Structured error handling
 #[derive(Debug)]
 enum AppError {
-    QueryFailed(QueryError),
+    QueryFailed(ClaudeError),
     InvalidResponse(String),
     Timeout(Duration),
 }

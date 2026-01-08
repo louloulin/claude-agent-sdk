@@ -6,7 +6,7 @@
 //! - Batch processing with controlled concurrency
 //! - Fan-out/fan-in patterns
 
-use claude_agent_sdk_rs::{ContentBlock, Message, query};
+use claude_agent_sdk_rs::{ClaudeError, ContentBlock, Message, query};
 use futures::stream::{self, StreamExt};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -16,11 +16,11 @@ use tokio::sync::Semaphore;
 async fn parallel_queries(
     prompts: Vec<String>,
     max_concurrency: usize,
-) -> Vec<(String, Result<Vec<Message>, anyhow::Error>)> {
+) -> Vec<(String, Result<Vec<Message>, ClaudeError>)> {
     let semaphore = Arc::new(Semaphore::new(max_concurrency));
     let start_time = Instant::now();
 
-    let results = stream::iter(prompts)
+    let results = stream::iter(prompts.into_iter())
         .map(|prompt| {
             let semaphore = semaphore.clone();
             async move {
@@ -46,7 +46,7 @@ async fn parallel_queries(
             }
         })
         .buffer_unordered(max_concurrency)
-        .collect()
+        .collect::<Vec<(String, Result<Vec<Message>, ClaudeError>)>>()
         .await;
 
     let total_elapsed = start_time.elapsed();
@@ -125,15 +125,24 @@ async fn fan_out_pattern(
     let start_time = Instant::now();
     let prompts_per_worker = prompts.len().div_ceil(num_workers);
 
-    // Create worker channels
-    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
+    // Create work channel (use bounded channel with sufficient capacity)
+    let (tx, mut rx) = tokio::sync::mpsc::channel(num_workers * 10);
+    let rx = Arc::new(tokio::sync::Mutex::new(rx));
 
     // Spawn workers
     for worker_id in 0..num_workers {
-        let mut rx = rx.clone();
+        let rx = rx.clone();
         tokio::spawn(async move {
             let mut processed = 0;
-            while let Some(prompt) = rx.recv().await {
+            loop {
+                let prompt = {
+                    let mut rx = rx.lock().await;
+                    rx.recv().await
+                };
+                match prompt {
+                    Some(prompt) => prompt,
+                    None => break, // Channel closed
+                };
                 println!("  [Worker {}] Processing: {}", worker_id + 1, prompt);
 
                 match query(&prompt, None).await {
