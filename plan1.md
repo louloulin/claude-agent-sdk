@@ -1,10 +1,10 @@
 # Claude Agent SDK Rust - 全面未来发展计划 v2.0
 
-**版本**: v2.8
+**版本**: v2.9
 **创建日期**: 2026-01-07
-**最后更新**: 2026-01-08 (v2.8 YAML配置支持)
+**最后更新**: 2026-01-08 (v2.9 热加载功能开发中)
 **当前SDK版本**: v0.6.3
-**状态**: ✅ 生产就绪 (Production Ready) + Agent Skills (含YAML配置支持)
+**状态**: ✅ 生产就绪 (Production Ready) + Agent Skills (热加载功能开发中)
 
 ---
 

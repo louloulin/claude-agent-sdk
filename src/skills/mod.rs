@@ -2,6 +2,7 @@
 
 pub mod dependency;
 pub mod error;
+pub mod hot_reload;
 pub mod tags;
 pub mod types;
 pub mod version;
@@ -14,6 +15,7 @@ use std::path::{Path, PathBuf};
 
 pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
+pub use hot_reload::{HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 pub use version::{CompatibilityResult, VersionManager};

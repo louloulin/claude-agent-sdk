@@ -37,6 +37,10 @@ pub enum SkillError {
     /// Skill version conflict
     #[error("Skill version conflict: {0}")]
     VersionConflict(String),
+
+    /// Configuration error
+    #[error("Configuration error: {0}")]
+    Configuration(String),
 }
 
 /// Result type for Skill operations
