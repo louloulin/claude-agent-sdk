@@ -88,17 +88,22 @@ async fn run_concurrent_queries_join() -> Result<()> {
         "Explain Rust ownership",
     ];
 
-    let futures = questions.into_iter().map(|q| {
-        println!("   Starting query: {}", q);
+    // Create futures for each query
+    let futures: Vec<_> = questions.into_iter().map(|q| {
+        let q = q.to_string();
         async move {
             let start = Instant::now();
-            let messages = query(q, None).await?;
+            let messages = query(q.to_string(), None).await?;
             println!("   Query completed in {:?}", start.elapsed());
             Ok::<Vec<Message>, anyhow::Error>(messages)
         }
-    });
+    }).collect();
 
-    let results = tokio::try_join!(futures.collect::<Vec<_>>())?;
+    // Use futures_util to run all futures concurrently
+    use futures::future::join_all;
+    let results = join_all(futures).await;
+    let results: Result<Vec<_>, _> = results.into_iter().collect();
+    let results = results?;
     println!("   All {} queries completed", results.len());
 
     Ok(())
@@ -158,22 +163,25 @@ async fn run_concurrent_streams() -> Result<()> {
     ];
 
     let streams = futures::stream::iter(questions)
-        .map(|q| async move {
-            let start = Instant::now();
-            let mut stream = query_stream(q, None).await?;
-            let mut count = 0;
+        .map(|q| {
+            let q = q.to_string();
+            async move {
+                let start = Instant::now();
+                let mut stream = query_stream(q, None).await?;
+                let mut count = 0;
 
-            while let Some(result) = stream.next().await {
-                result?;
-                count += 1;
+                while let Some(result) = stream.next().await {
+                    result?;
+                    count += 1;
+                }
+
+                println!(
+                    "   Stream completed in {:?}, {} messages",
+                    start.elapsed(),
+                    count
+                );
+                Ok::<(), anyhow::Error>(())
             }
-
-            println!(
-                "   Stream completed in {:?}, {} messages",
-                start.elapsed(),
-                count
-            );
-            Ok::<(), anyhow::Error>(())
         })
         .buffer_unordered(3); // Process up to 3 streams concurrently
 
@@ -220,13 +228,14 @@ async fn batch_processing_example() -> Result<()> {
 async fn error_isolation_example() -> Result<()> {
     let queries = vec![
         "Valid query 1",
+    let total_queries = total_queries;
         "Invalid query that might fail",
         "Valid query 2",
     ];
 
     let results: Vec<_> = futures::stream::iter(queries)
         .map(|q| async move {
-            match query(q, None).await {
+            match query(q.to_string(), None).await {
                 Ok(messages) => {
                     println!("   ✓ Query succeeded: {}", q);
                     Some(messages)
@@ -242,7 +251,7 @@ async fn error_isolation_example() -> Result<()> {
         .await;
 
     let successful = results.iter().filter(|r| r.is_some()).count();
-    println!("   {}/{} queries succeeded", successful, queries.len());
+    println!("   {}/{} queries succeeded", successful, total_queries);
 
     Ok(())
 }
@@ -255,7 +264,7 @@ async fn rate_limited_concurrent() -> Result<()> {
     use tokio::time::{Duration, sleep};
 
     let queries = vec!["Query 1", "Query 2", "Query 3", "Query 4", "Query 5"];
-    let queries_count = queries.len();
+    let queries_count = total_queries;
 
     let rate_limit_ms = 500u64; // Max 2 queries per second
     let last_call = Arc::new(AtomicU64::new(0));
@@ -291,7 +300,7 @@ async fn rate_limited_concurrent() -> Result<()> {
                 );
 
                 println!("   Executing: {}", q);
-                query(q, None).await
+                query(q.to_string(), None).await
             }
         })
         .buffer_unordered(2) // Max 2 concurrent
@@ -313,14 +322,14 @@ async fn concurrent_with_timeout() -> Result<()> {
         ("Longer query", "Explain quantum computing"),
         ("Medium query", "What is Rust?"),
     ];
-    let queries_count = queries.len();
+    let queries_count = total_queries;
 
     let timeout = Duration::from_secs(10);
 
     let results: Vec<_> = futures::stream::iter(queries)
         .map(|(name, q)| async move {
             let start = Instant::now();
-            match tokio::time::timeout(timeout, query(q, None)).await {
+            match tokio::time::timeout(timeout, query(q.to_string(), None)).await {
                 Ok(Ok(messages)) => {
                     println!("   ✓ {} completed in {:?}", name, start.elapsed());
                     Some((name, messages))

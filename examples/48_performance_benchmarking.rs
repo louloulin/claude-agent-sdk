@@ -181,11 +181,11 @@ async fn benchmark_concurrent() -> Result<()> {
 
 /// Example 6: Scaling analysis
 async fn benchmark_scaling() -> Result<()> {
-    let query_sizes = vec![
+    let query_sizes: Vec<(&str, String)> = vec![
         ("Short", "What is 2 + 2?".to_string()),
         (
             "Medium",
-            "Explain the concept of ownership in Rust programming language, including how it relates to borrowing and lifetimes",
+            "Explain the concept of ownership in Rust programming language, including how it relates to borrowing and lifetimes".to_string(),
         ),
         (
             "Long",
@@ -203,7 +203,7 @@ async fn benchmark_scaling() -> Result<()> {
 
     for (name, query_text) in query_sizes {
         let start = Instant::now();
-        let messages = query(query_text.to_string(), None).await?;
+        let messages = query(query_text, None).await?;
 
         let elapsed = start.elapsed();
         let response_size = extract_response_size(&messages);
