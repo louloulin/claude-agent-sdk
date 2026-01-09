@@ -329,6 +329,7 @@ async fn regression_test() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "Performance analysis test requires significant time and API calls. Run with: cargo test --test performance_analysis -- --ignored"]
 async fn test_full_performance_analysis() -> anyhow::Result<()> {
     let separator = "=".repeat(60);
     println!("\n{}", separator);

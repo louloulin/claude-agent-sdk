@@ -2,7 +2,7 @@
 //!
 //! Multiple agents execute in parallel, and their outputs are aggregated.
 //!
-//! ```
+//! ```text
 //!         → Agent A ─┐
 //! Input ─┼→ Agent B ─┼→ Aggregator → Output
 //!         → Agent C ─┘

@@ -158,7 +158,7 @@ impl SkillResources {
     /// use claude_agent_sdk_rs::skills::SkillResources;
     ///
     /// let mut resources = SkillResources::default();
-    /// resources.add_tool("search");
+    /// resources.add_tool("search".to_string());
     /// assert_eq!(resources.tools.len(), 1);
     /// ```
     pub fn add_tool(&mut self, tool: String) {
@@ -174,7 +174,7 @@ impl SkillResources {
     /// use claude_agent_sdk_rs::skills::SkillResources;
     ///
     /// let mut resources = SkillResources::default();
-    /// resources.add_test("test_basic_functionality");
+    /// resources.add_test("test_basic_functionality".to_string());
     /// assert_eq!(resources.tests.len(), 1);
     /// ```
     pub fn add_test(&mut self, test: String) {

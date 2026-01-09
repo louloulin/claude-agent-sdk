@@ -3,7 +3,7 @@
 //! Agents execute one after another, with each agent's output becoming the input
 //! for the next agent in the sequence.
 //!
-//! ```
+//! ```text
 //! Input → Agent A → Agent B → Agent C → Output
 //! ```
 //!
