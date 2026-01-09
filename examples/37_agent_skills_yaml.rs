@@ -211,6 +211,6 @@ Provide structured feedback with:
     println!("   7. 使用安全的 serde_norway crate");
     println!("\n📚 使用方法:");
     println!("   - 添加依赖: cargo add --features yaml");
-    println!("   - 保存配置: skill.save_to_yaml(path)");
-    println!("   - 加载配置: SkillPackage::load_from_yaml(path)");
+    println!("   - 保存配置: skill.save_to_file(path)");
+    println!("   - 加载配置: SkillPackage::load_from_file(path)");
 }
