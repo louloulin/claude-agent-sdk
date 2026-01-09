@@ -139,8 +139,8 @@ async fn fan_out_pattern(
                     let mut rx = rx.lock().await;
                     rx.recv().await
                 };
-                match prompt {
-                    Some(prompt) => prompt,
+                let prompt = match prompt {
+                    Some(p) => p,
                     None => break, // Channel closed
                 };
                 println!("  [Worker {}] Processing: {}", worker_id + 1, prompt);
@@ -174,7 +174,10 @@ async fn fan_out_pattern(
 
     // Distribute work
     for prompt in prompts {
-        tx.send(prompt)?;
+        if let Err(e) = tx.send(prompt).await {
+            eprintln!("Send error: {}", e);
+            return Vec::new();
+        }
     }
 
     let elapsed = start_time.elapsed();

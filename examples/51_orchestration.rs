@@ -46,7 +46,7 @@ fn create_researcher() -> Box<dyn Agent> {
 
 /// Create a writer agent that creates content
 fn create_writer() -> Box<dyn Agent> {
-    claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
+    Box::new(claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         "Writer",
         "Creates structured content",
         |input| {
@@ -57,12 +57,12 @@ fn create_writer() -> Box<dyn Agent> {
             .with_confidence(0.90)
             .with_metadata("word_count", "850"))
         },
-    )
+    ))
 }
 
 /// Create an editor agent that refines content
 fn create_editor() -> Box<dyn Agent> {
-    claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
+    Box::new(claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         "Editor",
         "Reviews and improves content",
         |input| {
@@ -73,12 +73,12 @@ fn create_editor() -> Box<dyn Agent> {
             .with_confidence(0.92)
             .with_metadata("changes_made", "15"))
         },
-    )
+    ))
 }
 
 /// Create a critic agent that provides feedback
 fn create_critic(name: &'static str, perspective: &'static str) -> Box<dyn Agent> {
-    claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
+    Box::new(claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         name,
         format!("Provides {} perspective", perspective),
         move |input| {
@@ -88,12 +88,12 @@ fn create_critic(name: &'static str, perspective: &'static str) -> Box<dyn Agent
             ))
             .with_confidence(0.85))
         },
-    )
+    ))
 }
 
 /// Create an analyzer agent that evaluates different aspects
 fn create_analyzer(aspect: &'static str) -> Box<dyn Agent> {
-    claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
+    Box::new(claude_agent_sdk_rs::orchestration::agent::SimpleAgent::new(
         format!("{}_Analyzer", aspect),
         format!("Analyzes {}", aspect),
         move |input| {
@@ -103,7 +103,7 @@ fn create_analyzer(aspect: &'static str) -> Box<dyn Agent> {
             ))
             .with_confidence(0.88))
         },
-    )
+    ))
 }
 
 // ============================================================================
@@ -147,9 +147,9 @@ async fn sequential_pipeline_example() -> Result<(), Box<dyn std::error::Error>>
 
     // Create agents
     let agents: Vec<Box<dyn Agent>> = vec![
-        Box::new(create_researcher()),
-        Box::new(create_writer()),
-        Box::new(create_editor()),
+        create_researcher(),
+        create_writer(),
+        create_editor(),
     ];
 
     // Create orchestrator
@@ -190,10 +190,10 @@ async fn parallel_analysis_example() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create agents with different perspectives
     let agents: Vec<Box<dyn Agent>> = vec![
-        Box::new(create_critic("Alice", "technical")),
-        Box::new(create_critic("Bob", "business")),
-        Box::new(create_critic("Charlie", "user-experience")),
-        Box::new(create_critic("Diana", "security")),
+        create_critic("Alice", "technical"),
+        create_critic("Bob", "business"),
+        create_critic("Charlie", "user-experience"),
+        create_critic("Diana", "security"),
     ];
 
     // Create orchestrator
@@ -226,7 +226,7 @@ async fn parallel_with_limit_example() -> Result<(), Box<dyn std::error::Error>>
     // Track concurrent execution
     let concurrent_count = Arc::new(AtomicUsize::new(0));
     let max_concurrent = Arc::new(AtomicUsize::new(0));
-    let mut agents = Vec::new();
+    let mut agents: Vec<Box<dyn Agent>> = Vec::new();
 
     // Create 10 agents that track concurrency
     for i in 0..10 {
