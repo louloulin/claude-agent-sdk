@@ -111,125 +111,6 @@ async fn test_query_with_options() -> anyhow::Result<()> {
 
     Ok(())
 }
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-#[tokio::test]
-async fn test_query_with_options() -> anyhow::Result<()> {
-    let _timer = TestTimer::new("query with options");
-
-    let options = ClaudeAgentOptions::builder()
-        .permission_mode(PermissionMode::BypassPermissions)
-        .build();
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
-
-    let messages = query("Say 'test'", Some(options)).await?;
-
-    assert_response_contains(messages, "test")?;
-
-    Ok(())
-}
 
 #[tokio::test]
 async fn test_mock_tool_execution() -> anyhow::Result<()> {
@@ -308,7 +189,7 @@ async fn test_hook_execution() -> anyhow::Result<()> {
     hooks.add_pre_tool_use(test_hook);
 
     let options = ClaudeAgentOptions::builder()
-        .hooks(Some(hooks.build()))
+        .hooks(hooks.build())
         .build();
 
     let _messages = query("What is 2 + 2?", Some(options)).await?;
@@ -330,23 +211,18 @@ async fn property_non_empty_response(prompt: &str) -> bool {
 }
 
 /// Property: Temperature should affect response consistency
+/// Note: Temperature is not currently supported in ClaudeAgentOptions
+/// This is a placeholder for future property-based testing
 async fn property_temperature_effect() -> anyhow::Result<()> {
     let prompt = "Say a random number between 1 and 100";
 
-    // Low temperature - should be more consistent
-    let options_low = ClaudeAgentOptions {
-        temperature: Some(0.0),
-        ..Default::default()
-    };
+    // Note: Temperature parameter is not available in the current SDK
+    // This test demonstrates the concept but uses default options
+    let options = ClaudeAgentOptions::builder().build();
 
-    let options_high = ClaudeAgentOptions {
-        temperature: Some(1.0),
-        ..Default::default()
-    };
-
-    let _response1 = query(prompt, Some(options_low)).await?;
-    let _response2 = query(prompt, Some(options_low)).await?;
-    let _response3 = query(prompt, Some(options_high)).await?;
+    let _response1 = query(prompt, Some(options.clone())).await?;
+    let _response2 = query(prompt, Some(options.clone())).await?;
+    let _response3 = query(prompt, Some(options)).await?;
 
     // In real property-based test, would measure variance
     Ok(())
@@ -422,30 +298,24 @@ async fn main() -> anyhow::Result<()> {
 
     println!("\n📋 Running Tests...\n");
 
-    // Unit tests
+    // Note: Functions marked with #[tokio::test] are run automatically by cargo test
+    // They are not called here in main()
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Unit Tests");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    println!("  Run 'cargo test --example 49_testing_strategies' to run unit tests");
 
-    test_simple_query().await?;
-    test_query_with_options().await?;
-    test_mock_tool_execution().await?;
-
-    // Integration tests
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Integration Tests");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-
-    test_multi_turn_conversation().await?;
-    test_permission_system().await?;
-    test_hook_execution().await?;
+    println!("  Run 'cargo test --example 49_testing_strategies' to run integration tests");
 
     // Property-based tests
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Property-Based Tests");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
-    let result = property_non_empty_response("What is 2 + 2?");
+    let result = property_non_empty_response("What is 2 + 2?").await;
     println!("  Property: Non-empty response = {}", result);
 
     property_temperature_effect().await?;
@@ -454,8 +324,7 @@ async fn main() -> anyhow::Result<()> {
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Deterministic Tests");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-
-    test_deterministic_behavior().await?;
+    println!("  Run 'cargo test --example 49_testing_strategies' to run deterministic tests");
 
     // Performance tests
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

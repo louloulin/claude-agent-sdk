@@ -21,6 +21,7 @@ tokio = { version = "1.48", features = [
   "rt-multi-thread",
   "process",
   "io-util",
+  "signal",
   "sync",
   "time",
 ] }

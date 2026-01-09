@@ -155,7 +155,7 @@ Provide structured feedback with:
     };
 
     let minimal_path = PathBuf::from("minimal_skill.yaml");
-    minimal_skill.save_to_yaml(&minimal_path).unwrap();
+    minimal_skill.save_to_file(&minimal_path).unwrap();
     println!("   ✅ 已保存简化版技能到: {:?}", minimal_path);
 
     let minimal_yaml = std::fs::read_to_string(&minimal_path).unwrap();

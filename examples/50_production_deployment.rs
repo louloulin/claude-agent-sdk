@@ -14,7 +14,7 @@ use claude_agent_sdk_rs::{
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
-use tokio::signal::ctrl_c;
+// Note: ctrl_c is a function, not a module import
 use tokio::time::sleep;
 
 // ============================================================================
@@ -249,7 +249,7 @@ impl ShutdownSignal {
 
         // Handle Ctrl+C
         tokio::spawn(async move {
-            match ctrl_c().await {
+            match tokio::signal::ctrl_c().await {
                 Ok(()) => {
                     println!("\n🛑 Received shutdown signal");
                     shutdown.store(true, Ordering::Relaxed);
@@ -338,13 +338,14 @@ impl ProductionService {
         });
 
         // Metrics reporting task
+        let shutdown_metrics = self.shutdown.clone();
         tokio::spawn(async move {
             let mut interval = tokio::time::interval(Duration::from_secs(60));
 
             loop {
                 interval.tick().await;
 
-                if shutdown.is_shutdown() {
+                if shutdown_metrics.is_shutdown() {
                     println!("🛑 Metrics reporter shutting down");
                     break;
                 }

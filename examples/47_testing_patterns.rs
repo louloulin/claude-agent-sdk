@@ -162,7 +162,7 @@ async fn integration_testing_patterns() -> Result<()> {
         println!("   Running test: {}", test.name);
 
         let options = ClaudeAgentOptions::builder()
-            .max_turns(Some(test.max_turns))
+            .max_turns(test.max_turns)
             .allowed_tools(test.expected_tools.clone())
             .build();
 
@@ -170,7 +170,7 @@ async fn integration_testing_patterns() -> Result<()> {
             Ok(messages) => {
                 let turn_count = messages.len() as u32;
                 let valid_turns =
-                    turn_count >= test.min_turns as usize && turn_count <= test.max_turns as usize;
+                    turn_count >= test.min_turns && turn_count <= test.max_turns;
 
                 println!("     Turn count: {} (valid: {})", turn_count, valid_turns);
 
@@ -281,7 +281,6 @@ async fn snapshot_testing() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .model("claude-sonnet-4-5")
         .max_turns(1)
-        .temperature(Some(0.0)) // Deterministic
         .build();
 
     let messages = query(query_text, Some(options)).await?;
@@ -341,28 +340,46 @@ async fn test_data_builders() -> Result<()> {
         }
 
         fn build(self) -> (String, ClaudeAgentOptions) {
-            let options = ClaudeAgentOptions::builder()
-                .max_turns(self.max_turns)
-                .model(self.model)
-                .build();
+            // Build options with only the fields that are set
+            let options = match (self.max_turns, self.model) {
+                (Some(max_turns), Some(model)) => {
+                    ClaudeAgentOptions::builder()
+                        .max_turns(max_turns)
+                        .model(model)
+                        .build()
+                }
+                (Some(max_turns), None) => {
+                    ClaudeAgentOptions::builder()
+                        .max_turns(max_turns)
+                        .build()
+                }
+                (None, Some(model)) => {
+                    ClaudeAgentOptions::builder()
+                        .model(model)
+                        .build()
+                }
+                (None, None) => {
+                    ClaudeAgentOptions::builder().build()
+                }
+            };
 
             (self.query, options)
         }
     }
 
     // Use the builder
-    let (query, options) = TestDataBuilder::new()
+    let (query_text, options) = TestDataBuilder::new()
         .query("What is 2 + 2?")
         .max_turns(2)
         .model("claude-sonnet-4-5")
         .build();
 
     println!("   Built test data:");
-    println!("     Query: {}", query);
+    println!("     Query: {}", query_text);
     println!("     Max turns: {:?}", options.max_turns);
     println!("     Model: {:?}", options.model);
 
-    let _messages = query(&query, Some(options)).await?;
+    let _messages = query(&query_text, Some(options)).await?;
     println!("   ✓ Test data builder pattern works");
 
     Ok(())
@@ -421,11 +438,11 @@ async fn test_isolation() -> Result<()> {
     let session_2 = "test-session-2";
 
     let options1 = ClaudeAgentOptions::builder()
-        .resume(Some(session_1.to_string()))
+        .resume(session_1.to_string())
         .build();
 
     let options2 = ClaudeAgentOptions::builder()
-        .resume(Some(session_2.to_string()))
+        .resume(session_2.to_string())
         .build();
 
     // Run queries in isolated sessions
@@ -434,7 +451,7 @@ async fn test_isolation() -> Result<()> {
 
     // Verify isolation
     let options1_check = ClaudeAgentOptions::builder()
-        .resume(Some(session_1.to_string()))
+        .resume(session_1.to_string())
         .continue_conversation(true)
         .build();
 

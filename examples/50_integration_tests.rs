@@ -244,7 +244,7 @@ async fn test_hooks() -> Result<()> {
     hooks.add_pre_tool_use_with_matcher("Read", test_hook);
 
     let options = ClaudeAgentOptions::builder()
-        .hooks(Some(hooks.build()))
+        .hooks(hooks.build())
         .build();
 
     let _messages = query("Read README.md", Some(options)).await?;
@@ -340,7 +340,7 @@ async fn test_fallback_model() -> Result<()> {
 /// Test 13: Extended thinking
 async fn test_extended_thinking() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .max_thinking_tokens(Some(10000))
+        .max_thinking_tokens(10000)
         .build();
 
     let _messages = query("Solve this complex problem", Some(options)).await?;
