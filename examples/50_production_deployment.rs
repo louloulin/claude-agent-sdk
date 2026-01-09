@@ -9,12 +9,12 @@
 //! - Deployment strategies
 
 use claude_agent_sdk_rs::{
-    ClaudeClient, ContentBlock, Message, query, types::config::ClaudeAgentOptions,
+    ContentBlock, Message, query, types::config::ClaudeAgentOptions,
 };
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
-use tokio::signal;
+use tokio::signal::ctrl_c;
 use tokio::time::sleep;
 
 // ============================================================================
@@ -92,10 +92,7 @@ impl ProductionConfig {
     }
 
     fn to_claude_options(&self) -> ClaudeAgentOptions {
-        ClaudeAgentOptions {
-            max_tokens: Some(self.max_tokens),
-            ..Default::default()
-        }
+        ClaudeAgentOptions::default()
     }
 }
 
@@ -103,7 +100,7 @@ impl ProductionConfig {
 // Metrics and Monitoring
 // ============================================================================
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 struct Metrics {
     total_requests: Arc<std::sync::atomic::AtomicU64>,
     successful_requests: Arc<std::sync::atomic::AtomicU64>,
@@ -165,6 +162,7 @@ struct MetricStats {
 // Health Checks
 // ============================================================================
 
+#[derive(Clone)]
 struct HealthChecker {
     is_healthy: Arc<AtomicBool>,
 }
@@ -230,6 +228,7 @@ struct CheckResult {
 // Graceful Shutdown
 // ============================================================================
 
+#[derive(Clone)]
 struct ShutdownSignal {
     shutdown: Arc<AtomicBool>,
 }
@@ -250,7 +249,7 @@ impl ShutdownSignal {
 
         // Handle Ctrl+C
         tokio::spawn(async move {
-            match signal::ctrl_c().await {
+            match ctrl_c().await {
                 Ok(()) => {
                     println!("\n🛑 Received shutdown signal");
                     shutdown.store(true, Ordering::Relaxed);
@@ -380,9 +379,10 @@ impl ProductionService {
             Ok(Ok(messages)) => {
                 let text = messages
                     .iter()
-                    .filter_map(|m| {
+                    .find_map(|m| {
                         if let Message::Assistant(msg) = m {
-                            msg.message
+                            Some(
+                                msg.message
                                 .content
                                 .iter()
                                 .filter_map(|b| {
@@ -394,12 +394,12 @@ impl ProductionService {
                                 })
                                 .collect::<Vec<_>>()
                                 .join(" ")
+                            )
                         } else {
-                            String::new()
+                            None
                         }
                     })
-                    .collect::<Vec<_>>()
-                    .join(" ");
+                    .unwrap_or_else(|| String::new());
 
                 (true, text)
             },

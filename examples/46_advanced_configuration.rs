@@ -5,7 +5,7 @@
 
 use anyhow::Result;
 use claude_agent_sdk_rs::{
-    ClaudeAgentOptions, PermissionMode, SdkBeta, SystemPrompt, Tools, ToolsPreset, query,
+    ClaudeAgentOptions, PermissionMode, SdkBeta, SystemPrompt, SystemPromptPreset, Tools, ToolsPreset, query,
 };
 
 #[tokio::main]
@@ -80,7 +80,11 @@ async fn custom_system_prompts() -> Result<()> {
     );
 
     // System prompt from preset
-    let preset_prompt = SystemPrompt::Preset(SystemPromptPreset::new("custom_prompt"));
+    let preset_prompt = SystemPrompt::Preset(SystemPromptPreset {
+        type_: "preset".to_string(),
+        preset: "custom_prompt".to_string(),
+        append: None,
+    });
 
     // Use system prompt in options
     let options = ClaudeAgentOptions::builder()

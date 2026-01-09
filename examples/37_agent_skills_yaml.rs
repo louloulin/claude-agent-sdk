@@ -92,7 +92,7 @@ Provide structured feedback with:
     // 2. 保存为 YAML 格式
     println!("2️⃣  保存为 YAML 格式");
     let yaml_path = PathBuf::from("example_skill.yaml");
-    skill.save_to_yaml(&yaml_path).unwrap();
+    skill.save_to_file(&yaml_path).unwrap();
     println!("   ✅ 已保存到: {:?}", yaml_path);
     println!();
 
@@ -111,7 +111,7 @@ Provide structured feedback with:
 
     // 4. 从 YAML 文件加载
     println!("4️⃣  从 YAML 文件加载");
-    let loaded_skill = SkillPackage::load_from_yaml(&yaml_path).unwrap();
+    let loaded_skill = SkillPackage::load_from_file(&yaml_path).unwrap();
     println!("   ✅ 成功加载技能: {}", loaded_skill.metadata.name);
     println!("   📝 描述: {}", loaded_skill.metadata.description);
     println!();

@@ -17,39 +17,84 @@ async fn main() -> Result<()> {
     println!("=== Complete Integration Test Example ===\n");
 
     // Run all integration tests
-    let tests = vec![
-        ("Basic Query", test_basic_query),
-        ("Streaming Query", test_streaming_query),
-        ("Custom Tools", test_custom_tools),
-        ("Bidirectional Client", test_bidirectional_client),
-        ("Error Handling", test_error_handling),
-        ("Permission System", test_permission_system),
-        ("Hooks", test_hooks),
-        ("Budget Control", test_budget_control),
-        ("Session Management", test_session_management),
-        ("Concurrent Operations", test_concurrent_operations),
-    ];
-
     let mut passed = 0;
     let mut failed = 0;
 
-    for (name, test_fn) in tests {
-        println!("Running: {}", name);
-        match test_fn().await {
-            Ok(_) => {
-                println!("   ✓ PASSED\n");
-                passed += 1;
-            },
-            Err(e) => {
-                println!("   ✗ FAILED: {}\n", e);
-                failed += 1;
-            },
-        }
+    // Test 1: Basic Query
+    println!("Running: Basic Query");
+    match test_basic_query().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
     }
+
+    // Test 2: Streaming Query
+    println!("Running: Streaming Query");
+    match test_streaming_query().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 3: Custom Tools
+    println!("Running: Custom Tools");
+    match test_custom_tools().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 4: Bidirectional Client
+    println!("Running: Bidirectional Client");
+    match test_bidirectional_client().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 5: Error Handling
+    println!("Running: Error Handling");
+    match test_error_handling().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 6: Permission System
+    println!("Running: Permission System");
+    match test_permission_system().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 7: Hooks
+    println!("Running: Hooks");
+    match test_hooks().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 8: Budget Control
+    println!("Running: Budget Control");
+    match test_budget_control().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 9: Session Management
+    println!("Running: Session Management");
+    match test_session_management().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    // Test 10: Concurrent Operations
+    println!("Running: Concurrent Operations");
+    match test_concurrent_operations().await {
+        Ok(_) => { println!("   ✓ PASSED\n"); passed += 1; },
+        Err(e) => { println!("   ✗ FAILED: {}\n", e); failed += 1; },
+    }
+
+    let total = passed + failed;
 
     // Print summary
     println!("=== Test Summary ===");
-    println!("Total: {}", tests.len());
+    println!("Total: {}", total);
     println!("Passed: {}", passed);
     println!("Failed: {}", failed);
 
@@ -141,15 +186,17 @@ async fn test_bidirectional_client() -> Result<()> {
     client.query("What is 2 + 2?").await?;
 
     let mut response_count = 0;
-    let mut stream = client.receive_response();
+    {
+        let mut stream = client.receive_response();
 
-    while let Some(result) = stream.next().await {
-        let msg = result?;
-        if matches!(msg, Message::Result(_)) {
-            break;
+        while let Some(result) = stream.next().await {
+            let msg = result?;
+            if matches!(msg, Message::Result(_)) {
+                break;
+            }
+            response_count += 1;
         }
-        response_count += 1;
-    }
+    } // Drop stream here
 
     client.disconnect().await?;
 
@@ -182,27 +229,23 @@ async fn test_permission_system() -> Result<()> {
 
 /// Test 7: Hooks system
 async fn test_hooks() -> Result<()> {
-    use claude_agent_sdk_rs::{Hook, HookContext, HookInput, HookJSONOutput, HookMatcher};
-    use std::collections::HashMap;
+    use claude_agent_sdk_rs::{HookContext, HookInput, HookJsonOutput, HookMatcher, Hooks};
+    use std::sync::Arc;
 
     async fn test_hook(
         _input: HookInput,
         _tool_use_id: Option<String>,
         _context: HookContext,
-    ) -> anyhow::Result<HookJSONOutput> {
-        Ok(serde_json::json!({}))
+    ) -> HookJsonOutput {
+        HookJsonOutput::Sync(Default::default())
     }
 
-    let mut hooks = HashMap::new();
-    hooks.insert(
-        "PreToolUse".to_string(),
-        vec![HookMatcher {
-            matcher: Some("Read".to_string()),
-            hooks: vec![Hook::new(test_hook)],
-        }],
-    );
+    let mut hooks = Hooks::new();
+    hooks.add_pre_tool_use_with_matcher("Read", test_hook);
 
-    let options = ClaudeAgentOptions::builder().hooks(Some(hooks)).build();
+    let options = ClaudeAgentOptions::builder()
+        .hooks(Some(hooks.build()))
+        .build();
 
     let _messages = query("Read README.md", Some(options)).await?;
     Ok(())
@@ -222,11 +265,11 @@ async fn test_budget_control() -> Result<()> {
 /// Test 9: Session management
 async fn test_session_management() -> Result<()> {
     let options1 = ClaudeAgentOptions::builder()
-        .resume(Some("test-session-1".to_string()))
+        .resume("test-session-1".to_string())
         .build();
 
     let options2 = ClaudeAgentOptions::builder()
-        .resume(Some("test-session-2".to_string()))
+        .resume("test-session-2".to_string())
         .build();
 
     let _msg1 = query("Remember: X = 1", Some(options1)).await?;
@@ -234,7 +277,7 @@ async fn test_session_management() -> Result<()> {
 
     // Verify sessions are isolated
     let options_check = ClaudeAgentOptions::builder()
-        .resume(Some("test-session-1".to_string()))
+        .resume("test-session-1".to_string())
         .continue_conversation(true)
         .build();
 
@@ -287,7 +330,7 @@ async fn test_multimodal_input() -> Result<()> {
 async fn test_fallback_model() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .model("claude-opus-4-5")
-        .fallback_model(Some("claude-sonnet-4-5".to_string()))
+        .fallback_model("claude-sonnet-4-5".to_string())
         .build();
 
     let _messages = query("What is 2 + 2?", Some(options)).await?;
@@ -320,9 +363,9 @@ async fn test_system_prompts() -> Result<()> {
     use claude_agent_sdk_rs::SystemPrompt;
 
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(SystemPrompt::text(
-            "You are a helpful assistant focused on brevity.",
-        )))
+        .system_prompt(SystemPrompt::Text(
+            "You are a helpful assistant focused on brevity.".to_string(),
+        ))
         .build();
 
     let _messages = query("What is 2 + 2? Be brief.", Some(options)).await?;
@@ -334,7 +377,7 @@ async fn test_cli_path_config() -> Result<()> {
     use std::path::PathBuf;
 
     let options = ClaudeAgentOptions::builder()
-        .cli_path(Some(PathBuf::from("claude")))
+        .cli_path(PathBuf::from("claude"))
         .build();
 
     let _messages = query("What is 2 + 2?", Some(options)).await?;
@@ -346,7 +389,7 @@ async fn test_working_directory() -> Result<()> {
     use std::path::PathBuf;
 
     let options = ClaudeAgentOptions::builder()
-        .cwd(Some(PathBuf::from("/tmp")))
+        .cwd(PathBuf::from("/tmp"))
         .build();
 
     let _messages = query("What is the current directory?", Some(options)).await?;
@@ -382,7 +425,7 @@ async fn test_fork_session() -> Result<()> {
 
 /// Test 20: Max turns enforcement
 async fn test_max_turns_enforcement() -> Result<()> {
-    let options = ClaudeAgentOptions::builder().max_turns(Some(1)).build();
+    let options = ClaudeAgentOptions::builder().max_turns(1).build();
 
     let messages = query("What is 2 + 2?", Some(options)).await?;
 
@@ -440,7 +483,7 @@ async fn test_memory_leak() -> Result<()> {
 /// Cleanup and teardown
 async fn test_cleanup() -> Result<()> {
     // Test proper resource cleanup
-    let client = ClaudeClient::new(ClaudeAgentOptions::default());
+    let mut client = ClaudeClient::new(ClaudeAgentOptions::default());
     client.connect().await?;
     client.disconnect().await?;
 
