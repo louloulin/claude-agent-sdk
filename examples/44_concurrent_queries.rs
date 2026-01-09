@@ -228,10 +228,11 @@ async fn batch_processing_example() -> Result<()> {
 async fn error_isolation_example() -> Result<()> {
     let queries = vec![
         "Valid query 1",
-    let total_queries = total_queries;
         "Invalid query that might fail",
         "Valid query 2",
     ];
+
+    let total_queries = queries.len();
 
     let results: Vec<_> = futures::stream::iter(queries)
         .map(|q| async move {
@@ -264,7 +265,7 @@ async fn rate_limited_concurrent() -> Result<()> {
     use tokio::time::{Duration, sleep};
 
     let queries = vec!["Query 1", "Query 2", "Query 3", "Query 4", "Query 5"];
-    let queries_count = total_queries;
+    let queries_count = queries.len();
 
     let rate_limit_ms = 500u64; // Max 2 queries per second
     let last_call = Arc::new(AtomicU64::new(0));
@@ -322,7 +323,7 @@ async fn concurrent_with_timeout() -> Result<()> {
         ("Longer query", "Explain quantum computing"),
         ("Medium query", "What is Rust?"),
     ];
-    let queries_count = total_queries;
+    let queries_count = queries.len();
 
     let timeout = Duration::from_secs(10);
 

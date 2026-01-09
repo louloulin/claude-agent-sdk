@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     println!("\n8. Debug Configuration:");
     debug_config_example().await?;
 
-    Ok((
+    Ok(()
 }
 
 /// Example 1: Enable Beta Features
@@ -63,7 +63,7 @@ async fn beta_features_example() -> Result<()> {
 
     let _messages = query("List available beta features", Some(options)).await?;
     println!("   ✓ Configuration active");
-    Ok((
+    Ok(()
 }
 
 /// Example 2: Custom System Prompts
@@ -93,7 +93,7 @@ async fn custom_system_prompts() -> Result<()> {
     let _messages = query("What is Rust ownership?", Some(options)).await?;
     println!("   ✓ Custom prompt used");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 3: Advanced Tool Configuration
@@ -125,7 +125,7 @@ async fn advanced_tool_config() -> Result<()> {
 
     let _messages = query("List files in current directory", Some(options)).await?;
     println!("   ✓ Tools configured");
-    Ok((
+    Ok(()
 }
 
 /// Example 4: Budget and Cost Control
@@ -151,7 +151,7 @@ async fn budget_control_example() -> Result<()> {
         },
     }
 
-    Ok((
+    Ok(()
 }
 
 /// Example 5: Model Selection and Fallback
@@ -170,7 +170,7 @@ async fn model_selection_example() -> Result<()> {
     let _messages = query("Solve this complex problem", Some(options)).await?;
     println!("   ✓ Model selection successful");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 6: Advanced Session Management
@@ -193,7 +193,7 @@ async fn session_management_example() -> Result<()> {
     let _messages = query("What is 2 + 2?", Some(options_fork)).await?;
     println!("   ✓ Fork session created");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 7: Environment Variables
@@ -213,7 +213,7 @@ async fn env_vars_example() -> Result<()> {
     let _messages = query("Check environment", Some(options)).await?;
     println!("   ✓ Environment configured");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 8: Debug Configuration
@@ -240,7 +240,7 @@ async fn debug_config_example() -> Result<()> {
     let _messages = query("Simple test query", Some(options)).await?;
     println!("   ✓ Debug output captured");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 9: Working Directory Configuration
@@ -263,7 +263,7 @@ async fn working_directory_example() -> Result<()> {
     let _messages = query("List files in working directory", Some(options)).await?;
     println!("   ✓ Working directory configured");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 10: User Identifier and Metadata
@@ -279,14 +279,14 @@ async fn user_metadata_example() -> Result<()> {
     let _messages = query("Who am I?", Some(options)).await?;
     println!("   ✓ User metadata configured");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 11: Stream vs Non-Stream Configuration
 async fn stream_config_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .include_partial_messages(true) // Include partial in stream
-        .max_buffer_size(1024 * 1024)) // 1MB buffer
+        .max_buffer_size(1024 * 1024) // 1MB buffer
         .build();
 
     println!("   Stream configuration:");
@@ -296,7 +296,7 @@ async fn stream_config_example() -> Result<()> {
     let _messages = query("Explain streams", Some(options)).await?;
     println!("   ✓ Stream configuration applied");
 
-    Ok((
+    Ok(()
 }
 
 /// Example 12: Complete Production Configuration
@@ -340,5 +340,5 @@ async fn production_config_example() -> Result<()> {
     let _messages = query("Production test query", Some(options)).await?;
     println!("   ✓ Production-ready configuration");
 
-    Ok((
+    Ok(()
 }
