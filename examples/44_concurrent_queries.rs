@@ -73,7 +73,7 @@ async fn run_sequential_queries() -> Result<()> {
     for (i, question) in questions.iter().enumerate() {
         println!("   Query {}: {}", i + 1, question);
         let start = Instant::now();
-        let _messages = query(question, None).await?;
+        let _messages = query(question.to_string(), None).await?;
         println!("   Completed in {:?}", start.elapsed());
     }
 
@@ -133,7 +133,7 @@ async fn run_concurrent_queries_taskpool() -> Result<()> {
         println!("   Starting query {}: {}", i + 1, question);
         join_set.spawn(async move {
             let start = Instant::now();
-            let messages = query(question, None).await?;
+            let messages = query(question.to_string(), None).await?;
             println!("   Query {} finished in {:?}", i + 1, start.elapsed());
             Ok::<Vec<Message>, anyhow::Error>(messages)
         });
@@ -198,7 +198,7 @@ async fn batch_processing_example() -> Result<()> {
     let results: Vec<_> = futures::stream::iter(data)
         .map(|(item, category)| async move {
             let question = format!("What is {}? It's a {}", item, category);
-            let messages = query(&question, None).await?;
+            let messages = query(question.to_string(), None).await?;
             Ok::<(String, String), anyhow::Error>((item.to_string(), category.to_string()))
         })
         .buffer_unordered(3)

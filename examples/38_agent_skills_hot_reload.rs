@@ -66,14 +66,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("4️⃣  创建热加载管理器");
     let mut manager = HotReloadManager::new(event_receiver);
 
-    // 加载初始技能
-    let loaded_skill = SkillPackage::load_from_file(&skill1_path)?;
-    manager.handle_event(HotReloadEvent::SkillCreated {
-        path: skill1_path.clone(),
-        skill: loaded_skill,
-    });
+    // 处理初始文件创建事件（watcher会自动检测并发送事件）
+    sleep(Duration::from_millis(200)).await;
+    let event_count = manager.process_events();
 
     println!("   ✅ 管理器已创建");
+    println!("   📦 处理了 {} 个初始事件", event_count);
     println!("   📦 当前技能数: {}", manager.get_skills().len());
     println!();
 

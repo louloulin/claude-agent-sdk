@@ -5,7 +5,7 @@
 
 use anyhow::Result;
 use claude_agent_sdk_rs::{
-    ClaudeAgentOptions, PermissionMode, SdkBeta, SystemPrompt, query, tools,
+    ClaudeAgentOptions, PermissionMode, SdkBeta, SystemPrompt, query, Tools,
 };
 
 #[tokio::main]
@@ -44,36 +44,35 @@ async fn main() -> Result<()> {
     println!("\n8. Debug Configuration:");
     debug_config_example().await?;
 
-    Ok(())
+    Ok((
 }
 
 /// Example 1: Enable Beta Features
 async fn beta_features_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .betas(vec![
-            SdkBeta::MaxTokens3,            // Increased token limits
-            SdkBeta::ComputerTools20250124, // Enhanced computer tools
-            SdkBeta::PromptCaching,         // Prompt caching
+            // Note: Some beta features may not be available in current SDK version
+            // SdkBeta::MaxTokens3,            // Increased token limits
+            // SdkBeta::ComputerTools20250124, // Enhanced computer tools
+            // SdkBeta::PromptCaching,         // Prompt caching
         ])
         .build();
 
-    println!("   Enabled beta features:");
-    println!("   - MaxTokens3");
-    println!("   - ComputerTools20250124");
-    println!("   - PromptCaching");
+    println!("   Beta features configuration:");
+    println!("   - (Some beta features may not be available)");
 
     let _messages = query("List available beta features", Some(options)).await?;
-    println!("   ✓ Beta features active");
-    Ok(())
+    println!("   ✓ Configuration active");
+    Ok((
 }
 
 /// Example 2: Custom System Prompts
 async fn custom_system_prompts() -> Result<()> {
     // Simple system prompt
-    let simple_prompt = SystemPrompt::text("You are a helpful Rust programming assistant.");
+    let simple_prompt = SystemPrompt::Text("You are a helpful Rust programming assistant.".to_string());
 
     // Multi-part system prompt
-    let multi_part_prompt = SystemPrompt::text(
+    let multi_part_prompt = SystemPrompt::Text(
         "You are a Rust expert.\n\
          Focus on:\n\
          1. Idiomatic Rust code\n\
@@ -83,18 +82,18 @@ async fn custom_system_prompts() -> Result<()> {
     );
 
     // System prompt from file
-    let file_prompt = SystemPrompt::file_path("path/to/prompt.txt");
+    let file_prompt = SystemPrompt::FilePath("path/to/prompt.txt");
 
     // Use system prompt in options
     let options = ClaudeAgentOptions::builder()
-        .system_prompt(Some(multi_part_prompt))
+        .system_prompt(multi_part_prompt)
         .build();
 
     println!("   Configured custom system prompt");
     let _messages = query("What is Rust ownership?", Some(options)).await?;
     println!("   ✓ Custom prompt used");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 3: Advanced Tool Configuration
@@ -108,7 +107,7 @@ async fn advanced_tool_config() -> Result<()> {
     let custom_tools = tools::custom(&["Read", "Write", "Bash"]);
 
     let options = ClaudeAgentOptions::builder()
-        .tools(Some(coding_tools))
+        .tools(coding_tools
         .allowed_tools(vec![
             "Read".to_string(),
             "Write".to_string(),
@@ -126,7 +125,7 @@ async fn advanced_tool_config() -> Result<()> {
 
     let _messages = query("List files in current directory", Some(options)).await?;
     println!("   ✓ Tools configured");
-    Ok(())
+    Ok((
 }
 
 /// Example 4: Budget and Cost Control
@@ -152,7 +151,7 @@ async fn budget_control_example() -> Result<()> {
         },
     }
 
-    Ok(())
+    Ok((
 }
 
 /// Example 5: Model Selection and Fallback
@@ -160,8 +159,8 @@ async fn model_selection_example() -> Result<()> {
     // Primary model with fallback
     let options = ClaudeAgentOptions::builder()
         .model("claude-opus-4-5")
-        .fallback_model(Some("claude-sonnet-4-5".to_string()))
-        .max_thinking_tokens(Some(50000)) // Extended thinking
+        .fallback_model("claude-sonnet-4-5".to_string(
+        .max_thinking_tokens(50000) // Extended thinking
         .build();
 
     println!("   Primary model: claude-opus-4-5");
@@ -171,7 +170,7 @@ async fn model_selection_example() -> Result<()> {
     let _messages = query("Solve this complex problem", Some(options)).await?;
     println!("   ✓ Model selection successful");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 6: Advanced Session Management
@@ -183,7 +182,7 @@ async fn session_management_example() -> Result<()> {
 
     // Resume existing session
     let options_resume = ClaudeAgentOptions::builder()
-        .resume(Some("my-session-id".to_string()))
+        .resume("my-session-id".to_string()
         .continue_conversation(true)
         .build();
 
@@ -194,7 +193,7 @@ async fn session_management_example() -> Result<()> {
     let _messages = query("What is 2 + 2?", Some(options_fork)).await?;
     println!("   ✓ Fork session created");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 7: Environment Variables
@@ -214,7 +213,7 @@ async fn env_vars_example() -> Result<()> {
     let _messages = query("Check environment", Some(options)).await?;
     println!("   ✓ Environment configured");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 8: Debug Configuration
@@ -230,8 +229,8 @@ async fn debug_config_example() -> Result<()> {
     extra_args.insert("verbose".to_string(), None);
 
     let options = ClaudeAgentOptions::builder()
-        .stderr_callback(Some(stderr_callback))
-        .extra_args(Some(extra_args))
+        .stderr_callback(stderr_callback
+        .extra_args(extra_args
         .build();
 
     println!("   Debug mode enabled");
@@ -241,7 +240,7 @@ async fn debug_config_example() -> Result<()> {
     let _messages = query("Simple test query", Some(options)).await?;
     println!("   ✓ Debug output captured");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 9: Working Directory Configuration
@@ -249,7 +248,7 @@ async fn working_directory_example() -> Result<()> {
     use std::path::PathBuf;
 
     let options = ClaudeAgentOptions::builder()
-        .cwd(Some(PathBuf::from("/tmp")))
+        .cwd(PathBuf::from("/tmp")
         .add_dirs(vec![
             PathBuf::from("/home/user/projects"),
             PathBuf::from("/shared"),
@@ -264,14 +263,14 @@ async fn working_directory_example() -> Result<()> {
     let _messages = query("List files in working directory", Some(options)).await?;
     println!("   ✓ Working directory configured");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 10: User Identifier and Metadata
 async fn user_metadata_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
-        .user(Some("user-12345".to_string()))
-        .permission_prompt_tool_name(Some("admin_approval".to_string()))
+        .user("user-12345".to_string()
+        .permission_prompt_tool_name("admin_approval".to_string()
         .build();
 
     println!("   User ID: user-12345");
@@ -280,14 +279,14 @@ async fn user_metadata_example() -> Result<()> {
     let _messages = query("Who am I?", Some(options)).await?;
     println!("   ✓ User metadata configured");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 11: Stream vs Non-Stream Configuration
 async fn stream_config_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         .include_partial_messages(true) // Include partial in stream
-        .max_buffer_size(Some(1024 * 1024)) // 1MB buffer
+        .max_buffer_size(1024 * 1024)) // 1MB buffer
         .build();
 
     println!("   Stream configuration:");
@@ -297,7 +296,7 @@ async fn stream_config_example() -> Result<()> {
     let _messages = query("Explain streams", Some(options)).await?;
     println!("   ✓ Stream configuration applied");
 
-    Ok(())
+    Ok((
 }
 
 /// Example 12: Complete Production Configuration
@@ -305,28 +304,28 @@ async fn production_config_example() -> Result<()> {
     let options = ClaudeAgentOptions::builder()
         // Model selection
         .model("claude-sonnet-4-5")
-        .fallback_model(Some("claude-haiku-4-5".to_string()))
+        .fallback_model("claude-haiku-4-5".to_string()
         // Cost control
         .max_budget_usd(1.00)
         .max_turns(10)
         // Permissions
         .permission_mode(PermissionMode::AcceptEdits)
         // Tools
-        .tools(Some(tools::preset::production()))
+        .tools(tools::preset::production()
         .allowed_tools(vec![
             "Read".to_string(),
             "Write".to_string(),
             "Bash".to_string(),
         ])
         // System prompt
-        .system_prompt(Some(SystemPrompt::text(
+        .system_prompt(SystemPrompt::Text(
             "You are a production assistant focused on \
              reliability and correctness.",
-        )))
+        )
         // Beta features
         .betas(vec![SdkBeta::MaxTokens3, SdkBeta::PromptCaching])
         // Performance
-        .max_thinking_tokens(Some(20000))
+        .max_thinking_tokens(20000
         // Build
         .build();
 
@@ -341,5 +340,5 @@ async fn production_config_example() -> Result<()> {
     let _messages = query("Production test query", Some(options)).await?;
     println!("   ✓ Production-ready configuration");
 
-    Ok(())
+    Ok((
 }

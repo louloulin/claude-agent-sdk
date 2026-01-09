@@ -53,7 +53,7 @@ async fn benchmark_query_latency() -> Result<()> {
 
     for (i, query_text) in queries.iter().enumerate() {
         let start = Instant::now();
-        let _messages = query(query_text, None).await?;
+        let _messages = query(query_text.to_string(), None).await?;
         let elapsed = start.elapsed();
 
         latencies.push(elapsed);
@@ -86,7 +86,7 @@ async fn benchmark_memory_usage() -> Result<()> {
 
     let start = Instant::now();
     for _ in 0..iterations {
-        let _messages = query(query_text, None).await?;
+        let _messages = query(query_text.to_string(), None).await?;
     }
     let total_time = start.elapsed();
 
@@ -129,7 +129,7 @@ async fn benchmark_query_vs_stream() -> Result<()> {
     // Benchmark query()
     let start = Instant::now();
     for _ in 0..iterations {
-        let _messages = query(query_text, None).await?;
+        let _messages = query(query_text.to_string(), None).await?;
     }
     let query_time = start.elapsed();
 
@@ -182,14 +182,14 @@ async fn benchmark_concurrent() -> Result<()> {
 /// Example 6: Scaling analysis
 async fn benchmark_scaling() -> Result<()> {
     let query_sizes = vec![
-        ("Short", "What is 2 + 2?"),
+        ("Short", "What is 2 + 2?".to_string()),
         (
             "Medium",
             "Explain the concept of ownership in Rust programming language, including how it relates to borrowing and lifetimes",
         ),
         (
             "Long",
-            &format!(
+            format!(
                 "Provide a comprehensive explanation of:\n\
              1. Rust ownership system\n\
              2. Borrowing and references\n\
@@ -203,7 +203,7 @@ async fn benchmark_scaling() -> Result<()> {
 
     for (name, query_text) in query_sizes {
         let start = Instant::now();
-        let messages = query(query_text, None).await?;
+        let messages = query(query_text.to_string(), None).await?;
 
         let elapsed = start.elapsed();
         let response_size = extract_response_size(&messages);
@@ -281,13 +281,14 @@ async fn statistical_analysis() -> Result<()> {
 
     for _ in 0..iterations {
         let start = Instant::now();
-        let _messages = query(query_text, None).await?;
+        let _messages = query(query_text.to_string(), None).await?;
         latencies.push(start.elapsed().as_millis());
     }
 
     // Calculate statistics
     let mean = mean(&latencies);
-    let median = median(&latencies);
+    let mut latencies_sorted = latencies.clone();
+    let median = median(&mut latencies_sorted);
     let std_dev = std_deviation(&latencies, mean);
     let min = latencies.iter().min().unwrap();
     let max = latencies.iter().max().unwrap();
@@ -376,7 +377,7 @@ async fn regression_test() -> Result<()> {
 
     for (name, target_ms, query_text) in baselines {
         let start = Instant::now();
-        let _messages = query(query_text, None).await?;
+        let _messages = query(query_text.to_string(), None).await?;
         let elapsed = start.elapsed();
 
         let passed = elapsed.as_millis() < target_ms;
