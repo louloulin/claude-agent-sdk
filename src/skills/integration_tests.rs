@@ -203,7 +203,7 @@ This is a test skill for hook serialization.
 "#;
 
         let temp_dir = std::env::temp_dir();
-        let skill_path = temp_dir.join("test-skill.md");
+        let skill_path = temp_dir.join("test-hooks-skill.md");
         std::fs::write(&skill_path, yaml).expect("Failed to write test skill");
 
         let skill = SkillMdFile::parse(&skill_path).expect("Failed to parse test skill");
