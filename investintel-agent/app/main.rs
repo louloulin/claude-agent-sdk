@@ -18,9 +18,11 @@ use claude_agent_sdk_rs::{
 
 mod tools;
 mod orchestration;
+mod hierarchical_orchestration;
 
 use tools::*;
 use orchestration::run_comprehensive_analysis;
+use hierarchical_orchestration::{create_hierarchical_orchestrator, AdvisorCoordinator};
 
 /// 创建完整的MCP工具服务器
 fn create_investment_tools() -> Result<claude_agent_sdk_rs::SdkMcpServer> {
@@ -181,8 +183,61 @@ async fn main() -> Result<()> {
 
     println!("{}\n", "─".repeat(60));
 
-    // 示例5: 组合压力测试
-    println!("📌 示例5: 投资组合压力测试");
+    // 示例5: 层次化Agent编排 (Hierarchical Orchestration)
+    println!("📌 示例5: 层次化Agent编排 - Advisor协调所有Subagents");
+    println!("{}\n", "─".repeat(60));
+
+    println!("🤖 运行层次化多Agent系统...\n");
+
+    let orchestrator = create_hierarchical_orchestrator();
+    let input = claude_agent_sdk_rs::orchestration::OrchestratorInput::new("AAPL".to_string());
+
+    match orchestrator.orchestrate(vec![], input).await {
+        Ok(output) => {
+            println!("✅ 层次化分析完成\n");
+            println!("置信度: {:.1}%", output.result.confidence * 100.0);
+
+            if let Ok(result_json) = serde_json::from_str::<serde_json::Value>(&output.result.content) {
+                println!("综合评分: {:.1}/100", result_json["overall_score"].as_f64().unwrap_or(0.0));
+                println!("投资建议: {}\n", result_json["recommendation"].as_str().unwrap_or("N/A"));
+
+                if let Some(component_scores) = result_json["component_scores"].as_object() {
+                    println!("各维度评分:");
+                    for (key, value) in component_scores {
+                        println!("  - {}: {:.1}", key, value.as_f64().unwrap_or(0.0));
+                    }
+                }
+
+                if let Some(investment_plan) = result_json["investment_plan"].as_object() {
+                    println!("\n投资计划:");
+                    for (key, value) in investment_plan {
+                        if let Some(str_val) = value.as_str() {
+                            println!("  - {}: {}", key, str_val);
+                        } else if let Some(num_val) = value.as_f64() {
+                            println!("  - {}: ${:.2}", key, num_val);
+                        }
+                    }
+                }
+
+                println!("\n详细分析:\n{}", serde_json::to_string_pretty(&result_json).unwrap_or_default());
+            }
+
+            if !output.result.metadata.is_empty() {
+                println!("\n元数据:");
+                for (key, value) in &output.result.metadata {
+                    println!("  - {}: {}", key, value);
+                }
+            }
+        }
+        Err(e) => {
+            println!("❌ 层次化分析失败: {}", e);
+        }
+    }
+
+    println!("{}\n", "─".repeat(60));
+
+    // 示例6: 组合压力测试
+    println!("📌 示例6: 投资组合压力测试");
     println!("{}\n", "─".repeat(60));
 
     let query5 = "使用stress_test工具对$100,000投资组合进行压力测试，包括2008金融危机和COVID-19场景";

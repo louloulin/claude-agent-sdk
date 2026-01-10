@@ -2892,9 +2892,41 @@ cargo build --release
 - ✅ WebSocket 实时数据流
 - ✅ 本地 LLM 增强
 
-### 新增功能（本次实现）
+### 新增功能（本次实现 - Phase 2.1）
 
-#### 1. 投资智能引擎 ✅
+#### 1. Subagents 配置系统 ✅ NEW
+- **目录**: `.claude/agents/` (5个配置文件)
+- **文件**:
+  - `research-agent.md` - 市场研究专家配置
+  - `analyst-agent.md` - 投资分析师配置
+  - `risk-agent.md` - 风险管理专家配置
+  - `sentiment-agent.md` - 情感分析专家配置
+  - `advisor-agent.md` - 投资顾问配置
+- **功能**:
+  - 完整的 YAML frontmatter 元数据
+  - 详细的任务职责和能力定义
+  - 工作流程和最佳实践
+  - 输出格式规范
+
+#### 2. 层次化编排系统 (Hierarchical Orchestration) ✅ NEW
+- **文件**: `app/hierarchical_orchestration.rs` (600+ 行)
+- **功能**:
+  - `AdvisorCoordinator` - 主协调器
+  - `HierarchicalOrchestrator` - 层次化编排器
+  - 4个专业 Subagents 实现
+  - 并行+顺序混合执行模式
+  - 综合评分和投资建议生成
+  - 完整的投资计划生成
+- **架构**:
+  ```
+  Advisor Coordinator
+  ├─ Research Agent (技术分析)
+  ├─ Analyst Agent (基本面分析)
+  ├─ Risk Agent (风险评估)
+  └─ Sentiment Agent (情感分析)
+  ```
+
+#### 3. 投资智能引擎 ✅
 - **文件**: `app/investment_engine.rs` (800+ 行)
 - **功能**:
   - 使用 `query_stream()` 实现实时流式分析
@@ -2939,9 +2971,10 @@ cargo build --release
 
 | 类别 | 数量 | 详情 |
 |------|------|------|
-| Rust 文件 | 15+ | 7,500+ 行代码 |
+| Rust 文件 | 20+ | 8,500+ 行代码 |
 | Agent Skills | 10 | 完整 SKILL.md |
-| Subagents | 8 | 专业配置 |
+| Subagents 配置 | 5 | `.claude/agents/` |
+| Subagents 实现 | 4 | Rust Agent trait 实现 |
 | MCP Tools | 7 | 投资分析工具 |
 | 测试用例 | 70+ | 100% 通过 |
 | 文档 | 12,000+ | 报告和指南 |
@@ -2952,6 +2985,56 @@ cargo build --release
 - 情感分析: <10ms
 - 流式分析: O(1) 内存
 - 并发处理: 全面支持
+- **层次化编排**: 混合并行+顺序模式
+
+### 层次化编排特性 (Hierarchical Orchestration)
+
+#### 核心组件
+1. **AdvisorCoordinator** - 主协调器
+   - 协调所有 Subagents
+   - 综合评分计算
+   - 投资建议生成
+   - 投资计划制定
+
+2. **HierarchicalOrchestrator** - 编排器
+   - 实现 `Orchestrator` trait
+   - 支持并行+顺序混合执行
+   - 上下文传递和聚合
+   - 元数据追踪
+
+3. **专业 Subagents**
+   - `MarketResearchAgent` - 技术分析
+   - `InvestmentAnalystAgent` - 基本面分析
+   - `RiskManagementAgent` - 风险评估
+   - `SentimentAnalysisAgent` - 情感分析
+
+#### 执行流程
+```
+1. 并行执行 (Phase 1)
+   ├─ Research Agent
+   └─ Sentiment Agent
+
+2. 顺序执行 (Phase 2)
+   ├─ Analyst Agent (使用 Phase 1 上下文)
+   └─ Risk Agent (使用 Phase 1 上下文)
+
+3. 综合分析 (Phase 3)
+   └─ Advisor Coordinator (聚合所有结果)
+```
+
+#### 评分系统
+- **技术面**: 25% 权重
+- **基本面**: 35% 权重
+- **情感面**: 15% 权重
+- **风险面**: 25% 权重 (反转)
+- **综合评分**: 0-100 分
+
+#### 投资建议映射
+- 80+ 分: 强烈买入
+- 65-80 分: 买入
+- 50-65 分: 持有
+- 35-50 分: 减持
+- <35 分: 卖出
 
 ### 下一步
 
@@ -2968,5 +3051,6 @@ cargo build --release
 ---
 
 **最后更新**: 2026-01-10
-**版本**: 3.1
-**状态**: ✅ 核心功能完成，可商业化部署
+**版本**: 3.2
+**状态**: ✅ 核心功能完成，层次化编排已实现
+**新增**: Subagents 配置系统 + 层次化编排架构
