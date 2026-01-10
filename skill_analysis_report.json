@@ -1,0 +1,1063 @@
+[
+  {
+    "path": "performance-optimizer",
+    "metadata": {
+      "name": "\"Performance Optimizer\"",
+      "description": "\"Application and infrastructure performance analysis and optimization expert\"",
+      "version": "\"2.0.0\"",
+      "author": "\"Performance Team <performance@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 31,
+      "languages": {
+        "rust": 19,
+        "bash": 4,
+        "sql": 3
+      },
+      "total_code_lines": 391,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": false,
+      "avg_code_lines_per_block": 12.612903225806452
+    },
+    "quality_analysis": {
+      "sections": 67,
+      "list_items": 63,
+      "tables": 4,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": false,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 4.96,
+      "non_empty_lines": 496
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "rust",
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "postgresql",
+        "redis"
+      ],
+      "cloud": [
+        "docker"
+      ],
+      "tools": [
+        "git",
+        "prometheus",
+        "grafana",
+        "elk"
+      ],
+      "concepts": [
+        "tdd",
+        "docker"
+      ]
+    },
+    "utility_score": 77.48
+  },
+  {
+    "path": "cloud-infrastructure",
+    "metadata": {
+      "name": "\"Cloud Infrastructure\"",
+      "description": "\"Expert in cloud infrastructure design, deployment, and management across AWS, Azure, and GCP\"",
+      "version": "\"1.5.0\"",
+      "author": "\"DevOps Team <devops@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 12,
+      "languages": {
+        "json": 2,
+        "python": 8,
+        "yaml": 1,
+        "hcl": 1
+      },
+      "total_code_lines": 48,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 4.0
+    },
+    "quality_analysis": {
+      "sections": 38,
+      "list_items": 17,
+      "tables": 1,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 4.19,
+      "non_empty_lines": 419
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "dynamodb"
+      ],
+      "cloud": [
+        "aws",
+        "azure",
+        "terraform",
+        "kubernetes",
+        "docker",
+        "ansible"
+      ],
+      "tools": [
+        "prometheus",
+        "grafana"
+      ],
+      "concepts": [
+        "serverless",
+        "kubernetes",
+        "docker"
+      ]
+    },
+    "utility_score": 77.095
+  },
+  {
+    "path": "docker-helper",
+    "metadata": {
+      "name": "\"Docker Helper\"",
+      "description": "\"Docker and container orchestration expert for development and deployment\"",
+      "version": "\"2.3.0\"",
+      "author": "\"Infrastructure Team <infra@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 22,
+      "languages": {
+        "dockerfile": 10,
+        "yaml": 5,
+        "bash": 6
+      },
+      "total_code_lines": 224,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 10.181818181818182
+    },
+    "quality_analysis": {
+      "sections": 73,
+      "list_items": 40,
+      "tables": 1,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 3.03,
+      "non_empty_lines": 303
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "rust",
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "postgresql",
+        "redis"
+      ],
+      "cloud": [
+        "kubernetes",
+        "docker"
+      ],
+      "tools": [
+        "git"
+      ],
+      "concepts": [
+        "devops",
+        "kubernetes",
+        "docker"
+      ]
+    },
+    "utility_score": 91.515
+  },
+  {
+    "path": "technical-writer",
+    "metadata": {
+      "name": "\"Technical Writer\"",
+      "description": "\"Technical documentation specialist for APIs, SDKs, and software projects\"",
+      "version": "\"1.2.0\"",
+      "author": "\"Documentation Team <docs@example.com>\"",
+      "tags": "",
+      "dependencies": "[]"
+    },
+    "code_analysis": {
+      "code_blocks": 26,
+      "languages": {
+        "json": 3,
+        "bash": 3,
+        "javascript": 1,
+        "python": 1,
+        "rust": 3,
+        "markdown": 6,
+        "toml": 1,
+        "mermaid": 2
+      },
+      "total_code_lines": 268,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 10.307692307692308
+    },
+    "quality_analysis": {
+      "sections": 87,
+      "list_items": 103,
+      "tables": 8,
+      "has_introduction": true,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 5.31,
+      "non_empty_lines": 531
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "javascript",
+        "rust",
+        "go",
+        "java",
+        "ruby"
+      ],
+      "frameworks": [
+        "react",
+        "gin"
+      ],
+      "databases": [
+        "postgresql",
+        "redis"
+      ],
+      "tools": [
+        "git"
+      ]
+    },
+    "utility_score": 93.655
+  },
+  {
+    "path": "data-engineering",
+    "metadata": {
+      "name": "\"Data Engineering\"",
+      "description": "\"Expert in data pipeline design, ETL/ELT processes, data warehousing, and big data technologies\"",
+      "version": "\"1.4.0\"",
+      "author": "\"Data Team <data@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 10,
+      "languages": {
+        "yaml": 1,
+        "sql": 5,
+        "python": 2
+      },
+      "total_code_lines": 34,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 3.4
+    },
+    "quality_analysis": {
+      "sections": 29,
+      "list_items": 32,
+      "tables": 1,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 5.17,
+      "non_empty_lines": 517
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "postgresql"
+      ],
+      "cloud": [
+        "aws"
+      ],
+      "concepts": [
+        "serverless"
+      ]
+    },
+    "utility_score": 77.58500000000001
+  },
+  {
+    "path": "mobile-developer",
+    "metadata": {
+      "name": "\"Mobile Developer\"",
+      "description": "\"移动开发专家，精通 iOS、Android 和跨平台移动应用开发\"",
+      "version": "\"1.4.0\"",
+      "author": "\"Mobile Team <mobile@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 9,
+      "languages": {
+        "swift": 3,
+        "kotlin": 2,
+        "javascript": 1
+      },
+      "total_code_lines": 1346,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 149.55555555555554
+    },
+    "quality_analysis": {
+      "sections": 20,
+      "list_items": 45,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": true,
+      "content_depth_score": 10,
+      "non_empty_lines": 1230
+    },
+    "tech_analysis": {
+      "languages": [
+        "javascript",
+        "typescript",
+        "go",
+        "java",
+        "swift",
+        "kotlin"
+      ],
+      "frameworks": [
+        "react",
+        "gin"
+      ]
+    },
+    "utility_score": 78.0
+  },
+  {
+    "path": "frontend-developer",
+    "metadata": {
+      "name": "\"Frontend Developer\"",
+      "description": "\"Modern frontend development expert specializing in React, Vue, Angular, and responsive web applications\"",
+      "version": "\"1.3.0\"",
+      "author": "\"Frontend Team <frontend@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 16,
+      "languages": {
+        "javascript": 10,
+        "typescript": 2,
+        "html": 1,
+        "css": 1
+      },
+      "total_code_lines": 828,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 51.75
+    },
+    "quality_analysis": {
+      "sections": 26,
+      "list_items": 56,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 8.15,
+      "non_empty_lines": 815
+    },
+    "tech_analysis": {
+      "languages": [
+        "javascript",
+        "typescript",
+        "go",
+        "java"
+      ],
+      "frameworks": [
+        "react",
+        "vue",
+        "angular",
+        "gin"
+      ]
+    },
+    "utility_score": 77.075
+  },
+  {
+    "path": "logging-monitoring",
+    "metadata": {
+      "name": "\"Logging & Monitoring\"",
+      "description": "\"Comprehensive logging, monitoring, and observability expert for distributed systems\"",
+      "version": "\"1.6.0\"",
+      "author": "\"SRE Team <sre@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 23,
+      "languages": {
+        "rust": 4,
+        "yaml": 3,
+        "python": 1,
+        "json": 1,
+        "bash": 1,
+        "sql": 1,
+        "markdown": 1
+      },
+      "total_code_lines": 403,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 17.52173913043478
+    },
+    "quality_analysis": {
+      "sections": 56,
+      "list_items": 106,
+      "tables": 3,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 4.64,
+      "non_empty_lines": 464
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "rust",
+        "go",
+        "java"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "elasticsearch"
+      ],
+      "cloud": [
+        "aws",
+        "kubernetes"
+      ],
+      "tools": [
+        "prometheus",
+        "grafana",
+        "elk"
+      ],
+      "concepts": [
+        "kubernetes"
+      ]
+    },
+    "utility_score": 87.32
+  },
+  {
+    "path": "api-tester",
+    "metadata": {
+      "name": "\"API Tester\"",
+      "description": "\"Automated API testing assistant for REST and GraphQL endpoints\"",
+      "version": "\"1.5.0\"",
+      "author": "\"QA Team <qa@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 1,
+      "languages": {},
+      "total_code_lines": 21,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 21.0
+    },
+    "quality_analysis": {
+      "sections": 19,
+      "list_items": 56,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": false,
+      "has_chinese": false,
+      "content_depth_score": 0.86,
+      "non_empty_lines": 86
+    },
+    "tech_analysis": {
+      "languages": [
+        "go"
+      ]
+    },
+    "utility_score": 51.43
+  },
+  {
+    "path": "skill-validator",
+    "metadata": {
+      "name": "\"SKILL.md Validator\"",
+      "description": "\"Validates SKILL.md files for format, completeness, and best practices\"",
+      "version": "\"1.0.0\"",
+      "author": "\"Documentation Team <docs@example.com>\"",
+      "tags": "",
+      "dependencies": "[]"
+    },
+    "code_analysis": {
+      "code_blocks": 10,
+      "languages": {
+        "bash": 6,
+        "yaml": 1,
+        "markdown": 1,
+        "makefile": 1
+      },
+      "total_code_lines": 73,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 7.3
+    },
+    "quality_analysis": {
+      "sections": 22,
+      "list_items": 25,
+      "tables": 1,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 1.49,
+      "non_empty_lines": 149
+    },
+    "tech_analysis": {
+      "languages": [
+        "go"
+      ],
+      "frameworks": [
+        "echo"
+      ],
+      "tools": [
+        "git"
+      ]
+    },
+    "utility_score": 72.745
+  },
+  {
+    "path": "deployment-automation",
+    "metadata": {
+      "name": "\"Deployment Automation\"",
+      "description": "\"Automated deployment pipeline and CI/CD workflow expert\"",
+      "version": "\"2.0.0\"",
+      "author": "\"DevOps Team <devops@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 9,
+      "languages": {
+        "yaml": 9
+      },
+      "total_code_lines": 142,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 15.777777777777779
+    },
+    "quality_analysis": {
+      "sections": 25,
+      "list_items": 119,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": false,
+      "has_chinese": false,
+      "content_depth_score": 2.69,
+      "non_empty_lines": 269
+    },
+    "tech_analysis": {
+      "frameworks": [
+        "gin"
+      ],
+      "cloud": [
+        "docker"
+      ],
+      "tools": [
+        "git",
+        "github actions",
+        "gitlab ci"
+      ],
+      "concepts": [
+        "devops",
+        "cicd",
+        "docker"
+      ]
+    },
+    "utility_score": 77.345
+  },
+  {
+    "path": "machine-learning-engineer",
+    "metadata": {
+      "name": "\"Machine Learning Engineer\"",
+      "description": "\"Machine learning model development, training, deployment and MLOps expert\"",
+      "version": "\"1.3.0\"",
+      "author": "\"ML Team <ml@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 8,
+      "languages": {
+        "python": 6
+      },
+      "total_code_lines": 22,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 2.75
+    },
+    "quality_analysis": {
+      "sections": 34,
+      "list_items": 29,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 1.71,
+      "non_empty_lines": 171
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "go"
+      ],
+      "frameworks": [
+        "tensorflow",
+        "pytorch"
+      ],
+      "cloud": [
+        "kubernetes"
+      ],
+      "tools": [
+        "prometheus"
+      ],
+      "concepts": [
+        "kubernetes"
+      ]
+    },
+    "utility_score": 75.855
+  },
+  {
+    "path": "git-workflow",
+    "metadata": {
+      "name": "\"Git Workflow Assistant\"",
+      "description": "\"Expert Git workflow guidance and repository management\"",
+      "version": "\"1.8.0\"",
+      "author": "\"Platform Team <platform@example.com>\"",
+      "tags": "",
+      "dependencies": "[]"
+    },
+    "code_analysis": {
+      "code_blocks": 12,
+      "languages": {
+        "markdown": 1,
+        "bash": 7
+      },
+      "total_code_lines": 101,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 8.416666666666666
+    },
+    "quality_analysis": {
+      "sections": 45,
+      "list_items": 67,
+      "tables": 1,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": false,
+      "has_chinese": false,
+      "content_depth_score": 2.17,
+      "non_empty_lines": 217
+    },
+    "tech_analysis": {
+      "languages": [
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "tools": [
+        "git"
+      ]
+    },
+    "utility_score": 78.08500000000001
+  },
+  {
+    "path": "database-migrator",
+    "metadata": {
+      "name": "\"Database Migrator\"",
+      "description": "\"Database schema migration and data transformation expert\"",
+      "version": "\"3.2.1\"",
+      "author": "\"Database Team <db@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 3,
+      "languages": {
+        "sql": 3
+      },
+      "total_code_lines": 21,
+      "has_comments": false,
+      "has_error_handling": false,
+      "has_best_practices": false,
+      "avg_code_lines_per_block": 7.0
+    },
+    "quality_analysis": {
+      "sections": 17,
+      "list_items": 30,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": false,
+      "has_troubleshooting": false,
+      "has_tools": false,
+      "has_chinese": false,
+      "content_depth_score": 1.08,
+      "non_empty_lines": 108
+    },
+    "tech_analysis": {
+      "languages": [
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "postgresql",
+        "mysql"
+      ]
+    },
+    "utility_score": 38.54
+  },
+  {
+    "path": "devops-engineer",
+    "metadata": {
+      "name": "\"DevOps Engineer\"",
+      "description": "\"DevOps 工程师专家，精通持续集成/持续部署、基础设施自动化和系统可靠性工程\"",
+      "version": "\"1.6.0\"",
+      "author": "\"DevOps Team <devops@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 5,
+      "languages": {
+        "yaml": 2
+      },
+      "total_code_lines": 16,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 3.2
+    },
+    "quality_analysis": {
+      "sections": 18,
+      "list_items": 109,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": false,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": true,
+      "content_depth_score": 4.05,
+      "non_empty_lines": 405
+    },
+    "tech_analysis": {
+      "languages": [
+        "go"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "cloud": [
+        "aws",
+        "terraform",
+        "kubernetes",
+        "ansible"
+      ],
+      "tools": [
+        "git",
+        "jenkins",
+        "github actions",
+        "gitlab ci",
+        "prometheus",
+        "grafana",
+        "elk",
+        "jenkins"
+      ],
+      "concepts": [
+        "kubernetes"
+      ]
+    },
+    "utility_score": 67.025
+  },
+  {
+    "path": "code-reviewer",
+    "metadata": {
+      "name": "\"Code Reviewer\"",
+      "description": "\"Performs comprehensive code reviews with focus on best practices, security, and performance\"",
+      "version": "\"2.1.0\"",
+      "author": "\"DevOps Team <devops@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 1,
+      "languages": {},
+      "total_code_lines": 16,
+      "has_comments": true,
+      "has_error_handling": false,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 16.0
+    },
+    "quality_analysis": {
+      "sections": 11,
+      "list_items": 36,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": false,
+      "has_chinese": false,
+      "content_depth_score": 0.6,
+      "non_empty_lines": 60
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "javascript",
+        "typescript",
+        "rust",
+        "go",
+        "java"
+      ],
+      "concepts": [
+        "devops"
+      ]
+    },
+    "utility_score": 50.3
+  },
+  {
+    "path": "security-auditor",
+    "metadata": {
+      "name": "\"Security Auditor\"",
+      "description": "\"Security vulnerability detection and remediation expert for applications and infrastructure\"",
+      "version": "\"1.4.0\"",
+      "author": "\"Security Team <security@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 14,
+      "languages": {
+        "rust": 3,
+        "dockerfile": 1,
+        "yaml": 2,
+        "bash": 3,
+        "javascript": 1
+      },
+      "total_code_lines": 168,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 12.0
+    },
+    "quality_analysis": {
+      "sections": 66,
+      "list_items": 154,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": true,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 3.69,
+      "non_empty_lines": 369
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "javascript",
+        "rust",
+        "go",
+        "java"
+      ],
+      "frameworks": [
+        "gin"
+      ],
+      "databases": [
+        "postgresql"
+      ],
+      "cloud": [
+        "aws",
+        "kubernetes",
+        "docker"
+      ],
+      "tools": [
+        "git"
+      ],
+      "concepts": [
+        "kubernetes",
+        "docker"
+      ]
+    },
+    "utility_score": 91.845
+  },
+  {
+    "path": "backend-developer",
+    "metadata": {
+      "name": "\"Backend Developer\"",
+      "description": "\"后端开发专家，精通API设计、微服务架构、数据库设计和后端系统性能优化\"",
+      "version": "\"1.5.0\"",
+      "author": "\"Backend Team <backend@example.com>\"",
+      "tags": "",
+      "dependencies": ""
+    },
+    "code_analysis": {
+      "code_blocks": 17,
+      "languages": {
+        "python": 12,
+        "sql": 1
+      },
+      "total_code_lines": 1107,
+      "has_comments": true,
+      "has_error_handling": true,
+      "has_best_practices": true,
+      "avg_code_lines_per_block": 65.11764705882354
+    },
+    "quality_analysis": {
+      "sections": 57,
+      "list_items": 86,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": true,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": true,
+      "content_depth_score": 10,
+      "non_empty_lines": 1031
+    },
+    "tech_analysis": {
+      "languages": [
+        "python",
+        "go"
+      ],
+      "frameworks": [
+        "django",
+        "flask",
+        "fastapi",
+        "gin"
+      ],
+      "databases": [
+        "postgresql",
+        "mysql",
+        "mongodb",
+        "redis",
+        "cassandra",
+        "neo4j"
+      ],
+      "tools": [
+        "git",
+        "prometheus",
+        "grafana"
+      ],
+      "concepts": [
+        "microservices"
+      ]
+    },
+    "utility_score": 90.0
+  },
+  {
+    "path": "example-calculator",
+    "metadata": {
+      "name": "\"Example Calculator\"",
+      "description": "\"A simple calculator skill demonstrating SKILL.md format\"",
+      "version": "\"1.0.0\"",
+      "author": "\"Claude Agent SDK Team\"",
+      "tags": "",
+      "dependencies": "[]"
+    },
+    "code_analysis": {
+      "code_blocks": 0,
+      "languages": {},
+      "total_code_lines": 0,
+      "has_comments": false,
+      "has_error_handling": false,
+      "has_best_practices": false,
+      "avg_code_lines_per_block": 0
+    },
+    "quality_analysis": {
+      "sections": 4,
+      "list_items": 11,
+      "tables": 0,
+      "has_introduction": false,
+      "has_examples": true,
+      "has_best_practices": false,
+      "has_troubleshooting": false,
+      "has_tools": true,
+      "has_chinese": false,
+      "content_depth_score": 0.26,
+      "non_empty_lines": 26
+    },
+    "tech_analysis": {},
+    "utility_score": 15.13
+  }
+]
