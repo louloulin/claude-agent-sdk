@@ -128,6 +128,26 @@ pub struct ClaudeAgentOptions {
     /// using `ClaudeClient.rewind_files()`.
     #[builder(default = false)]
     pub enable_file_checkpointing: bool,
+    /// Enable automatic discovery and loading of SKILL.md files
+    ///
+    /// When enabled, the SDK will automatically scan and load skills from
+    /// `.claude/skills/` directories (project, user, and local).
+    ///
+    /// Default: `false` (opt-in for backward compatibility)
+    #[builder(default = false)]
+    pub auto_discover_skills: bool,
+    /// Custom project skills directory path
+    ///
+    /// If not specified, defaults to `.claude/skills/` relative to `cwd`.
+    /// Only used when `auto_discover_skills` is `true`.
+    #[builder(default, setter(into, strip_option))]
+    pub project_skills_dir: Option<PathBuf>,
+    /// Custom user skills directory path
+    ///
+    /// If not specified, defaults to `~/.config/claude/skills/`.
+    /// Only used when `auto_discover_skills` is `true`.
+    #[builder(default, setter(into, strip_option))]
+    pub user_skills_dir: Option<PathBuf>,
 }
 
 impl Default for ClaudeAgentOptions {

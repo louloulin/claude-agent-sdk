@@ -5,6 +5,7 @@ pub mod error;
 pub mod hot_reload;
 pub mod performance;
 pub mod sandbox;
+pub mod skill_md;
 pub mod tags;
 pub mod types;
 pub mod version;
@@ -21,6 +22,7 @@ pub use error::{SkillError, SkillOutput, SkillResult};
 pub use hot_reload::{HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher};
 pub use performance::{BatchOperations, IndexedSkillCollection, LruCache, PerformanceStats};
 pub use sandbox::{SandboxConfig, SandboxExecutor, SandboxResult, SandboxUtils};
+pub use skill_md::{SkillMdError, SkillMdFile, SkillMdMetadata, SkillsDirScanner};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 pub use version::{CompatibilityResult, VersionManager};
@@ -140,5 +142,109 @@ impl SkillRegistry {
         }
 
         Ok(packages)
+    }
+
+    /// Discover and load SKILL.md files from a skills directory
+    ///
+    /// This method searches for subdirectories containing `SKILL.md` files,
+    /// parses them with full YAML frontmatter support, and returns the loaded
+    /// packages.
+    ///
+    /// # Arguments
+    /// * `dir` - Path to the skills directory (e.g., `.claude/skills/`)
+    ///
+    /// # Returns
+    /// A vector of successfully loaded SkillPackages
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use claude_agent_sdk_rs::skills::SkillRegistry;
+    ///
+    /// let packages = SkillRegistry::discover_skill_md_from_dir(".claude/skills")?;
+    /// for package in packages {
+    ///     println!("Found skill: {} from SKILL.md", package.metadata.name);
+    /// }
+    /// # Ok::<(), claude_agent_sdk_rs::skills::SkillError>(())
+    /// ```
+    pub fn discover_skill_md_from_dir<P: AsRef<Path>>(dir: P) -> Result<Vec<SkillPackage>, SkillError> {
+        let dir = dir.as_ref();
+
+        if !dir.exists() {
+            // Return empty vec instead of error for missing directories
+            tracing::debug!("Skills directory does not exist: {:?}", dir);
+            return Ok(Vec::new());
+        }
+
+        if !dir.is_dir() {
+            return Err(SkillError::Io(format!(
+                "Path is not a directory: {:?}",
+                dir
+            )));
+        }
+
+        // Use SkillsDirScanner to discover all SKILL.md files
+        let scanner = crate::skills::SkillsDirScanner::new(dir.to_path_buf());
+        let skill_md_files = scanner.scan()
+            .map_err(|e| SkillError::Io(format!("Failed to scan skills directory: {}", e)))?;
+
+        // Convert all SkillMdFile to SkillPackage
+        let mut packages = Vec::new();
+        for skill_md in skill_md_files {
+            let package = skill_md.to_skill_package();
+            tracing::info!(
+                "Loaded SKILL.md: {} from {:?}",
+                package.metadata.name,
+                skill_md.skill_dir
+            );
+            packages.push(package);
+        }
+
+        Ok(packages)
+    }
+
+    /// Discover and load skills from multiple directories with priority
+    ///
+    /// Searches multiple directories in order, merging results. Later directories
+    /// override earlier ones if skills have the same ID.
+    ///
+    /// # Arguments
+    /// * `dirs` - Vector of directory paths to search (in priority order)
+    ///
+    /// # Returns
+    /// A vector of successfully loaded SkillPackages
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use claude_agent_sdk_rs::skills::SkillRegistry;
+    ///
+    /// let packages = SkillRegistry::discover_from_multiple_dirs(vec![
+    ///     ".claude/skills",
+    ///     "~/.config/claude/skills",
+    /// ])?;
+    /// # Ok::<(), claude_agent_sdk_rs::skills::SkillError>(())
+    /// ```
+    pub fn discover_from_multiple_dirs<P: AsRef<Path>>(dirs: Vec<P>) -> Result<Vec<SkillPackage>, SkillError> {
+        let mut all_packages = Vec::new();
+        let mut seen_ids = std::collections::HashSet::new();
+
+        for dir in dirs {
+            let dir = dir.as_ref();
+
+            // Try SKILL.md discovery first (modern format)
+            if let Ok(mut packages) = Self::discover_skill_md_from_dir(dir) {
+                // Filter out duplicates (keep first occurrence)
+                packages.retain(|p| seen_ids.insert(p.metadata.id.clone()));
+                all_packages.extend(packages);
+            }
+
+            // Fall back to JSON discovery (legacy format)
+            if let Ok(mut packages) = Self::discover_from_dir(dir) {
+                // Filter out duplicates (keep first occurrence)
+                packages.retain(|p| seen_ids.insert(p.metadata.id.clone()));
+                all_packages.extend(packages);
+            }
+        }
+
+        Ok(all_packages)
     }
 }
