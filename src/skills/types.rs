@@ -235,7 +235,7 @@ impl SkillPackage {
     #[cfg(feature = "yaml")]
     pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
         let yaml =
-            serde_norway::to_string(self).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+            serde_yaml::to_string(self).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(yaml.as_bytes())?;
@@ -246,7 +246,7 @@ impl SkillPackage {
     #[cfg(feature = "yaml")]
     pub fn load_from_yaml<P: AsRef<std::path::Path>>(path: P) -> io::Result<Self> {
         let content = fs::read_to_string(path)?;
-        let package: SkillPackage = serde_norway::from_str(&content)
+        let package: SkillPackage = serde_yaml::from_str(&content)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         Ok(package)
     }
@@ -362,13 +362,13 @@ mod tests {
         };
 
         // Test serialization
-        let yaml = serde_norway::to_string(&package).unwrap();
+        let yaml = serde_yaml::to_string(&package).unwrap();
         assert!(yaml.contains("test-skill"));
         assert!(yaml.contains("Test Skill"));
         assert!(yaml.contains("1.0.0"));
 
         // Test deserialization
-        let deserialized: SkillPackage = serde_norway::from_str(&yaml).unwrap();
+        let deserialized: SkillPackage = serde_yaml::from_str(&yaml).unwrap();
         assert_eq!(deserialized.metadata.id, package.metadata.id);
         assert_eq!(deserialized.metadata.name, package.metadata.name);
         assert_eq!(deserialized.metadata.version, package.metadata.version);
@@ -462,8 +462,8 @@ mod tests {
             resources: SkillResources::default(),
         };
 
-        let yaml = serde_norway::to_string(&package).unwrap();
-        let deserialized: SkillPackage = serde_norway::from_str(&yaml).unwrap();
+        let yaml = serde_yaml::to_string(&package).unwrap();
+        let deserialized: SkillPackage = serde_yaml::from_str(&yaml).unwrap();
 
         assert_eq!(deserialized.metadata.author, None);
         assert!(deserialized.metadata.dependencies.is_empty());

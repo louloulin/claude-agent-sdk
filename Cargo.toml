@@ -22,12 +22,18 @@ regex = "1.10"
 chrono = { version = "0.4", features = ["serde"] }
 indexmap = "2.2"
 serde_yaml = { version = "0.9", optional = true }
+thiserror = "2.0"
+tracing = "0.1"
+uuid = { version = "1.0", features = ["v4"] }
+semver = "1.0"
+paste = "1.0"
 
 [dev-dependencies]
 tokio-test = "0.4"
+tempfile = "3.4"
 
 [features]
-default = []
+default = ["yaml"]
 yaml = ["serde_yaml"]
 
 [workspace]

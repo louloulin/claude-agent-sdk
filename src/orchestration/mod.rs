@@ -61,11 +61,13 @@ pub mod context;
 pub mod errors;
 pub mod orchestrator;
 pub mod patterns;
+pub mod registry;
 
 // Re-export commonly used types
 pub use agent::{Agent, AgentInput, AgentOutput};
 pub use context::{ExecutionConfig, ExecutionContext, ExecutionTrace};
 pub use errors::{OrchestrationError, Result};
 pub use orchestrator::{Orchestrator, OrchestratorInput, OrchestratorOutput};
+pub use registry::{AgentFilter, AgentMetadata, AgentRegistry, AgentRegistryBuilder, RegistryError};
 
 pub use patterns::{parallel::ParallelOrchestrator, sequential::SequentialOrchestrator};
