@@ -8,6 +8,9 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
+// Use types from the current module's types.rs
+use super::types::SkillPackage;
+
 /// Errors that can occur when parsing SKILL.md files
 #[derive(Debug, Error)]
 pub enum SkillMdError {

@@ -27,6 +27,9 @@ pub mod vscode;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod integration_tests;
+
 use async_trait::async_trait;
 use std::path::Path;
 

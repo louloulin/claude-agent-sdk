@@ -194,7 +194,7 @@ impl ToolRestriction {
                         if allowed_base == base_tool {
                             // Check if parameters match the pattern
                             if let Some(params) = &params {
-                                if Self::pattern_matches(allowed_pattern, params) {
+                                if Self::pattern_matches(&allowed_pattern, params) {
                                     return true;
                                 }
                             }
