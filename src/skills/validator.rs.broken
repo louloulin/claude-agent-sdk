@@ -1,0 +1,10 @@
+        let version = &skill.metadata.version;
+        if !version.is_empty() {
+                // Basic semver check
+                if !version.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                    warnings.push(ValidationWarning {
+                        message: format!("Version '{}' doesn't follow semantic versioning (should start with a number)", version),
+                        category: WarningCategory::BestPractice,
+                    });
+        }
+    }

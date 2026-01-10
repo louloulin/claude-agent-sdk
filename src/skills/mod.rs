@@ -24,6 +24,8 @@ pub mod types;
 pub mod version;
 pub mod vscode;
 
+// Note: validator module is available as an example in examples/.claude/skills/skill-validator/
+
 #[cfg(test)]
 mod tests;
 

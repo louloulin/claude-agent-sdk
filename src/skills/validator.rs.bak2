@@ -1,0 +1,683 @@
+//! Skill validation module
+//!
+//! Provides comprehensive validation for SKILL.md files including:
+//! - Name format validation
+//! - Description quality checks
+//! - File existence verification
+//! - Script permission checks
+//! - Dependency validation
+//!
+//! Based on: https://code.claude.com/docs/en/skills
+
+use crate::skills::skill_md::SkillMdFile;
+use crate::skills::error::SkillError;
+use std::path::{Path, PathBuf};
+use thiserror::Error;
+
+/// Validation result for a skill
+#[derive(Debug, Clone)]
+pub struct ValidationResult {
+    /// Skill name
+    pub skill_name: String,
+    /// Skill path
+    pub skill_path: PathBuf,
+    /// Validation status
+    pub status: ValidationStatus,
+    /// List of validation issues
+    pub issues: Vec<ValidationIssue>,
+    /// List of warnings
+    pub warnings: Vec<ValidationWarning>,
+}
+
+/// Validation status
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ValidationStatus {
+    /// Skill is valid and ready to use
+    Valid,
+    /// Skill has minor issues but can be used
+    Warning,
+    /// Skill has critical issues and should not be used
+    Invalid,
+    /// Skill has fatal errors and cannot be loaded
+    Fatal,
+}
+
+/// Validation issue severity
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IssueSeverity {
+    Error,
+    Warning,
+    Info,
+}
+
+/// Validation issue
+#[derive(Debug, Clone)]
+pub struct ValidationIssue {
+    /// Issue severity
+    pub severity: IssueSeverity,
+    /// Issue category
+    pub category: IssueCategory,
+    /// Issue message
+    pub message: String,
+    /// Suggested fix
+    pub suggestion: Option<String>,
+    /// Location in file (if applicable)
+    pub location: Option<String>,
+}
+
+/// Validation warning (non-critical issues)
+#[derive(Debug, Clone)]
+pub struct ValidationWarning {
+    /// Warning message
+    pub message: String,
+    /// Warning category
+    pub category: WarningCategory,
+}
+
+/// Issue categories
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IssueCategory {
+    Name,
+    Description,
+    Metadata,
+    FileStructure,
+    Dependencies,
+    Scripts,
+    Tools,
+    Hooks,
+    Context,
+    Other,
+}
+
+impl std::fmt::Display for IssueCategory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IssueCategory::Name => write!(f, "Name"),
+            IssueCategory::Description => write!(f, "Description"),
+            IssueCategory::Metadata => write!(f, "Metadata"),
+            IssueCategory::FileStructure => write!(f, "File Structure"),
+            IssueCategory::Dependencies => write!(f, "Dependencies"),
+            IssueCategory::Scripts => write!(f, "Scripts"),
+            IssueCategory::Tools => write!(f, "Tools"),
+            IssueCategory::Hooks => write!(f, "Hooks"),
+            IssueCategory::Context => write!(f, "Context"),
+            IssueCategory::Other => write!(f, "Other"),
+        }
+    }
+}
+
+/// Warning categories
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum WarningCategory {
+    BestPractice,
+    Performance,
+    Security,
+    Documentation,
+    Maintainability,
+}
+
+/// Skill validator
+pub struct SkillValidator {
+    /// Strict mode (fail on warnings)
+    strict: bool,
+    /// Check description quality
+    check_description_quality: bool,
+    /// Validate dependencies
+    validate_dependencies: bool,
+    /// Check script permissions
+    check_script_permissions: bool,
+}
+
+impl Default for SkillValidator {
+    fn default() -> Self {
+        Self {
+            strict: false,
+            check_description_quality: true,
+            validate_dependencies: true,
+            check_script_permissions: true,
+        }
+    }
+}
+
+impl SkillValidator {
+    /// Create a new skill validator with default settings
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Enable strict mode (warnings become errors)
+    pub fn strict(mut self, strict: bool) -> Self {
+        self.strict = strict;
+        self
+    }
+
+    /// Enable or disable description quality checks
+    pub fn check_description_quality(mut self, check: bool) -> Self {
+        self.check_description_quality = check;
+        self
+    }
+
+    /// Enable or disable dependency validation
+    pub fn validate_dependencies(mut self, validate: bool) -> Self {
+        self.validate_dependencies = validate;
+        self
+    }
+
+    /// Enable or disable script permission checks
+    pub fn check_script_permissions(mut self, check: bool) -> Self {
+        self.check_script_permissions = check;
+        self
+    }
+
+    /// Validate a skill at the given path
+    ///
+    /// # Arguments
+    ///
+    /// * `skill_path` - Path to the skill directory or SKILL.md file
+    ///
+    /// # Returns
+    ///
+    /// A ValidationResult with all issues and warnings found
+    pub fn validate<P: AsRef<Path>>(&self, skill_path: P) -> Result<ValidationResult, SkillError> {
+        let path = skill_path.as_ref();
+
+        // Determine if path is a directory or file
+        let skill_md_path = if path.is_dir() {
+            path.join("SKILL.md")
+        } else {
+            path.to_path_buf()
+        };
+
+        // Check if SKILL.md exists
+        if !skill_md_path.exists() {
+            return Ok(ValidationResult {
+                skill_name: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
+                skill_path: path.to_path_buf(),
+                status: ValidationStatus::Fatal,
+                issues: vec![ValidationIssue {
+                    severity: IssueSeverity::Error,
+                    category: IssueCategory::FileStructure,
+                    message: "SKILL.md file not found".to_string(),
+                    suggestion: Some("Create a SKILL.md file in the skill directory".to_string()),
+                    location: None,
+                }],
+                warnings: vec![],
+            });
+        }
+
+        // Parse the skill
+        let skill = match SkillMdFile::parse(&skill_md_path) {
+            Ok(skill) => skill,
+            Err(e) => {
+                return Ok(ValidationResult {
+                    skill_name: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
+                    skill_path: path.to_path_buf(),
+                    status: ValidationStatus::Fatal,
+                    issues: vec![ValidationIssue {
+                        severity: IssueSeverity::Error,
+                        category: IssueCategory::FileStructure,
+                        message: format!("Failed to parse SKILL.md: {}", e),
+                        suggestion: Some("Check YAML syntax and ensure all required fields are present".to_string()),
+                        location: None,
+                    }],
+                    warnings: vec![],
+                });
+            }
+        };
+
+        let mut issues = vec![];
+        let mut warnings = vec![];
+        let skill_name = skill.metadata.name.clone();
+
+        // Validate name format
+        self.validate_name(&skill, &mut issues);
+
+        // Validate description
+        if self.check_description_quality {
+            self.validate_description(&skill, &mut issues, &mut warnings);
+        }
+
+        // Validate metadata
+        self.validate_metadata(&skill, &mut issues, &mut warnings);
+
+        // Validate file structure
+        self.validate_file_structure(&skill, &mut issues);
+
+        // Validate dependencies
+        if self.validate_dependencies {
+            self.check_dependencies(&skill, &mut issues, &mut warnings);
+        }
+
+        // Validate scripts
+        if self.check_script_permissions {
+            self.validate_scripts(&skill, &mut issues, &mut warnings);
+        }
+
+        // Validate tools
+        self.validate_tools(&skill, &mut issues);
+
+        // Validate hooks
+        self.validate_hooks(&skill, &mut warnings);
+
+        // Determine overall status
+        let status = self.determine_status(&issues, &warnings);
+
+        Ok(ValidationResult {
+            skill_name,
+            skill_path: path.to_path_buf(),
+            status,
+            issues,
+            warnings,
+        })
+    }
+
+    /// Validate skill name format
+    fn validate_name(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>) {
+        let name = &skill.metadata.name;
+
+        // Check name length
+        if name.len() > 64 {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::Name,
+                message: format!("Name exceeds maximum length of 64 characters (currently {})", name.len()),
+                suggestion: Some("Shorten the skill name to 64 characters or less".to_string()),
+                location: Some("name".to_string()),
+            });
+        }
+
+        // Check name format (lowercase, alphanumeric, hyphens)
+        let valid_chars = name.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+        if !valid_chars {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::Name,
+                message: "Name contains invalid characters".to_string(),
+                suggestion: Some("Use only lowercase letters, numbers, and hyphens".to_string()),
+                location: Some("name".to_string()),
+            });
+        }
+
+        // Check if name starts or ends with hyphen
+        if name.starts_with('-') || name.ends_with('-') {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::Name,
+                message: "Name starts or ends with a hyphen".to_string(),
+                suggestion: Some("Remove leading or trailing hyphens".to_string()),
+                location: Some("name".to_string()),
+            });
+        }
+
+        // Check for consecutive hyphens
+        if name.contains("--") {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Warning,
+                category: IssueCategory::Name,
+                message: "Name contains consecutive hyphens".to_string(),
+                suggestion: Some("Use single hyphens between words".to_string()),
+                location: Some("name".to_string()),
+            });
+        }
+    }
+
+    /// Validate description quality
+    fn validate_description(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>, warnings: &mut Vec<ValidationWarning>) {
+        let description = &skill.metadata.description;
+
+        // Check description length
+        if description.len() < 10 {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::Description,
+                message: format!("Description is too short ({} characters)", description.len()),
+                suggestion: Some("Provide a more detailed description (at least 10 characters)".to_string()),
+                location: Some("description".to_string()),
+            });
+        }
+
+        if description.len() > 1024 {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::Description,
+                message: format!("Description exceeds maximum length of 1024 characters (currently {})", description.len()),
+                suggestion: Some("Shorten the description to 1024 characters or less".to_string()),
+                location: Some("description".to_string()),
+            });
+        }
+
+        // Check for description quality indicators
+        let has_what = description.to_lowercase().contains("what");
+        let has_when = description.to_lowercase().contains("when") || description.to_lowercase().contains("use");
+        let has_why = description.to_lowercase().contains("why") || description.to_lowercase().contains("purpose");
+
+        if !has_what && !has_when && !has_why {
+            warnings.push(ValidationWarning {
+                message: "Description could be more specific. Consider adding what the skill does and when to use it.".to_string(),
+                category: WarningCategory::BestPractice,
+            });
+        }
+
+        // Check for generic descriptions
+        let generic_phrases = ["this skill", "a skill", "the skill"];
+        let lower_desc = description.to_lowercase();
+        if generic_phrases.iter().any(|phrase| lower_desc.starts_with(phrase)) {
+            warnings.push(ValidationWarning {
+                message: "Description starts with a generic phrase. Consider being more specific.".to_string(),
+                category: WarningCategory::Documentation,
+            });
+        }
+    }
+
+    /// Validate metadata fields
+    fn validate_metadata(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>, warnings: &mut Vec<ValidationWarning>) {
+        // Check if version is valid semver
+        if let Some(version) = &skill.metadata.version {
+            if !version.is_empty() {
+                // Basic semver check
+                if !version.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                    warnings.push(ValidationWarning {
+                        message: format!("Version '{}' doesn't follow semantic versioning (should start with a number)", version),
+                        category: WarningCategory::BestPractice,
+                    });
+                }
+            }
+        }
+
+        // Check if author is present
+        if skill.metadata.author.is_none() || skill.metadata.author.as_ref().map_or(true, |a| a.is_empty()) {
+            warnings.push(ValidationWarning {
+                message: "Author field is missing or empty. Consider adding author information.".to_string(),
+                category: WarningCategory::Documentation,
+            });
+        }
+
+        // Check if tags are present
+        if skill.metadata.tags.is_empty() {
+            warnings.push(ValidationWarning {
+                message: "No tags specified. Consider adding tags to help users discover your skill.".to_string(),
+                category: WarningCategory::Documentation,
+            });
+        }
+    }
+
+    /// Validate file structure
+    fn validate_file_structure(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>) {
+        // Check for progressive disclosure files
+        if skill.reference.is_some() && !skill.reference.as_ref().unwrap().exists() {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::FileStructure,
+                message: "Referenced reference.md file does not exist".to_string(),
+                suggestion: Some("Create the reference.md file or remove the reference".to_string()),
+                location: Some("progressive disclosure".to_string()),
+            });
+        }
+
+        if skill.forms.is_some() && !skill.forms.as_ref().unwrap().exists() {
+            issues.push(ValidationIssue {
+                severity: IssueSeverity::Error,
+                category: IssueCategory::FileStructure,
+                message: "Referenced forms.md file does not exist".to_string(),
+                suggestion: Some("Create the forms.md file or remove the reference".to_string()),
+                location: Some("progressive disclosure".to_string()),
+            });
+        }
+
+        // Check if scripts directory exists (if scripts are listed)
+        if !skill.scripts.is_empty() {
+            let scripts_dir = skill.skill_dir.join("scripts");
+            if !scripts_dir.exists() {
+                issues.push(ValidationIssue {
+                    severity: IssueSeverity::Warning,
+                    category: IssueCategory::FileStructure,
+                    message: "Scripts directory does not exist".to_string(),
+                    suggestion: Some("Create a scripts/ directory in the skill folder".to_string()),
+                    location: Some("scripts/".to_string()),
+                });
+            }
+        }
+    }
+
+    /// Validate dependencies
+    fn check_dependencies(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>, warnings: &mut Vec<ValidationWarning>) {
+        let deps = &skill.metadata.dependencies;
+
+        if deps.is_empty() {
+            return;
+        }
+
+        // Check for circular dependencies would require checking all skills
+        // For now, just warn if there are many dependencies
+        if deps.len() > 5 {
+            warnings.push(ValidationWarning {
+                message: format!("Skill has {} dependencies. Consider reducing dependencies for better maintainability.", deps.len()),
+                category: WarningCategory::Maintainability,
+            });
+        }
+
+        // Check dependency name format
+        for dep in deps {
+            if dep.is_empty() {
+                issues.push(ValidationIssue {
+                    severity: IssueSeverity::Error,
+                    category: IssueCategory::Dependencies,
+                    message: "Dependency name is empty".to_string(),
+                    suggestion: Some("Remove empty dependencies or specify valid skill names".to_string()),
+                    location: Some("dependencies".to_string()),
+                });
+            }
+        }
+    }
+
+    /// Validate scripts
+    fn validate_scripts(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>, warnings: &mut Vec<ValidationWarning>) {
+        for script_path in &skill.scripts {
+            if !script_path.exists() {
+                issues.push(ValidationIssue {
+                    severity: IssueSeverity::Error,
+                    category: IssueCategory::Scripts,
+                    message: format!("Script file not found: {}", script_path.display()),
+                    suggestion: Some("Create the missing script file".to_string()),
+                    location: Some(script_path.display().to_string()),
+                });
+                continue;
+            }
+
+            // Check if script is executable
+            use std::os::unix::fs::PermissionsExt;
+            match std::fs::metadata(script_path) {
+                Ok(metadata) => {
+                    let permissions = metadata.permissions();
+                    let mode = permissions.mode();
+                    if mode & 0o111 == 0 {
+                        warnings.push(ValidationWarning {
+                            message: format!("Script is not executable: {}", script_path.display()),
+                            category: WarningCategory::BestPractice,
+                        });
+                    }
+                }
+                Err(_) => {
+                    issues.push(ValidationIssue {
+                        severity: IssueSeverity::Warning,
+                        category: IssueCategory::Scripts,
+                        message: format!("Cannot read script metadata: {}", script_path.display()),
+                        suggestion: Some("Check file permissions".to_string()),
+                        location: Some(script_path.display().to_string()),
+                    });
+                }
+            }
+        }
+    }
+
+    /// Validate allowed tools
+    fn validate_tools(&self, skill: &SkillMdFile, issues: &mut Vec<ValidationIssue>) {
+        use crate::skills::tool_restriction::ToolRestriction;
+
+        if let Some(allowed_tools) = &skill.metadata.allowed_tools {
+            if allowed_tools.is_empty() {
+                issues.push(ValidationIssue {
+                    severity: IssueSeverity::Warning,
+                    category: IssueCategory::Tools,
+                    message: "allowed-tools is specified but empty".to_string(),
+                    suggestion: Some("Remove allowed-tools field or add tools to the list".to_string()),
+                    location: Some("allowed-tools".to_string()),
+                });
+                return;
+            }
+
+            // Validate tool names and patterns
+            for tool in allowed_tools {
+                if tool == "*" {
+                    continue; // Wildcard is valid
+                }
+
+                // Check if it's a pattern (contains parentheses)
+                if tool.contains('(') {
+                    // Validate pattern format: ToolName(param:value)
+                    if !tool.ends_with(')') {
+                        issues.push(ValidationIssue {
+                            severity: IssueSeverity::Error,
+                            category: IssueCategory::Tools,
+                            message: format!("Invalid tool pattern format: '{}'", tool),
+                            suggestion: Some("Use format: ToolName(param:value)".to_string()),
+                            location: Some("allowed-tools".to_string()),
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    /// Validate hooks configuration
+    fn validate_hooks(&self, skill: &SkillMdFile, warnings: &mut Vec<ValidationWarning>) {
+        if let Some(hooks) = &skill.metadata.hooks {
+            let total_hooks = hooks.pre_tool_use.as_ref().map_or(0, |h| h.len())
+                + hooks.post_tool_use.as_ref().map_or(0, |h| h.len())
+                + hooks.stop.as_ref().map_or(0, |h| h.len());
+
+            if total_hooks > 10 {
+                warnings.push(ValidationWarning {
+                    message: format!("Skill has {} hooks defined. Consider reducing for better performance.", total_hooks),
+                    category: WarningCategory::Performance,
+                });
+            }
+
+            // Check for wildcard hooks that could impact performance
+            if let Some(pre) = &hooks.pre_tool_use {
+                for hook in pre {
+                    if hook.matcher == "*" {
+                        warnings.push(ValidationWarning {
+                            message: "PreToolUse hook with '*' matcher will run before every tool call. This may impact performance.".to_string(),
+                            category: WarningCategory::Performance,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    /// Determine overall validation status
+    fn determine_status(&self, issues: &[ValidationIssue], warnings: &[ValidationWarning]) -> ValidationStatus {
+        let error_count = issues.iter().filter(|i| i.severity == IssueSeverity::Error).count();
+        let warning_count = warnings.len();
+
+        if error_count > 0 {
+            ValidationStatus::Invalid
+        } else if self.strict && warning_count > 0 {
+            ValidationStatus::Invalid
+        } else if warning_count > 0 {
+            ValidationStatus::Warning
+        } else {
+            ValidationStatus::Valid
+        }
+    }
+}
+
+impl ValidationResult {
+    /// Print validation result to stdout
+    pub fn print(&self) {
+        println!("📋 Skill: {}", self.skill_name);
+        println!("📁 Path: {}", self.skill_path.display());
+        println!("📊 Status: {}\n", self.format_status());
+
+        if !self.issues.is_empty() {
+            println!("🔴 Issues Found:");
+            for (i, issue) in self.issues.iter().enumerate() {
+                println!("  {}. [{}] {}", i + 1, issue.category, issue.message);
+                if let Some(suggestion) = &issue.suggestion {
+                    println!("     💡 Suggestion: {}", suggestion);
+                }
+                if let Some(location) = &issue.location {
+                    println!("     📍 Location: {}", location);
+                }
+            }
+            println!();
+        }
+
+        if !self.warnings.is_empty() {
+            println!("⚠️  Warnings:");
+            for (i, warning) in self.warnings.iter().enumerate() {
+                println!("  {}. {}", i + 1, warning.message);
+            }
+            println!();
+        }
+
+        if self.issues.is_empty() && self.warnings.is_empty() {
+            println!("✅ No issues found! Skill is ready to use.\n");
+        }
+    }
+
+    /// Format status as emoji
+    fn format_status(&self) -> &'static str {
+        match self.status {
+            ValidationStatus::Valid => "✅ Valid",
+            ValidationStatus::Warning => "⚠️  Warning",
+            ValidationStatus::Invalid => "❌ Invalid",
+            ValidationStatus::Fatal => "💀 Fatal",
+        }
+    }
+
+    /// Check if validation passed
+    pub fn is_valid(&self) -> bool {
+        matches!(self.status, ValidationStatus::Valid | ValidationStatus::Warning)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validator_creation() {
+        let validator = SkillValidator::new()
+            .strict(true)
+            .check_description_quality(true)
+            .validate_dependencies(true)
+            .check_script_permissions(true);
+
+        // Just test that it compiles and can be created
+        assert_eq!(validator.strict, true);
+    }
+
+    #[test]
+    fn test_validate_existing_skill() {
+        let validator = SkillValidator::new();
+        let result = validator.validate("examples/.claude/skills/pdf-processor");
+
+        assert!(result.is_ok());
+        let validation_result = result.unwrap();
+        assert_eq!(validation_result.skill_name, "pdf-processor");
+    }
+
+    #[test]
+    fn test_validate_nonexistent_skill() {
+        let validator = SkillValidator::new();
+        let result = validator.validate("nonexistent-skill");
+
+        assert!(result.is_ok());
+        let validation_result = result.unwrap();
+        assert_eq!(validation_result.status, ValidationStatus::Fatal);
+        assert!(!validation_result.issues.is_empty());
+    }
+}
