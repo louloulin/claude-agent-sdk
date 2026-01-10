@@ -30,3 +30,7 @@ url = "2.5"
 hex = "0.4"
 clap = { version = "4.5", features = ["derive"] }
 uuid = { version = "1.6", features = ["v4", "serde"] }
+tokio-tungstenite = "0.23"
+rand = "0.8"
+plotters = "0.3"
+resvg = "0.42"
