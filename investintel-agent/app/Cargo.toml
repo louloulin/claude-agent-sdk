@@ -1,0 +1,14 @@
+[package]
+name = "investintel"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "investintel"
+path = "main.rs"
+
+[dependencies]
+claude-agent-sdk-rs = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
