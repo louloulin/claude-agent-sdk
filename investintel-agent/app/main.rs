@@ -19,10 +19,15 @@ use claude_agent_sdk_rs::{
 mod tools;
 mod orchestration;
 mod hierarchical_orchestration;
+mod data;
 
 use tools::*;
 use orchestration::run_comprehensive_analysis;
 use hierarchical_orchestration::{create_hierarchical_orchestrator, AdvisorCoordinator};
+use data::yahoo;
+use data::alpha_vantage;
+use data::websocket;
+use data::fusion;
 
 /// 创建完整的MCP工具服务器
 fn create_investment_tools() -> Result<claude_agent_sdk_rs::SdkMcpServer> {
@@ -63,6 +68,80 @@ fn create_investment_tools() -> Result<claude_agent_sdk_rs::SdkMcpServer> {
                 name: "correlation_analysis",
                 description: "Calculate correlation matrix for assets",
                 handler: correlation_analysis
+            },
+            // Yahoo Finance Data Source Tools
+            tool! {
+                name: "yahoo_finance_quote",
+                description: "Get real-time quote from Yahoo Finance (symbol: stock ticker)",
+                handler: yahoo::yahoo_finance_quote
+            },
+            tool! {
+                name: "yahoo_finance_historical",
+                description: "Get historical OHLCV data from Yahoo Finance (symbol, interval, range)",
+                handler: yahoo::yahoo_finance_historical
+            },
+            tool! {
+                name: "yahoo_finance_search",
+                description: "Search for stock symbols on Yahoo Finance (query: company name or ticker)",
+                handler: yahoo::yahoo_finance_search
+            },
+            // Alpha Vantage Data Source Tools
+            tool! {
+                name: "alpha_vantage_quote",
+                description: "Get real-time quote from Alpha Vantage (symbol: stock ticker, requires ALPHA_VANTAGE_API_KEY env var)",
+                handler: alpha_vantage::alpha_vantage_quote
+            },
+            tool! {
+                name: "alpha_vantage_technical",
+                description: "Get technical indicators from Alpha Vantage (symbol, function: RSI/MACD/SMA/etc, interval, time_period)",
+                handler: alpha_vantage::alpha_vantage_technical
+            },
+            tool! {
+                name: "alpha_vantage_news_sentiment",
+                description: "Get news sentiment from Alpha Vantage (tickers: comma-separated symbols, optional time_from/time_to)",
+                handler: alpha_vantage::alpha_vantage_news_sentiment
+            },
+            tool! {
+                name: "alpha_vantage_overview",
+                description: "Get company overview/fundamentals from Alpha Vantage (symbol: stock ticker)",
+                handler: alpha_vantage::alpha_vantage_overview
+            },
+            // WebSocket Real-time Data Tools
+            tool! {
+                name: "websocket_start_polygon",
+                description: "Start WebSocket connection to Polygon.io for real-time market data (api_key: optional, uses POLYGON_API_KEY env var)",
+                handler: websocket::websocket_start_polygon
+            },
+            tool! {
+                name: "websocket_subscribe_ticks",
+                description: "Subscribe to real-time tick data for a symbol via WebSocket (symbol: stock ticker or * for all)",
+                handler: websocket::websocket_subscribe_ticks
+            },
+            tool! {
+                name: "websocket_stats",
+                description: "Get WebSocket connection statistics and subscriber information",
+                handler: websocket::websocket_stats
+            },
+            // Data Fusion Engine Tools
+            tool! {
+                name: "fusion_initialize",
+                description: "Initialize multi-source data fusion engine (alpha_vantage_key: optional)",
+                handler: fusion::fusion_initialize
+            },
+            tool! {
+                name: "fusion_get_quote",
+                description: "Get quote using smart multi-source fusion with caching (symbol: stock ticker)",
+                handler: fusion::fusion_get_quote
+            },
+            tool! {
+                name: "fusion_stats",
+                description: "Get fusion engine statistics (cache, sources, latency)",
+                handler: fusion::fusion_stats
+            },
+            tool! {
+                name: "fusion_clear_cache",
+                description: "Clear fusion engine cache",
+                handler: fusion::fusion_clear_cache
             },
         ],
     )?;

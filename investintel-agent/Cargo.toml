@@ -6,10 +6,21 @@ description = "InvestIntel AI - 智能投资助手基于Claude Agent SDK"
 authors = ["InvestIntel AI Team"]
 license = "MIT"
 
+[lib]
+name = "investintel_agent"
+path = "lib.rs"
+
 [dependencies]
 claude-agent-sdk-rs = { path = "..", features = ["yaml"] }
 tokio = { version = "1.48", features = ["full"] }
 anyhow = "1.0"
 serde_json = "1.0"
 async-trait = "0.1"
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+tokio-tungstenite = { version = "0.23", features = ["rustls-tls-native-roots"] }
+futures-util = "0.3"
+
+[dev-dependencies]
+tokio-test = "0.4"
