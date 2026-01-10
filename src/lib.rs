@@ -241,6 +241,7 @@ pub mod observability;
 pub mod orchestration;
 pub mod query;
 pub mod skills;
+pub mod storage;
 pub mod types;
 pub mod version;
 
@@ -260,6 +261,11 @@ pub use orchestration::{
 };
 pub use skills::{
     Skill, SkillError, SkillInput, SkillOutput, SkillPackage, SkillRegistry, SkillResources,
+};
+pub use storage::{
+    Embedder, EmbeddingConfig, EmbeddingProvider, LocalEmbedder, OpenAIEmbedder,
+    Paper, PaperMetadata, StorageError, StorageResult, VectorMetric, VectorSearchOptions,
+    VectorSearchResult, VectorStore, VectorStoreConfig,
 };
 pub use types::{
     config::*,

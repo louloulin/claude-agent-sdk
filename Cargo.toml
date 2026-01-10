@@ -27,6 +27,8 @@ tracing = "0.1"
 uuid = { version = "1.0", features = ["v4"] }
 semver = "1.0"
 paste = "1.0"
+rusqlite = { version = "0.32", features = ["bundled"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 
 [dev-dependencies]
 tokio-test = "0.4"
