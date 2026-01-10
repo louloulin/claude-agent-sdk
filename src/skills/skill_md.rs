@@ -28,10 +28,16 @@ pub enum SkillMdError {
 }
 
 /// SKILL.md frontmatter metadata
+///
+/// Based on Claude Code Skills specification:
+/// https://code.claude.com/docs/en/skills
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SkillMdMetadata {
+    // === Required Fields ===
     pub name: String,
     pub description: String,
+
+    // === Standard Fields ===
     #[serde(default = "default_version")]
     pub version: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -40,10 +46,103 @@ pub struct SkillMdMetadata {
     pub tags: Vec<String>,
     #[serde(default)]
     pub dependencies: Vec<String>,
+
+    // === Advanced Fields (Claude Code Official) ===
+
+    /// Tool restrictions - limits which tools the skill can use
+    /// Can include tool specifications like "Bash(python:*)"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allowed_tools: Option<Vec<String>>,
+
+    /// Specific model to use for this skill (e.g., "claude-sonnet-4-20250514")
+    /// Defaults to the session's model if not specified
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+
+    /// Context mode - set to "fork" to run in isolated sub-agent context
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<SkillContext>,
+
+    /// Agent type when using context: fork
+    /// Examples: "general-purpose", "Explore", "Plan", "code-reviewer"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent: Option<String>,
+
+    /// Lifecycle hooks for events during skill execution
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hooks: Option<SkillHooks>,
+
+    /// Whether this skill appears in the / menu (default: true)
+    /// Does not affect Skill tool invocation or auto-discovery
+    #[serde(default = "default_user_invocable")]
+    pub user_invocable: bool,
+
+    /// Prevent model invocation via Skill tool
+    /// Does not affect auto-discovery based on description
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disable_model_invocation: Option<bool>,
 }
 
 fn default_version() -> String {
     "1.0.0".to_string()
+}
+
+fn default_user_invocable() -> bool {
+    true
+}
+
+/// Context mode for skill execution
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum SkillContext {
+    /// Run in isolated forked sub-agent context
+    Fork,
+}
+
+/// Lifecycle hooks for skill execution events
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SkillHooks {
+    /// Hooks before tool use
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pre_tool_use: Option<Vec<HookConfig>>,
+
+    /// Hooks after tool use
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub post_tool_use: Option<Vec<HookConfig>>,
+
+    /// Hooks when skill stops
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop: Option<Vec<HookConfig>>,
+}
+
+/// Configuration for a single lifecycle hook
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HookConfig {
+    /// Tool/event matcher (e.g., "Bash", "Read", "*")
+    pub matcher: String,
+
+    /// Command/script to execute
+    pub command: String,
+
+    /// Only run this hook once per session
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub once: Option<bool>,
+
+    /// Hook type
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<HookType>,
+}
+
+/// Type of hook execution
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum HookType {
+    /// Execute a shell command
+    Command,
+    /// Run a script file
+    Script,
+    /// Call a function
+    Function,
 }
 
 /// Parsed SKILL.md file with all associated resources
@@ -517,5 +616,166 @@ name: "Test"
 "#;
         let result2 = SkillMdFile::parse_frontmatter(content2);
         assert!(matches!(result2, Err(SkillMdError::MissingField(_))));
+    }
+
+    #[test]
+    fn test_parse_advanced_metadata_allowed_tools() {
+        let content = r#"---
+name: "Test"
+description: "Test with tool restrictions"
+allowed_tools:
+  - Read
+  - Grep
+  - "Bash(python:*)"
+---
+
+# Content
+"#;
+
+        let (metadata, _) = SkillMdFile::parse_frontmatter(content).unwrap();
+        assert_eq!(metadata.name, "Test");
+        assert!(metadata.allowed_tools.is_some());
+        let tools = metadata.allowed_tools.unwrap();
+        assert_eq!(tools, vec!["Read", "Grep", "Bash(python:*)"]);
+    }
+
+    #[test]
+    fn test_parse_advanced_metadata_model() {
+        let content = r#"---
+name: "Test"
+description: "Test with specific model"
+model: "claude-sonnet-4-20250514"
+---
+
+# Content
+"#;
+
+        let (metadata, _) = SkillMdFile::parse_frontmatter(content).unwrap();
+        assert_eq!(metadata.model, Some("claude-sonnet-4-20250514".to_string()));
+    }
+
+    #[test]
+    fn test_parse_advanced_metadata_context_fork() {
+        let content = r#"---
+name: "Test"
+description: "Test with fork context"
+context: fork
+agent: general-purpose
+---
+
+# Content
+"#;
+
+        let (metadata, _) = SkillMdFile::parse_frontmatter(content).unwrap();
+        assert_eq!(metadata.context, Some(SkillContext::Fork));
+        assert_eq!(metadata.agent, Some("general-purpose".to_string()));
+    }
+
+    #[test]
+    fn test_parse_advanced_metadata_hooks() {
+        let content = r#"---
+name: "Test"
+description: "Test with hooks"
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      command: "./scripts/security-check.sh $TOOL_INPUT"
+      once: true
+      type: command
+---
+
+# Content
+"#;
+
+        let (metadata, _) = SkillMdFile::parse_frontmatter(content).unwrap();
+        assert!(metadata.hooks.is_some());
+        let hooks = metadata.hooks.unwrap();
+        assert!(hooks.pre_tool_use.is_some());
+        let pre_hooks = hooks.pre_tool_use.unwrap();
+        assert_eq!(pre_hooks.len(), 1);
+        assert_eq!(pre_hooks[0].matcher, "Bash");
+        assert_eq!(pre_hooks[0].command, "./scripts/security-check.sh $TOOL_INPUT");
+        assert_eq!(pre_hooks[0].once, Some(true));
+        assert_eq!(pre_hooks[0].r#type, Some(HookType::Command));
+    }
+
+    #[test]
+    fn test_parse_advanced_metadata_user_invocable() {
+        let content1 = r#"---
+name: "Test"
+description: "Test hidden from menu"
+user-invocable: false
+---
+
+# Content
+"#;
+
+        let (metadata1, _) = SkillMdFile::parse_frontmatter(content1).unwrap();
+        assert_eq!(metadata1.user_invocable, false);
+
+        // Default should be true
+        let content2 = r#"---
+name: "Test"
+description: "Test default user invocable"
+---
+
+# Content
+"#;
+
+        let (metadata2, _) = SkillMdFile::parse_frontmatter(content2).unwrap();
+        assert_eq!(metadata2.user_invocable, true);
+    }
+
+    #[test]
+    fn test_parse_complete_advanced_metadata() {
+        let content = r#"---
+name: "Advanced Test"
+description: "Test all advanced fields. Use when working with advanced testing scenarios."
+version: "2.0.0"
+author: "Test Author <test@example.com>"
+tags:
+  - advanced
+  - testing
+dependencies:
+  - base-test
+allowed_tools:
+  - Read
+  - Grep
+  - "Bash(python:*)"
+model: "claude-sonnet-4-20250514"
+context: fork
+agent: general-purpose
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      command: "./scripts/check.sh"
+      once: true
+  PostToolUse:
+    - matcher: "*"
+      command: "./scripts/notify.sh"
+user-invocable: true
+disable-model-invocation: false
+---
+
+# Advanced Test Skill
+
+This is a comprehensive test of all metadata fields.
+"#;
+
+        let (metadata, content) = SkillMdFile::parse_frontmatter(content).unwrap();
+        assert_eq!(metadata.name, "Advanced Test");
+        assert!(metadata.description.contains("advanced testing"));
+        assert_eq!(metadata.version, "2.0.0");
+        assert_eq!(metadata.author, Some("Test Author <test@example.com>".to_string()));
+        assert_eq!(metadata.tags, vec!["advanced", "testing"]);
+        assert_eq!(metadata.dependencies, vec!["base-test"]);
+        assert!(metadata.allowed_tools.is_some());
+        assert_eq!(metadata.model, Some("claude-sonnet-4-20250514".to_string()));
+        assert_eq!(metadata.context, Some(SkillContext::Fork));
+        assert_eq!(metadata.agent, Some("general-purpose".to_string()));
+        assert!(metadata.hooks.is_some());
+        assert_eq!(metadata.user_invocable, true);
+        assert_eq!(metadata.disable_model_invocation, Some(false));
+        assert!(content.contains("comprehensive test"));
     }
 }

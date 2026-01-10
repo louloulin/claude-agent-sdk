@@ -1,12 +1,25 @@
 //! # Agent Skills System for Claude Agent SDK
+//!
+//! This module provides a comprehensive skills system based on Claude Code Skills specification.
+//!
+//! ## Features
+//!
+//! - **SKILL.md Parsing**: Full support for YAML frontmatter and markdown content
+//! - **Progressive Disclosure**: Lazy loading of supporting files to save context
+//! - **Tool Restrictions**: Enforce allowed-tools from skill metadata
+//! - **Advanced Metadata**: Support for all Claude Code skill fields
+//!
+//! Based on: https://code.claude.com/docs/en/skills
 
 pub mod dependency;
 pub mod error;
 pub mod hot_reload;
 pub mod performance;
+pub mod progressive_disclosure;
 pub mod sandbox;
 pub mod skill_md;
 pub mod tags;
+pub mod tool_restriction;
 pub mod types;
 pub mod version;
 pub mod vscode;
@@ -21,9 +34,11 @@ pub use dependency::{Dependency, DependencyResolver, ResolutionResult};
 pub use error::{SkillError, SkillOutput, SkillResult};
 pub use hot_reload::{HotReloadConfig, HotReloadEvent, HotReloadManager, HotReloadWatcher};
 pub use performance::{BatchOperations, IndexedSkillCollection, LruCache, PerformanceStats};
+pub use progressive_disclosure::ProgressiveSkillLoader;
 pub use sandbox::{SandboxConfig, SandboxExecutor, SandboxResult, SandboxUtils};
-pub use skill_md::{SkillMdError, SkillMdFile, SkillMdMetadata, SkillsDirScanner};
+pub use skill_md::{HookConfig, HookType, SkillContext, SkillHooks, SkillMdError, SkillMdFile, SkillMdMetadata, SkillsDirScanner};
 pub use tags::{TagFilter, TagOperator, TagQueryBuilder, TagUtils};
+pub use tool_restriction::{ToolRestriction, ToolRestrictionError};
 pub use types::{SkillInput, SkillMetadata, SkillPackage, SkillResources, SkillStatus};
 pub use version::{CompatibilityResult, VersionManager};
 pub use vscode::{VsCodeExportConfig, VsCodeUtils, export_batch_to_vscode, export_to_vscode};
