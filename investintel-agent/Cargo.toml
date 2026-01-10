@@ -1,7 +1,15 @@
-[workspace]
+[package]
+name = "investintel-agent"
+version = "0.1.0"
+edition = "2021"
+description = "InvestIntel AI - 智能投资助手基于Claude Agent SDK"
+authors = ["InvestIntel AI Team"]
+license = "MIT"
 
-[workspace.dependencies]
+[dependencies]
 claude-agent-sdk-rs = { path = "..", features = ["yaml"] }
 tokio = { version = "1.48", features = ["full"] }
 anyhow = "1.0"
 serde_json = "1.0"
+async-trait = "0.1"
+chrono = "0.4"

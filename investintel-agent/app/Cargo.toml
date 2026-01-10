@@ -12,3 +12,5 @@ claude-agent-sdk-rs = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 serde_json = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
