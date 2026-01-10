@@ -13,6 +13,10 @@ path = "main.rs"
 name = "investintel-v2"
 path = "main_v2.rs"
 
+[[bin]]
+name = "plan2_validation"
+path = "plan2_validation.rs"
+
 [dependencies]
 claude-agent-sdk-rs = { path = "../.." }
 tokio = { version = "1.48", features = ["full"] }
