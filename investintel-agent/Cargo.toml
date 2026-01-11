@@ -6,9 +6,17 @@ description = "InvestIntel AI - 智能投资助手基于Claude Agent SDK"
 authors = ["InvestIntel AI Team"]
 license = "MIT"
 
+[features]
+default = []
+ml = ["tch"]
+
 [lib]
 name = "investintel_agent"
 path = "lib.rs"
+
+[[bin]]
+name = "invest_cli"
+path = "bin/invest_cli.rs"
 
 [dependencies]
 claude-agent-sdk-rs = { path = "..", features = ["yaml"] }
@@ -21,6 +29,9 @@ serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 tokio-tungstenite = { version = "0.23", features = ["rustls-tls-native-roots"] }
 futures-util = "0.3"
+futures = "0.3"
+thiserror = "1.0"
+tracing = "0.1"
 
 # Phase 3: Trading dependencies (新增)
 hmac = "0.12"
@@ -29,8 +40,8 @@ hex = "0.4"
 base64 = "0.22"
 uuid = { version = "1.6", features = ["v4", "serde"] }
 
-# Phase 2: ML dependencies (已有)
-tch = "0.15"
+# Phase 2: ML dependencies (optional, for ML features)
+tch = { version = "0.15", optional = true }
 rand = "0.8"
 
 [dev-dependencies]

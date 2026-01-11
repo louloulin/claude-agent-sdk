@@ -5,7 +5,7 @@
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
-use hmac::{Hmac, Mac, NewHmac};
+use hmac::{Hmac, Mac};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
@@ -120,7 +120,7 @@ impl BinanceFuturesClient {
             .client
             .get(format!("{}{}", self.base_url, endpoint))
             .header("X-MBX-APIKEY", &self.api_key)
-            .query(&[("timestamp", ×tamp)])
+            .query(&[("timestamp", timestamp)])
             .query(&[("signature", &signature)])
             .send()
             .await
@@ -191,7 +191,7 @@ impl BinanceFuturesClient {
             .header("X-MBX-APIKEY", &self.api_key)
             .query(&[("symbol", symbol)])
             .query(&[("orderId", order_id)])
-            .query(&[("timestamp", ×tamp)])
+            .query(&[("timestamp", timestamp)])
             .query(&[("signature", &signature)])
             .send()
             .await
@@ -238,7 +238,7 @@ impl BinanceFuturesClient {
             .header("X-MBX-APIKEY", &self.api_key)
             .query(&[("symbol", symbol)])
             .query(&[("orderId", order_id)])
-            .query(&[("timestamp", ×tamp)])
+            .query(&[("timestamp", timestamp)])
             .query(&[("signature", &signature)])
             .send()
             .await
@@ -270,7 +270,7 @@ impl BinanceFuturesClient {
             .delete(format!("{}{}", self.base_url, endpoint))
             .header("X-MBX-APIKEY", &self.api_key)
             .query(&[("symbol", symbol)])
-            .query(&[("timestamp", ×tamp)])
+            .query(&[("timestamp", timestamp)])
             .query(&[("signature", &signature)])
             .send()
             .await
@@ -406,7 +406,7 @@ impl BinanceFuturesClient {
             .header("X-MBX-APIKEY", &self.api_key)
             .query(&[("symbol", symbol)])
             .query(&[("leverage", &leverage.to_string())])
-            .query(&[("timestamp", ×tamp)])
+            .query(&[("timestamp", timestamp)])
             .query(&[("signature", &signature)])
             .send()
             .await

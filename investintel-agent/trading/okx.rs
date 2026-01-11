@@ -5,7 +5,7 @@
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
-use hmac::{Hmac, Mac, NewHmac};
+use hmac::{Hmac, Mac};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
@@ -50,14 +50,14 @@ impl OkxClient {
         let method = "POST";
 
         let body = serde_json::to_string(&order)?;
-        let signature = self.sign(×tamp, method, endpoint, &body)?;
+        let signature = self.sign(timestamp, method, endpoint, &body)?;
 
         let response = self
             .client
             .post(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .header("Content-Type", "application/json")
             .body(body)
@@ -91,14 +91,14 @@ impl OkxClient {
         let timestamp = Self::get_timestamp()?;
         let method = "GET";
 
-        let signature = self.sign(×tamp, method, endpoint, "")?;
+        let signature = self.sign(timestamp, method, endpoint, "")?;
 
         let response = self
             .client
             .get(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .send()
             .await
@@ -137,14 +137,14 @@ impl OkxClient {
         let timestamp = Self::get_timestamp()?;
         let method = "GET";
 
-        let signature = self.sign(×tamp, method, endpoint, "")?;
+        let signature = self.sign(timestamp, method, endpoint, "")?;
 
         let mut request = self
             .client
             .get(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase);
 
         if let Some(inst_type) = inst_type {
@@ -185,14 +185,14 @@ impl OkxClient {
         };
 
         let body = serde_json::to_string(&request_body)?;
-        let signature = self.sign(×tamp, method, endpoint, &body)?;
+        let signature = self.sign(timestamp, method, endpoint, &body)?;
 
         let response = self
             .client
             .post(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .header("Content-Type", "application/json")
             .body(body)
@@ -220,14 +220,14 @@ impl OkxClient {
         let timestamp = Self::get_timestamp()?;
         let method = "GET";
 
-        let signature = self.sign(×tamp, method, endpoint, "")?;
+        let signature = self.sign(timestamp, method, endpoint, "")?;
 
         let response = self
             .client
             .get(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .query(&[("instId", inst_id)])
             .query(&[("ordId", order_id)])
@@ -272,14 +272,14 @@ impl OkxClient {
         };
 
         let body = serde_json::to_string(&request_body)?;
-        let signature = self.sign(×tamp, method, endpoint, &body)?;
+        let signature = self.sign(timestamp, method, endpoint, &body)?;
 
         let response = self
             .client
             .post(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .header("Content-Type", "application/json")
             .body(body)
@@ -307,14 +307,14 @@ impl OkxClient {
         let timestamp = Self::get_timestamp()?;
         let method = "GET";
 
-        let signature = self.sign(×tamp, method, endpoint, "")?;
+        let signature = self.sign(timestamp, method, endpoint, "")?;
 
         let response = self
             .client
             .get(format!("{}{}", self.base_url, endpoint))
             .header("OK-ACCESS-KEY", &self.api_key)
             .header("OK-ACCESS-SIGN", &signature)
-            .header("OK-ACCESS-TIMESTAMP", ×tamp)
+            .header("OK-ACCESS-TIMESTAMP", timestamp)
             .header("OK-ACCESS-PASSPHRASE", &self.passphrase)
             .query(&[("instId", inst_id)])
             .send()
