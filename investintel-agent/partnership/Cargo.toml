@@ -1,0 +1,20 @@
+[package]
+name = "partnership"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Claude Agent SDK
+claude-agent-sdk-rs = { path = "../.." }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+async-trait = "0.1"
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+
+[lib]
+name = "partnership"
+path = "src/lib.rs"

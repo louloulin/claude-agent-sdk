@@ -1,76 +1,287 @@
 ---
-name: graham-value-investing
-description: 分析股票的Graham内在价值和安全边际。当用户询问股票价值、内在价值、安全边际、Graham分析或价值投资时使用。支持快速估值、详细分析和批量分析。
+id: graham-value-investing
+name: Graham深度价值投资
+description: Ben Graham的深度价值投资方法,强调安全边际和深度折价购买
+version: 1.0.0
+author: InvestIntel AI Team
+dependencies:
+  - financial-data
+  - valuation-framework
+tags:
+  - value-investing
+  - fundamental-analysis
+  - ben-graham
+  - margin-of-safety
 ---
 
-# Graham Value Investing
+# Graham深度价值投资
 
-基于Benjamin Graham的价值投资法则计算股票内在价值和安全边际。
+**作者**: InvestIntel AI Team
+**版本**: 1.0.0
+**最后更新**: 2026-01-11
+**标签**: value-investing, fundamental-analysis, ben-graham, margin-of-safety
+**依赖**: [financial-data, valuation-framework]
 
-## 快速开始
+---
 
-分析单个股票：
-```bash
-cargo run --bin invest_cli -- analyze AAPL
+## 📖 技能描述
+
+Ben Graham的深度价值投资方法，强调安全边际和深度折价购买。本技能实现Graham的核心估值方法和筛选标准。
+
+### 核心理念
+
+1. **安全边际** (Margin of Safety) - 以低于内在价值30-40%的价格购买
+2. **Net-Net筛选** - 最严格的深度价值标准
+3. **Graham公式** - 简化的内在价值计算
+4. **防御型投资** - 优先保护本金，其次追求收益
+
+---
+
+## 🎯 投资标准
+
+### 1. 安全边际要求
+
+```yaml
+minimum_margin_of_safety: 0.30  # 30%最低安全边际
+preferred_margin_of_safety: 0.40  # 40%首选安全边际
 ```
 
-批量分析多只股票：
-```bash
-cargo run --bin invest_cli -- batch-analyze AAPL MSFT GOOGL
+**计算公式**:
+```
+安全边际 = (内在价值 - 当前价格) / 内在价值
 ```
 
-## 分析类型
+### 2. Graham公式估值
 
-### 快速估值
-使用Graham公式快速计算内在价值和安全边际。适用于：
-- 初步筛选投资标的
-- 快速判断股票是否被低估
-- 获取Graham评分
-
-### 详细分析
-完整的Graham-Buffett价值分析，包括：
-- Graham内在价值计算
-- Buffett质量指标（ROIC、护城河）
-- DCF估值模型
-- 完整的投资建议
-
-## 核心公式
-
-**Graham内在价值**：
+**基础公式**:
 ```
 V = EPS × (8.5 + 2g)
 ```
 
-**安全边际**：
+其中:
+- V = 内在价值
+- EPS = 每股收益
+- g = 预期增长率 (以小数表示，如0.05表示5%)
+- 8.5 = 零增长公司的合理倍数
+
+**修正公式** (当利率显著偏离历史平均时):
 ```
-Margin of Safety = (Intrinsic Value - Current Price) / Intrinsic Value
+V = EPS × (8.5 + 2g) × (4.4 / Y)
 ```
 
-**买入标准**：安全边际 ≥ 30%
+其中:
+- Y = 当前AAA级公司债券收益率
+- 4.4 = 历史平均AAA债券收益率
 
-## 投资建议标准
+### 3. Net-Net筛选标准
 
-- **强烈买入** (5/5): 安全边际 ≥ 50%
-- **买入** (4/5): 安全边际 ≥ 30%
-- **持有** (3/5): 安全边际 ≥ 15%
-- **观望** (2/5): 安全边际 ≥ 0%
-- **避免** (1/5): 安全边际 < 0%
+最严格的Graham筛选标准，适用于深度价值投资:
 
-## 支持功能
+**Net-Net营运资本定义**:
+```
+Net-Net = 流动资产 - 流动负债 - 总负债
+       = 现金 + 应收账款 + 存货 - 总负债
+```
 
-详见 [detailed-analysis.md](detailed-analysis.md) 了解完整分析框架
-详见 [evaluation-criteria.md](evaluation-criteria.md) 了解评分标准
-详见 [reference-implementation.md](reference-implementation.md) 了解Rust实现示例
+**买入标准**:
+```yaml
+net_net_price_ratio: 0.666  # 价格 ≤ 2/3 Net-Net价值
+```
 
-## 使用技巧
+**筛选条件**:
+- 当前价格 ≤ 2/3 × Net-Net每股价值
+- 流动资产 > 总负债
+- 无重大诉讼或监管风险
+- 过去10年持续盈利
 
-1. **适用于稳定增长的成熟公司**
-2. **对高增长公司可能低估内在价值**
-3. **周期性行业需要调整增长率预期**
-4. **亏损公司不适用Graham公式**
+### 4. 财务健康度要求
 
-## 相关资料
+```yaml
+# 流动性指标
+current_ratio: 2.0  # 流动比率 ≥ 2.0
+quick_ratio: 1.0    # 速动比率 ≥ 1.0
 
-- Benjamin Graham - 《智能投资者》
-- [Graham Formula详解](https://www.grahamvalue.com/article/understanding-benjamin-graham-formula-correctly)
-- [Investing.com: Benjamin Graham Formula](https://www.investing.com/academy/analysis/benjamin-graham-formula-definition/)
+# 负债水平
+debt_to_equity: 0.5  # 债务权益比 ≤ 0.5
+current_assets_to_total_liabilities: 2.0  # 流动资产/总负债 ≥ 2.0
+
+# 盈利稳定性
+earnings_consistency: 10  # 过去10年持续盈利
+positive_earnings_years: 9  # 过去10年中至少9年盈利
+```
+
+---
+
+## 🔍 投资流程
+
+### 步骤1: Net-Net筛选
+
+1. 计算Net-Net营运资本
+2. 计算Net-Net每股价值 = Net-Net / 总股本
+3. 筛选: 价格 ≤ 2/3 Net-Net价值
+
+### 步骤2: 财务健康检查
+
+1. 流动性检查: 流动比率 ≥ 2.0
+2. 负债检查: 流动资产 ≥ 2 × 总负债
+3. 盈利检查: 过去10年至少9年盈利
+
+### 步骤3: Graham公式估值
+
+1. 获取过去3-5年平均EPS
+2. 估算合理增长率g (保守估计)
+3. 计算内在价值 V = EPS × (8.5 + 2g)
+4. 验证安全边际 ≥ 30%
+
+### 步骤4: 综合评分
+
+```yaml
+评分标准 (总分100):
+
+1. 安全边际 (30分)
+   - 50%+: 30分
+   - 40-50%: 25分
+   - 30-40%: 20分
+   - <30%: 0分
+
+2. 财务健康 (25分)
+   - 流动比率 > 2.5: 10分
+   - 2.0-2.5: 8分
+   - 1.5-2.0: 5分
+
+   - 债务权益比 < 0.3: 10分
+   - 0.3-0.5: 8分
+   - 0.5-0.7: 5分
+
+   - 盈利连续性 (10年全盈利): 5分
+
+3. 盈利质量 (25分)
+   - ROE > 20%: 15分
+   - 15-20%: 12分
+   - 10-15%: 8分
+
+   - 自由现金流 > 净利润: 10分
+   - 80-100%: 8分
+
+4. 估值吸引力 (20分)
+   - P/E < 10: 20分
+   - 10-12: 15分
+   - 12-15: 10分
+
+   - P/B < 1.0: 10分
+   - 1.0-1.5: 5分
+```
+
+**投资决策**:
+- 80分以上: 强烈买入
+- 70-79分: 买入
+- 60-69分: 观察
+- 60分以下: 不投资
+
+---
+
+## 📊 估值示例
+
+### 示例1: Net-Net机会
+
+**公司数据**:
+- 股价: $10
+- 流动资产: $100M
+- 总负债: $30M
+- 总股本: 10M
+
+**计算**:
+```
+Net-Net = $100M - $30M = $70M
+Net-Net每股 = $70M / 10M = $7
+买入价上限 = 2/3 × $7 = $4.67
+```
+
+**结论**: 股价$10 > $4.67，不满足Net-Net标准 ❌
+
+### 示例2: Graham公式
+
+**公司数据**:
+- 股价: $50
+- EPS (过去3年平均): $5
+- 预期增长率: 5%
+
+**计算**:
+```
+V = $5 × (8.5 + 2×5%) = $5 × 8.6 = $43
+安全边际 = ($43 - $50) / $43 = -16.3%
+```
+
+**结论**: 安全边际为负，不投资 ❌
+
+### 示例3: 满足标准
+
+**公司数据**:
+- 股价: $25
+- EPS (平均): $4
+- 预期增长率: 6%
+- 流动比率: 2.8
+- 债务权益比: 0.2
+- ROE: 18%
+
+**计算**:
+```
+V = $4 × (8.5 + 2×6%) = $4 × 8.62 = $34.48
+安全边际 = ($34.48 - $25) / $34.48 = 27.5%
+```
+
+**评分**:
+- 安全边际: 20分 (27.5% < 30%)
+- 财务健康: 25分 (优秀)
+- 盈利质量: 23分 (ROE 18%)
+- 估值吸引力: 10分 (P/E = 6.25)
+
+**总分**: 78分 → 买入 ✅
+
+---
+
+## ⚠️ 风险提示
+
+### Graham方法的局限性
+
+1. **忽略增长质量**: 只看增长率数量，不看质量
+2. **过时标准**: Net-Net标准在现代市场中极其罕见
+3. **行业差异**: 未考虑不同行业的合理估值倍数差异
+4. **账面价值失真**: 现代公司中无形资产占比大，账面价值可能失真
+
+### 适用场景
+
+✅ **适用于**:
+- 传统制造业
+- 周期性行业底部
+- 小型被忽视公司
+- 熊市恐慌期
+
+❌ **不适用于**:
+- 高科技成长股
+- 生物医药未盈利公司
+- SaaS/订阅制业务
+- 互联网平台
+
+---
+
+## 🔗 相关资源
+
+### 经典著作
+- 《证券分析》 (Security Analysis) - Benjamin Graham & David Dodd
+- 《聪明的投资者》 (The Intelligent Investor) - Benjamin Graham
+
+### 相关技能
+- [Buffett质量价值投资](../buffett-quality-value/SKILL.md) - Graham方法进化版
+- [Kelly仓位管理](../kelly-position-sizing/SKILL.md) - 仓位优化
+- [Munger思维模型](../munger-mental-models/SKILL.md) - 多元思维模型
+
+---
+
+## 📝 变更历史
+
+### v1.0.0 (2026-01-11)
+- 初始版本
+- 实现Graham公式估值
+- 实现Net-Net筛选
+- 实现综合评分系统

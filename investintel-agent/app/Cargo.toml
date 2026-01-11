@@ -1,9 +1,11 @@
-[workspace]
-
 [package]
-name = "investintel"
+name = "investintel-agent-app"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "investintel_agent_app"
+path = "lib.rs"
 
 [[bin]]
 name = "investintel"
@@ -25,7 +27,7 @@ serde_json = "1.0"
 async-trait = "0.1"
 chrono = "0.4"
 serde = { version = "1.0", features = ["derive"] }
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 futures = "0.3"
 async-stream = "0.3"
 tokio-stream = "0.1"
@@ -34,7 +36,7 @@ url = "2.5"
 hex = "0.4"
 clap = { version = "4.5", features = ["derive"] }
 uuid = { version = "1.6", features = ["v4", "serde"] }
-tokio-tungstenite = "0.23"
+tokio-tungstenite = { version = "0.23", features = ["rustls-tls-native-roots"] }
 rand = "0.8"
 plotters = "0.3"
 resvg = "0.42"

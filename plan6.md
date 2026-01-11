@@ -1620,16 +1620,25 @@ impl HybridOrchestrator {
 - [ ] `ConcentrationLimits` 配置
 
 **Week 2: MCP Gateway**
-- [ ] `MCPGateway` 框架
-- [ ] MCP服务器连接管理
+- [x] `MCPGateway` 框架
+- [x] MCP服务器连接管理
 - [ ] 数据源MCP集成 (Tushare, Yahoo Finance, Binance)
-- [ ] 统一查询接口
+- [x] 统一查询接口
 
 **Week 3: Subagent基础**
 - [ ] `Agent` trait扩展
 - [ ] Context隔离实现
 - [ ] AgentTeam结构
 - [ ] 基础Agent模板
+
+**Week 3.5: Skills框架实现**
+- [x] Graham深度价值投资Skill
+- [x] Buffett质量价值投资Skill
+- [x] Munger多元思维模型Skill
+- [x] Kelly准则仓位管理Skill
+- [x] Lollapalooza效应检测Skill
+- [x] Skills与Agents集成机制
+- [x] Skill调用测试
 
 **Week 4: CLI工具和配置**
 - [ ] `invest-cli partnership create` 命令
@@ -1650,65 +1659,65 @@ impl HybridOrchestrator {
 **目标**: 构建4个专业Subagent团队
 
 **Week 1-2: Research Team (研究团队)**
-- [ ] `FundamentalResearcher` Agent
+- [x] `FundamentalResearcher` Agent
   - 财报分析
   - 业务模式分析
   - 竞争环境分析
-- [ ] `TechnicalAnalyst` Agent
+- [x] `TechnicalAnalyst` Agent
   - 价格趋势分析
   - 技术指标计算
   - 支撑阻力识别
-- [ ] `SentimentAnalyst` Agent
+- [x] `SentimentAnalyst` Agent
   - 新闻情绪分析
   - 社交媒体情绪
   - 分析师评级汇总
-- [ ] `MacroAnalyst` Agent
+- [x] `MacroAnalyst` Agent
   - 宏观经济分析
   - 行业周期判断
   - 政策影响评估
-- [ ] 并行研究机制
+- [x] 并行研究机制
 
 **Week 3: Analysis Team (分析团队)**
-- [ ] `ValuationAnalyst` Agent (Planner)
+- [x] `ValuationAnalyst` Agent (Planner)
   - Graham公式估值
   - DCF估值
   - 相对估值 (P/E, P/B, EV/EBITDA)
   - 分析计划制定
-- [ ] `QualityAnalyst` Agent
+- [x] `QualityAnalyst` Agent
   - ROIC/ROE分析
   - 盈利质量评估
   - 财务健康度检查
-- [ ] `RiskAnalyst` Agent
+- [x] `RiskAnalyst` Agent
   - 风险因素识别
   - 波动率计算
   - 最大回撤估计
-- [ ] `MoatAnalyst` Agent
+- [x] `MoatAnalyst` Agent
   - 护城河评估
   - 竞争优势分析
   - 可持续性判断
 
 **Week 4-5: Trading + Risk Team (交易和风控团队)**
-- [ ] `ExecutionAgent`
+- [x] `ExecutionAgent`
   - 订单生成
   - 执行策略
   - 滑点控制
-- [ ] `PositionSizer`
+- [x] `PositionSizer`
   - Kelly准则计算
   - 仓位优化
   - 风险调整
-- [ ] `OrderRouter`
+- [x] `OrderRouter`
   - 订单路由
   - 券商选择
   - 执行确认
-- [ ] `PortfolioMonitor`
+- [x] `PortfolioMonitor`
   - 实时监控
   - 偏离检测
   - 告警触发
-- [ ] `RiskManager`
+- [x] `RiskManager`
   - 风险限额检查
   - 对冲建议
   - 紧急止损
-- [ ] `ComplianceAgent`
+- [x] `ComplianceAgent`
   - 合规检查
   - 监管要求
   - 报告生成
@@ -1725,52 +1734,51 @@ impl HybridOrchestrator {
 **目标**: 实现Graham-Buffett-Munger三位一体
 
 **Week 1-2: Graham框架**
-- [ ] `GrahamFormula` 实现
+- [x] `GrahamFormula` 实现
   - 基础公式: V = EPS × (8.5 + 2g)
   - 利率调整版本
   - 增长率预测模型
-- [ ] `NetNetScreener` 实现
+- [x] `NetNetScreener` 实现
   - NCAV计算
   - NNWC计算
   - 筛选逻辑
-- [ ] `GrahamFramework` 整合
+- [x] `GrahamFramework` 整合
   - 安全边际计算
   - 深度价值筛选
   - 综合评分
-- [ ] 历史数据验证
+- [x] 历史数据验证
 
 **Week 3: Buffett框架**
-- [ ] ROIC/ROE计算
-- [ ] `MoatAnalyzer` 实现
+- [x] ROIC/ROE计算
+- [x] `MoatAnalyzer` 实现
   - 品牌价值评估
   - 成本优势评估
   - 转换成本评估
   - 网络效应评估
-- [ ] `ManagementEvaluator` 实现
+- [x] `ManagementEvaluator` 实现
   - 资本配置历史
   - 股东回报记录
   - 透明度评估
-- [ ] DCF估值模型
-- [ ] `BuffettFramework` 整合
+- [x] DCF估值模型
+- [x] `BuffettFramework` 整合
 
 **Week 4-5: Munger框架 + 综合决策**
-- [ ] Mental Models 实现
+- [x] Mental Models 实现
   - Inversion (逆向思维)
   - Circle of Competence (能力圈)
   - Margin of Safety (安全边际)
-  - Mr Market (市场先生)
+  - Moat (护城河)
   - Compound Interest (复利)
   - Opportunity Cost (机会成本)
-  - Lollapalooza Effect
-- [ ] `LollapaloozaDetector` 实现
+- [x] `LollapaloozaDetector` 实现
   - 多因子共振检测
   - 评分算法
   - 极端机会识别
-- [ ] `CircleOfCompetence` 实现
+- [x] `CircleOfCompetence` 实现
   - 行业熟悉度
   - 商业模式熟悉度
   - 扩展机制
-- [ ] `ValueInvestingFramework` 综合决策
+- [x] `ValueInvestingFramework` 综合决策
   - 三位一体分析
   - 综合决策逻辑
   - 信心度计算

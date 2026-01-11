@@ -6,8 +6,12 @@ pub mod agents;
 pub mod orchestrators;
 pub mod interactive_advisor;
 pub mod investment_hooks;
+pub mod skills;
+pub mod teams;
 
 pub use agents::*;
 pub use orchestrators::*;
 pub use interactive_advisor::*;
 pub use investment_hooks::*;
+pub use skills::*;
+pub use teams::*;

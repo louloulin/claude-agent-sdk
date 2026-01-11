@@ -8,6 +8,13 @@
 //! 2. **投资组合管理** - 资产配置、再平衡、绩效评估
 //! 3. **交易建议** - 时机选择、仓位管理、风险控制
 //!
+//! ## Modules
+//!
+//! - `data` - Market data sources and management
+//! - `strategies` - Trading strategies (LSTM, DQN) (optional)
+//! - `trading` - Order management and execution
+//! - `partnership` - Investment partnership structure (Plan6)
+//!
 //! ## 快速开始
 //!
 //! ```rust,no_run
@@ -74,4 +81,13 @@ pub use orchestration::{
 pub use skills_integration::{
     SkillsIntegrationSystem, SkillsIntegrationConfig, SmartAnalysisType,
     SkillInfo,
+};
+
+// Re-export app modules (agents, orchestrators)
+pub use investintel_agent_app::{
+    agents,
+    orchestrators,
+    investment_hooks,
+    interactive_advisor,
+    skills,
 };

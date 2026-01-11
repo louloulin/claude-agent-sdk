@@ -39,5 +39,5 @@ default = ["yaml"]
 yaml = ["serde_yaml"]
 
 [workspace]
-members = ["investintel-agent"]
+members = ["investintel-agent", "investintel-agent/partnership", "investintel-agent/app"]
 resolver = "2"

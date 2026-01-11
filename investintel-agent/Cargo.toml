@@ -18,6 +18,10 @@ path = "lib.rs"
 name = "invest_cli"
 path = "bin/invest_cli.rs"
 
+[[bin]]
+name = "partnership-demo"
+path = "partnership_demo.rs"
+
 [dependencies]
 claude-agent-sdk-rs = { path = "..", features = ["yaml"] }
 tokio = { version = "1.48", features = ["full"] }
@@ -32,6 +36,12 @@ futures-util = "0.3"
 futures = "0.3"
 thiserror = "1.0"
 tracing = "0.1"
+
+# App module dependency
+investintel-agent-app = { path = "app" }
+
+# Partnership module
+partnership = { path = "partnership" }
 
 # Phase 3: Trading dependencies (新增)
 hmac = "0.12"
