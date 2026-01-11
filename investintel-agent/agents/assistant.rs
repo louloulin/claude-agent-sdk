@@ -66,26 +66,29 @@ impl InvestmentAssistant {
     }
 
     /// 创建新的投资助手并加载Skills
-    pub async fn with_skills() -> Result<Self, anyhow::Error> {
+    pub async fn with_skills() -> anyhow::Result<Self> {
         let mut assistant = Self::new();
         assistant.load_skills().await?;
         Ok(assistant)
     }
 
     /// 从指定目录加载Skills
-    pub async fn load_skills_from_dir<P: Into<PathBuf>>(&mut self, dir: P) -> Result<(), anyhow::Error> {
-        let packages = SkillRegistry::discover_skill_md_from_dir(dir.into())?;
+    pub async fn load_skills_from_dir<P: Into<PathBuf>>(&mut self, dir: P) -> anyhow::Result<()> {
+        let packages = SkillRegistry::discover_skill_md_from_dir(dir.into())
+            .map_err(|e| anyhow::anyhow!("Failed to load skills: {}", e))?;
         self.loaded_skills.extend(packages);
         Ok(())
     }
 
     /// 加载项目Skills（从.claude/skills/）
-    pub async fn load_skills(&mut self) -> Result<(), anyhow::Error> {
-        let project_dir = std::env::current_dir()?;
+    pub async fn load_skills(&mut self) -> anyhow::Result<()> {
+        let project_dir = std::env::current_dir()
+            .map_err(|e| anyhow::anyhow!("Failed to get current dir: {}", e))?;
         let skills_dir = project_dir.join(".claude").join("skills");
 
         if skills_dir.exists() {
-            let packages = SkillRegistry::discover_skill_md_from_dir(&skills_dir)?;
+            let packages = SkillRegistry::discover_skill_md_from_dir(&skills_dir)
+                .map_err(|e| anyhow::anyhow!("Failed to discover skills: {}", e))?;
             tracing::info!("加载了 {} 个Skills", packages.len());
 
             for package in &packages {

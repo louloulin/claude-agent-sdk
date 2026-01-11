@@ -1,127 +1,76 @@
 ---
-name: "Graham Value Investing"
-description: "分析股票的内在价值和安全边际，基于Benjamin Graham的价值投资法则"
-version: "1.0.0"
-author: "InvestIntel AI Team"
-tags:
-  - value-investing
-  - stock-analysis
-  - graham
-  - intrinsic-value
-  - margin-of-safety
-dependencies: []
-allowed_tools:
-  - "Read"
-  - "Bash(rust:cargo)"
-model: "claude-sonnet-4-20250514"
+name: graham-value-investing
+description: 分析股票的Graham内在价值和安全边际。当用户询问股票价值、内在价值、安全边际、Graham分析或价值投资时使用。支持快速估值、详细分析和批量分析。
 ---
 
-# Graham Value Investing Skill
+# Graham Value Investing
 
-你是Benjamin Graham价值投资分析专家。当用户提供股票代码时，你将使用Graham公式计算内在价值并评估安全边际。
+基于Benjamin Graham的价值投资法则计算股票内在价值和安全边际。
 
-## Graham核心公式
+## 快速开始
 
-### 1. Graham内在价值公式
+分析单个股票：
+```bash
+cargo run --bin invest_cli -- analyze AAPL
+```
 
+批量分析多只股票：
+```bash
+cargo run --bin invest_cli -- batch-analyze AAPL MSFT GOOGL
+```
+
+## 分析类型
+
+### 快速估值
+使用Graham公式快速计算内在价值和安全边际。适用于：
+- 初步筛选投资标的
+- 快速判断股票是否被低估
+- 获取Graham评分
+
+### 详细分析
+完整的Graham-Buffett价值分析，包括：
+- Graham内在价值计算
+- Buffett质量指标（ROIC、护城河）
+- DCF估值模型
+- 完整的投资建议
+
+## 核心公式
+
+**Graham内在价值**：
 ```
 V = EPS × (8.5 + 2g)
 ```
 
-其中：
-- V = 内在价值
-- EPS = 每股收益
-- g = 预期增长率（使用小数形式，例如5% = 0.05）
-- 8.5 = 基础市盈率（零增长公司的合理PE）
-- 2 = 增长率系数
-
-### 2. Graham安全边际公式
-
+**安全边际**：
 ```
 Margin of Safety = (Intrinsic Value - Current Price) / Intrinsic Value
 ```
 
-**买入标准**: 安全边际 ≥ 30%
+**买入标准**：安全边际 ≥ 30%
 
-## 分析步骤
+## 投资建议标准
 
-### 步骤1：获取实时数据
+- **强烈买入** (5/5): 安全边际 ≥ 50%
+- **买入** (4/5): 安全边际 ≥ 30%
+- **持有** (3/5): 安全边际 ≥ 15%
+- **观望** (2/5): 安全边际 ≥ 0%
+- **避免** (1/5): 安全边际 < 0%
 
-使用investintel-agent库的MarketDataProvider获取：
-- 当前股价 (current_price)
-- 每股收益 (eps)
-- 预期增长率 (earnings_growth)
+## 支持功能
 
-### 步骤2：计算内在价值
+详见 [detailed-analysis.md](detailed-analysis.md) 了解完整分析框架
+详见 [evaluation-criteria.md](evaluation-criteria.md) 了解评分标准
+详见 [reference-implementation.md](reference-implementation.md) 了解Rust实现示例
 
-使用Graham公式：`V = EPS × (8.5 + 2g)`
+## 使用技巧
 
-### 步骤3：计算安全边际
+1. **适用于稳定增长的成熟公司**
+2. **对高增长公司可能低估内在价值**
+3. **周期性行业需要调整增长率预期**
+4. **亏损公司不适用Graham公式**
 
-```rust
-let margin = (intrinsic_value - current_price) / intrinsic_value;
-```
-
-### 步骤4：评估投资价值
-
-根据Graham安全边际标准：
-- **安全边际 ≥ 50%**: 强烈买入 (5/5)
-- **安全边际 ≥ 30%**: 买入 (4/5)
-- **安全边际 ≥ 15%**: 持有 (3/5)
-- **安全边际 ≥ 0%**: 观望 (2/5)
-- **安全边际 < 0%**: 避免 (1/5)
-
-## 使用Rust代码示例
-
-```rust
-use investintel_agent::agents::ValueInvestmentAgent;
-use investintel_agent::agents::{Agent, AgentInput};
-
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    // 创建Graham价值投资Agent
-    let agent = ValueInvestmentAgent::new();
-
-    // 分析股票
-    let input = AgentInput::new("AAPL");
-    let output = agent.execute(input).await?;
-
-    println!("{}", output.content);
-
-    Ok(()}
-}
-```
-
-## 评估标准
-
-### Graham评分 (0-40分)
-
-| 指标 | 权重 | 标准 |
-|------|------|------|
-| 内在价值折扣 | 20分 | 安全边际≥50%得20分，每降10%减4分 |
-| 盈利质量 | 10分 | EPS稳定且增长 |
-| 财务健康 | 10分 | 负债率<50%，流动比率>2 |
-
-## 输出格式
-
-为用户提供以下信息：
-
-1. **内在价值**: 计算出的Graham内在价值
-2. **当前股价**: 实时市场价格
-3. **安全边际**: 百分比形式
-4. **投资建议**: 强烈买入/买入/持有/观望/避免
-5. **Graham评分**: 0-40分
-6. **详细分析**: 估值折扣、盈利质量、财务健康状况
-
-## 注意事项
-
-1. Graham公式适合**稳定增长的成熟公司**
-2. 对于**高增长公司**，可能低估内在价值
-3. 对于**周期性行业**，需要调整增长率预期
-4. 对于**亏损公司**，Graham公式不适用
-
-## 参考资料
+## 相关资料
 
 - Benjamin Graham - 《智能投资者》
-- Graham公式：V = EPS × (8.5 + 2g)
-- 安全边际原则：买入价格应低于内在价值至少30%
+- [Graham Formula详解](https://www.grahamvalue.com/article/understanding-benjamin-graham-formula-correctly)
+- [Investing.com: Benjamin Graham Formula](https://www.investing.com/academy/analysis/benjamin-graham-formula-definition/)

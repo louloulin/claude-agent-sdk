@@ -31,6 +31,13 @@ pub mod agents;
 pub mod data;
 pub mod trading;
 pub mod mcp;
+pub mod persistence;
+pub mod error;
+pub mod logging;
+pub mod backtest;
+pub mod skills_executor;
+pub mod orchestration;
+pub mod skills_integration;
 
 #[cfg(feature = "ml")]
 pub mod strategies;
@@ -46,4 +53,25 @@ pub use mcp::{MCPGateway, GatewayConfig, DataQuery, Data, OrderRequest, OrderRes
 pub use trading::{
     BinanceFuturesClient, OkxClient, OrderManager, RiskEngine,
     EmergencyStopManager, OrderRequest as TradingOrderRequest, OrderResponse as TradingOrderResponse,
+};
+pub use persistence::{
+    PersistenceManager, UserConfig, RiskProfile, InvestmentGoal,
+    AnalysisHistory, HistoryEntry, HistoryEntryType, HistoryManager,
+    UserPreferences, Theme, AnalysisType,
+};
+pub use error::{InvestError, ErrorHandler, ErrorLogger, RecoveryStrategy};
+pub use logging::{LogLevel, LogManager, OperationLogger, PerformanceTracker};
+pub use backtest::{
+    BacktestEngine, BacktestConfig, BacktestResult,
+    Strategy, StrategySignal, GrahamStrategy, KellyStrategy, CombinedStrategy,
+    PerformanceMetrics, RiskMetrics,
+};
+pub use skills_executor::{SkillsExecutor, SkillsStats};
+pub use orchestration::{
+    InvestmentOrchestrator, AnalysisType, OrchestrationConfig,
+    OrchestrationResult, AgentResult,
+};
+pub use skills_integration::{
+    SkillsIntegrationSystem, SkillsIntegrationConfig, SmartAnalysisType,
+    SkillInfo,
 };
