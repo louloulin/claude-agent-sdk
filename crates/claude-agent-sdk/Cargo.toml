@@ -7,6 +7,9 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+description = "Rust SDK for Claude Code CLI - Build agents with skills, tools, and orchestration"
+keywords = ["claude", "anthropic", "ai", "agent", "sdk"]
+categories = ["api-bindings", "development-tools"]
 
 [lib]
 name = "claude_agent_sdk"
