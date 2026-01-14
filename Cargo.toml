@@ -43,11 +43,6 @@ typed-builder = "0.18"
 # === SDK Dependencies ===
 claude-agent-sdk = { path = "crates/claude-agent-sdk" }
 
-# === Trading & Data ===
-reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
-tokio-tungstenite = { version = "0.23", features = ["rustls-tls-native-roots"] }
-rusqlite = { version = "0.32", features = ["bundled"] }
-
 # === Dev Dependencies ===
 tokio-test = "0.4"
 tempfile = "3.4"
