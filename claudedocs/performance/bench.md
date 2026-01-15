@@ -656,5 +656,5 @@ pub fn setup_metrics() {
 ---
 
 **文档版本**: 1.0
-**最后更新**: 2025-01-15
+**最后更新**: 2026-01-15
 **作者**: Claude Agent SDK Performance Team

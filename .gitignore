@@ -52,7 +52,6 @@ temp/
 *.backup
 
 # Documentation build
-claudedocs/
 *.md.bak
 
 # Analysis reports (optional - comment out if you want to track these)
@@ -60,3 +59,7 @@ EXAMPLES_ANALYSIS_REPORT.md
 EXECUTION_SUMMARY.md
 FINAL_EXECUTION_REPORT.md
 skill_analysis_report.json
+
+# Performance test outputs
+benchmark_output_*.json
+test_results_*.csv

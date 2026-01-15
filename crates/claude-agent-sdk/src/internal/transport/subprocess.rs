@@ -252,43 +252,49 @@ impl SubprocessTransport {
         }
 
         // 使用 runtime executor 执行异步安装
-        let rt = tokio::runtime::Runtime::new()
-            .map_err(|e| ClaudeError::InternalError(format!("Failed to create runtime: {}", e)))?;
+        // 注意：我们在独立线程中运行，以避免在已有的 tokio runtime 中调用 block_on 导致 panic
+        let installer_options = options.clone();
+        std::thread::spawn(move || {
+            let rt = tokio::runtime::Runtime::new()
+                .map_err(|e| ClaudeError::InternalError(format!("Failed to create runtime: {}", e)))?;
 
-        let installer = CliInstaller::new(true);
-        let installer = if let Some(ref callback) = options.cli_install_callback {
-            installer.with_progress_callback(callback.clone())
-        } else {
-            // 默认进度回调：记录日志
-            let default_callback = std::sync::Arc::new(|event: InstallProgress| {
-                match event {
-                    InstallProgress::Checking(msg) => {
-                        tracing::info!("🔍 {}", msg);
-                    }
-                    InstallProgress::Downloading { current, total } => {
-                        if let Some(total) = total {
-                            let progress = (current as f64 / total as f64 * 100.0) as u32;
-                            tracing::info!("⬇️  Downloading: {}% ({}/{})", progress, current, total);
-                        } else {
-                            tracing::info!("⬇️  Downloading: {} bytes", current);
+            let installer = CliInstaller::new(true);
+            let installer = if let Some(ref callback) = installer_options.cli_install_callback {
+                installer.with_progress_callback(callback.clone())
+            } else {
+                // 默认进度回调：记录日志
+                let default_callback = std::sync::Arc::new(|event: InstallProgress| {
+                    match event {
+                        InstallProgress::Checking(msg) => {
+                            tracing::info!("🔍 {}", msg);
+                        }
+                        InstallProgress::Downloading { current, total } => {
+                            if let Some(total) = total {
+                                let progress = (current as f64 / total as f64 * 100.0) as u32;
+                                tracing::info!("⬇️  Downloading: {}% ({}/{})", progress, current, total);
+                            } else {
+                                tracing::info!("⬇️  Downloading: {} bytes", current);
+                            }
+                        }
+                        InstallProgress::Installing(msg) => {
+                            tracing::info!("🔧 {}", msg);
+                        }
+                        InstallProgress::Done(path) => {
+                            tracing::info!("✅ Installation complete: {}", path.display());
+                        }
+                        InstallProgress::Failed(err) => {
+                            tracing::error!("❌ {}", err);
                         }
                     }
-                    InstallProgress::Installing(msg) => {
-                        tracing::info!("🔧 {}", msg);
-                    }
-                    InstallProgress::Done(path) => {
-                        tracing::info!("✅ Installation complete: {}", path.display());
-                    }
-                    InstallProgress::Failed(err) => {
-                        tracing::error!("❌ {}", err);
-                    }
-                }
-            });
-            installer.with_progress_callback(default_callback)
-        };
+                });
+                installer.with_progress_callback(default_callback)
+            };
 
-        rt.block_on(installer.install_if_needed())
-            .map_err(|e| ClaudeError::InternalError(format!("Auto-install failed: {}", e)))
+            rt.block_on(installer.install_if_needed())
+                .map_err(|e| ClaudeError::InternalError(format!("Auto-install failed: {}", e)))
+        })
+        .join()
+        .map_err(|_| ClaudeError::InternalError("Auto-install thread panicked".to_string()))?
     }
 
     /// Build command arguments from options

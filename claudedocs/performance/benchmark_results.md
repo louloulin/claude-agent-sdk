@@ -1,6 +1,6 @@
 # Claude Agent SDK 性能测试报告
 
-**测试日期**: 2025-01-15
+**测试日期**: 2026-01-15
 **测试环境**: macOS, Rust 1.85+, Claude CLI 2.0+
 **测试版本**: cc-agent-sdk v0.1.5
 
@@ -231,6 +231,6 @@ print(f"总耗时: {elapsed:.1f}ms")
 
 ---
 
-**报告生成**: 2025-01-15
+**报告生成**: 2026-01-15
 **SDK版本**: 0.1.5
 **测试者**: Claude Agent SDK Performance Team
