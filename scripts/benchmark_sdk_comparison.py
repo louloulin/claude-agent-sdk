@@ -106,7 +106,7 @@ query(process.argv[2]).then(time => console.log(time));
             return -1
         return (time.perf_counter() - start) * 1000
 
-    def benchmark_rust(self, prompt: str, example: str = "simple_query") -> BenchmarkResult:
+    def benchmark_rust(self, prompt: str, example: str = "01_hello_world") -> BenchmarkResult:
         """运行Rust SDK基准测试"""
         print(f"运行Rust SDK测试 ({self.iterations}次迭代)...")
         times: List[float] = []
@@ -280,7 +280,7 @@ async def main():
 
         # 测试每个SDK
         try:
-            scenario_results["Rust"] = benchmark.benchmark_rust(prompt)
+            scenario_results["Rust"] = benchmark.benchmark_rust(prompt, "01_hello_world")
         except Exception as e:
             print(f"Rust SDK测试失败: {e}")
 
