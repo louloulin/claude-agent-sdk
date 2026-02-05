@@ -238,18 +238,50 @@ impl DependencyResolver {
         result
     }
 
-    /// Validate version requirements (simplified - just checks availability)
+    /// Validate version requirements using semantic versioning
     pub fn validate_versions(&self, skills: &HashMap<String, Vec<Dependency>>) -> bool {
         for deps in skills.values() {
             for dep in deps {
-                if !self.available.contains_key(&dep.skill_id) {
-                    return false;
+                // Check if dependency exists
+                let available_version = match self.available.get(&dep.skill_id) {
+                    Some(v) => v,
+                    None => return false,
+                };
+
+                // Validate version requirement if specified
+                if let Some(ref req_str) = dep.version_requirement {
+                    if !Self::check_version_requirement(available_version, req_str) {
+                        return false;
+                    }
                 }
-                // TODO: Implement actual version requirement parsing and checking
-                // For now, we just check if the dependency exists
             }
         }
         true
+    }
+
+    /// Check if a version satisfies a requirement using semantic versioning
+    fn check_version_requirement(version: &str, requirement: &str) -> bool {
+        use semver::{Version, VersionReq};
+
+        // Parse the available version
+        let version = match Version::parse(version) {
+            Ok(v) => v,
+            Err(_) => return false, // Invalid version format
+        };
+
+        // Parse the requirement (handle common prefixes)
+        let req_str = requirement.trim();
+        let req_str = match req_str.chars().next() {
+            Some('^') | Some('~') | Some('=') | Some('>') | Some('<') => req_str,
+            _ => &format!("^{}", req_str), // Default to caret requirement
+        };
+
+        let req = match VersionReq::parse(req_str) {
+            Ok(r) => r,
+            Err(_) => return false, // Invalid requirement format
+        };
+
+        req.matches(&version)
     }
 }
 
@@ -380,9 +412,40 @@ mod tests {
     }
 
     #[test]
-    fn test_version_validation() {
+    fn test_version_requirement_caret() {
+        // Test ^1.0.0 matches various versions
+        assert!(DependencyResolver::check_version_requirement("1.0.0", "^1.0.0"));
+        assert!(DependencyResolver::check_version_requirement("1.2.3", "^1.0.0"));
+        assert!(!DependencyResolver::check_version_requirement("2.0.0", "^1.0.0"));
+    }
+
+    #[test]
+    fn test_version_requirement_tilde() {
+        // Test ~1.2.0 allows patch changes but not minor
+        assert!(DependencyResolver::check_version_requirement("1.2.0", "~1.2.0"));
+        assert!(DependencyResolver::check_version_requirement("1.2.5", "~1.2.0"));
+        assert!(!DependencyResolver::check_version_requirement("1.3.0", "~1.2.0"));
+    }
+
+    #[test]
+    fn test_version_requirement_exact() {
+        // Test exact version matching
+        assert!(DependencyResolver::check_version_requirement("2.0.0", "=2.0.0"));
+        assert!(!DependencyResolver::check_version_requirement("2.0.1", "=2.0.0"));
+    }
+
+    #[test]
+    fn test_version_requirement_greater_than() {
+        // Test >= constraints
+        assert!(DependencyResolver::check_version_requirement("2.0.0", ">=1.0.0"));
+        assert!(DependencyResolver::check_version_requirement("1.5.0", ">=1.0.0"));
+        assert!(!DependencyResolver::check_version_requirement("0.9.0", ">=1.0.0"));
+    }
+
+    #[test]
+    fn test_version_validation_integration() {
         let mut resolver = DependencyResolver::new();
-        resolver.add_skill("dep1", "1.0.0");
+        resolver.add_skill("dep1", "1.5.0");
         resolver.add_skill("main", "1.0.0");
 
         let mut skills = HashMap::new();
@@ -392,6 +455,21 @@ mod tests {
         );
         skills.insert("dep1".to_string(), vec![]);
 
+        // Should pass - dep1@1.5.0 satisfies ^1.0.0
         assert!(resolver.validate_versions(&skills));
+
+        // Now test with incompatible version
+        let mut resolver2 = DependencyResolver::new();
+        resolver2.add_skill("dep1", "2.0.0"); // Major version bump
+
+        // Should fail - dep1@2.0.0 does not satisfy ^1.0.0
+        assert!(!resolver2.validate_versions(&skills));
+    }
+
+    #[test]
+    fn test_invalid_version_formats() {
+        // Test invalid version strings are handled gracefully
+        assert!(!DependencyResolver::check_version_requirement("not-a-version", "^1.0.0"));
+        assert!(!DependencyResolver::check_version_requirement("1.0.0", "not-a-req"));
     }
 }

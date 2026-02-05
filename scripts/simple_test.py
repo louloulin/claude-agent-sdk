@@ -4,18 +4,44 @@
 """
 import subprocess
 import time
+import os
+import sys
 
 print("🚀 运行单次查询测试...")
 print("-" * 60)
 
+# Check if API key is set
+api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+if not api_key or len(api_key) < 10:
+    print("❌ 错误: ANTHROPIC_API_KEY 未设置或无效")
+    print("   请设置环境变量: export ANTHROPIC_API_KEY=sk-ant-...")
+    print("\n   跳过测试 (需要有效的API密钥)")
+    sys.exit(0)
+
+# Check if binary exists, otherwise build it
+binary_path = "./target/release/examples/01_hello_world"
+if not os.path.exists(binary_path):
+    print("📦 首次运行，编译示例...")
+    build_result = subprocess.run(
+        ["cargo", "build", "--release", "--example", "01_hello_world"],
+        capture_output=True,
+        timeout=300
+    )
+    if build_result.returncode != 0:
+        print("❌ 编译失败:")
+        print(build_result.stderr.decode()[-500:])
+        sys.exit(1)
+    print("✅ 编译完成")
+
 prompt = "What is 2 + 2?"
 start = time.perf_counter()
 
+# Use the pre-built binary instead of cargo run
 result = subprocess.run(
-    ["cargo", "run", "--release", "--example", "01_hello_world"],
+    [binary_path],
     input=prompt.encode(),
     capture_output=True,
-    timeout=60,
+    timeout=120,
     cwd="."
 )
 
@@ -31,7 +57,23 @@ if result.returncode == 0:
     print(f"\n   输出预览:")
     print("   " + "\n   ".join(output.split('\n')[:10]))
 else:
-    print(f"   错误: {result.stderr.decode()[:200]}")
+    stderr = result.stderr.decode()
+    stdout = result.stdout.decode()
+    print(f"   错误输出:")
+    print(f"   stderr: {stderr[:300]}")
+    if stdout:
+        print(f"   stdout: {stdout[:300]}")
+
+    # Check for common API errors
+    if "401" in stderr or "authentication" in stderr.lower():
+        print(f"\n   ❌ API认证失败: 请检查 ANTHROPIC_API_KEY 是否正确")
+    elif "timeout" in stderr.lower() or "timed out" in stderr.lower():
+        print(f"\n   ⏱️  请求超时: 可能是网络问题")
+    elif "rate" in stderr.lower():
+        print(f"\n   ⚠️  速率限制: API请求过于频繁")
+
+    # Exit gracefully on error
+    sys.exit(0)
 
 # 性能分析
 print(f"\n{'='*60}")

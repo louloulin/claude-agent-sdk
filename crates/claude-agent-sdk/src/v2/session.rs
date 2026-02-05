@@ -166,9 +166,8 @@ impl Session {
 
     /// Get the model being used for this session
     pub async fn model(&self) -> Option<String> {
-        // TODO: Extract model from client options
-        // For now, return None as ClaudeClient doesn't expose this
-        None
+        // Return the model from session options if set
+        self.options.model.clone()
     }
 
     /// Check if the session is still connected
@@ -293,8 +292,8 @@ pub async fn resume_session(
     session_id: &str,
     options: SessionOptions,
 ) -> Result<Session> {
-    // TODO: Implement proper session resumption from persistent storage
-    // For now, create a new session with the provided ID
+    // Session resumption from persistent storage is not yet implemented.
+    // For now, create a new session with the provided ID.
     let opts: ClaudeAgentOptions = options.clone().into();
     let mut client = ClaudeClient::new(opts);
 

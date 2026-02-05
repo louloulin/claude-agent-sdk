@@ -32,9 +32,10 @@ class BenchmarkResult:
 class SDKBenchmark:
     """SDK基准测试器"""
 
-    def __init__(self, iterations: int = 50, timeout: int = 30):
+    def __init__(self, iterations: int = 50, timeout: int = 30, delay: float = 2.0):
         self.iterations = iterations
         self.timeout = timeout
+        self.delay = delay
 
     def _run_rust_example(self, example_name: str, prompt: str) -> float:
         """运行Rust示例并测量时间"""
@@ -116,6 +117,8 @@ query(process.argv[2]).then(time => console.log(time));
             if elapsed > 0:
                 times.append(elapsed)
             print(f"  迭代 {i+1}/{self.iterations}: {elapsed:.1f}ms", end='\r')
+            if i < self.iterations - 1:  # 最后一次迭代不延迟
+                time.sleep(self.delay)
 
         if not times:
             raise RuntimeError("Rust SDK测试失败: 所有迭代都超时或出错")
@@ -132,6 +135,8 @@ query(process.argv[2]).then(time => console.log(time));
             if elapsed > 0:
                 times.append(elapsed)
             print(f"  迭代 {i+1}/{self.iterations}: {elapsed:.1f}ms", end='\r')
+            if i < self.iterations - 1:  # 最后一次迭代不延迟
+                time.sleep(self.delay)
 
         if not times:
             raise RuntimeError("Python SDK测试失败: 所有迭代都超时或出错")
@@ -148,6 +153,8 @@ query(process.argv[2]).then(time => console.log(time));
             if elapsed > 0:
                 times.append(elapsed)
             print(f"  迭代 {i+1}/{self.iterations}: {elapsed:.1f}ms", end='\r')
+            if i < self.iterations - 1:  # 最后一次迭代不延迟
+                time.sleep(self.delay)
 
         if not times:
             raise RuntimeError("Node.js SDK测试失败: 所有迭代都超时或出错")
@@ -219,6 +226,11 @@ query(process.argv[2]).then(time => console.log(time));
         report.append("\n## 详细分析\n")
 
         for scenario, results_dict in results.items():
+            if not results_dict:
+                report.append(f"### {scenario}\n")
+                report.append("⚠️ 所有SDK测试均失败，无数据\n")
+                continue
+
             report.append(f"### {scenario}\n")
 
             # 找出最快的SDK
@@ -238,6 +250,11 @@ query(process.argv[2]).then(time => console.log(time));
         report.append("## 性能建议\n")
 
         for scenario, results_dict in results.items():
+            if not results_dict:
+                report.append(f"### {scenario}\n")
+                report.append("⚠️ 无数据，无法生成建议\n")
+                continue
+
             report.append(f"### {scenario}\n")
             fastest_sdk = min(results_dict.items(), key=lambda x: x[1].mean_ms)
             report.append(f"- **推荐**: {fastest_sdk[0]} ({fastest_sdk[1].mean_ms:.1f}ms 平均延迟)")
@@ -267,7 +284,7 @@ async def main():
         "代码生成": "Write a function to calculate fibonacci numbers in Python",
     }
 
-    benchmark = SDKBenchmark(iterations=30, timeout=60)
+    benchmark = SDKBenchmark(iterations=2, timeout=60, delay=3.0)
     all_results = {}
 
     for scenario_name, prompt in test_scenarios.items():
@@ -281,11 +298,13 @@ async def main():
         # 测试每个SDK
         try:
             scenario_results["Rust"] = benchmark.benchmark_rust(prompt, "01_hello_world")
+            time.sleep(2)  # SDK之间延迟，避免API限流
         except Exception as e:
             print(f"Rust SDK测试失败: {e}")
 
         try:
             scenario_results["Python"] = benchmark.benchmark_python(prompt)
+            time.sleep(2)  # SDK之间延迟，避免API限流
         except Exception as e:
             print(f"Python SDK测试失败: {e}")
 

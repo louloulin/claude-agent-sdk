@@ -219,7 +219,7 @@ pub async fn prompt(
         content,
         input_tokens,
         output_tokens,
-        model: None, // TODO: Extract from actual response
+        model: None, // Model info not available from current client implementation
     })
 }
 
