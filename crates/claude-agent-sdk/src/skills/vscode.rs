@@ -227,7 +227,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
             } else {
                 content.push_str("text");
             }
-            content.push_str("\n");
+            content.push('\n');
             content.push_str(script);
             content.push_str("\n```\n\n");
         }
@@ -240,7 +240,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
         for dep in &skill.metadata.dependencies {
             content.push_str(&format!("- {}\n", dep));
         }
-        content.push_str("\n");
+        content.push('\n');
     }
 
     // Resources section
@@ -257,7 +257,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
                 for folder in &skill.resources.folders {
                     content.push_str(&format!("- `{}`\n", folder.display()));
                 }
-                content.push_str("\n");
+                content.push('\n');
             }
 
             if has_tools {
@@ -265,7 +265,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
                 for tool in &skill.resources.tools {
                     content.push_str(&format!("- {}\n", tool));
                 }
-                content.push_str("\n");
+                content.push('\n');
             }
 
             if has_tests {
@@ -273,7 +273,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
                 for test in &skill.resources.tests {
                     content.push_str(&format!("- {}\n", test));
                 }
-                content.push_str("\n");
+                content.push('\n');
             }
         }
     }
@@ -281,8 +281,17 @@ pub fn export_to_vscode<P: AsRef<Path>>(
     // Examples section
     if config.include_examples {
         content.push_str("## Usage Examples\n\n");
-        content.push_str("```text\n");
-        content.push_str("TODO: Add usage examples here\n");
+        content.push_str("### Basic Usage\n\n");
+        content.push_str("```rust\n");
+        content.push_str("// Import the skill\n");
+        content.push_str("use claude_agent_sdk::skills::SkillPackage;\n\n");
+        content.push_str("// Load the skill from the installed directory\n");
+        content.push_str("let skill = SkillPackage::load(\"");
+        content.push_str(&skill.metadata.name);
+        content.push_str("\").unwrap();\n\n");
+        content.push_str("// Use the skill with an agent\n");
+        content.push_str("let agent = Agent::new()\n");
+        content.push_str("    .with_skill(skill);\n");
         content.push_str("```\n\n");
     }
 
@@ -290,7 +299,7 @@ pub fn export_to_vscode<P: AsRef<Path>>(
     if let Some(ref footer) = config.footer {
         content.push_str("---\n\n");
         content.push_str(footer);
-        content.push_str("\n");
+        content.push('\n');
     }
 
     // Write to file

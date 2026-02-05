@@ -93,7 +93,7 @@ where
 
     /// Get a value from the cache
     pub fn get(&mut self, key: &K) -> Option<&V> {
-        if let Some(_) = self.map.get(key) {
+        if self.map.contains_key(key) {
             // Move to end (most recently used)
             if let Some(pos) = self.access_order.iter().position(|k| k == key) {
                 self.access_order.remove(pos);
@@ -203,7 +203,7 @@ impl IndexedSkillCollection {
         for tag in &skill.metadata.tags {
             self.by_tag
                 .entry(tag.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(index);
         }
 

@@ -206,7 +206,7 @@ impl DependencyResolver {
         for (skill_id, deps) in skills {
             for dep in deps {
                 adj.entry(dep.skill_id.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(skill_id.clone());
             }
         }

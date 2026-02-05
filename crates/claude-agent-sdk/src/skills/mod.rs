@@ -209,7 +209,7 @@ impl SkillRegistry {
         }
 
         // Use SkillsDirScanner to discover all SKILL.md files
-        let scanner = crate::skills::SkillsDirScanner::new(dir.to_path_buf());
+        let scanner = crate::skills::SkillsDirScanner::new(dir);
         let skill_md_files = scanner.scan()
             .map_err(|e| SkillError::Io(format!("Failed to scan skills directory: {}", e)))?;
 

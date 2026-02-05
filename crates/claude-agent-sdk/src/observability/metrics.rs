@@ -28,6 +28,15 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 
+/// Type alias for label sets used in metric storage
+pub type LabelSet = Vec<(String, String)>;
+
+/// Type alias for counter/gauge storage maps
+pub type MetricValueMap = HashMap<LabelSet, f64>;
+
+/// Type alias for histogram storage maps
+pub type MetricHistogramMap = HashMap<LabelSet, Histogram>;
+
 /// Kind of metric
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum MetricKind {
@@ -221,9 +230,9 @@ pub trait MetricStorage: Send + Sync {
 
 /// In-memory metric storage
 struct MemoryMetricStorage {
-    counters: Arc<RwLock<HashMap<String, HashMap<Vec<(String, String)>, f64>>>>,
-    gauges: Arc<RwLock<HashMap<String, HashMap<Vec<(String, String)>, f64>>>>,
-    histograms: Arc<RwLock<HashMap<String, HashMap<Vec<(String, String)>, Histogram>>>>,
+    counters: Arc<RwLock<HashMap<String, MetricValueMap>>>,
+    gauges: Arc<RwLock<HashMap<String, MetricValueMap>>>,
+    histograms: Arc<RwLock<HashMap<String, MetricHistogramMap>>>,
 }
 
 impl MemoryMetricStorage {
@@ -235,7 +244,7 @@ impl MemoryMetricStorage {
         }
     }
 
-    fn labels_key(labels: &[(String, String)]) -> Vec<(String, String)> {
+    fn labels_key(labels: &[(String, String)]) -> LabelSet {
         let mut sorted = labels.to_vec();
         sorted.sort_by(|a, b| a.0.cmp(&b.0));
         sorted
@@ -249,7 +258,7 @@ impl MetricStorage for MemoryMetricStorage {
                 let mut counters = self.counters.write().unwrap();
                 let entry = counters
                     .entry(metric.name.clone())
-                    .or_insert_with(HashMap::new);
+                    .or_default();
                 let key = Self::labels_key(&metric.labels);
                 *entry.entry(key).or_insert(0.0) += metric.value;
             },
@@ -257,7 +266,7 @@ impl MetricStorage for MemoryMetricStorage {
                 let mut gauges = self.gauges.write().unwrap();
                 let entry = gauges
                     .entry(metric.name.clone())
-                    .or_insert_with(HashMap::new);
+                    .or_default();
                 let key = Self::labels_key(&metric.labels);
                 entry.insert(key, metric.value);
             },
@@ -265,7 +274,7 @@ impl MetricStorage for MemoryMetricStorage {
                 let mut histograms = self.histograms.write().unwrap();
                 let entry = histograms
                     .entry(metric.name.clone())
-                    .or_insert_with(HashMap::new);
+                    .or_default();
                 let key = Self::labels_key(&metric.labels);
                 let hist = entry.entry(key).or_insert_with(|| {
                     Histogram::new(HistogramBuckets::latency())
@@ -277,7 +286,7 @@ impl MetricStorage for MemoryMetricStorage {
                 let mut histograms = self.histograms.write().unwrap();
                 let entry = histograms
                     .entry(metric.name.clone())
-                    .or_insert_with(HashMap::new);
+                    .or_default();
                 let key = Self::labels_key(&metric.labels);
                 let hist = entry.entry(key).or_insert_with(|| {
                     Histogram::new(HistogramBuckets::latency())

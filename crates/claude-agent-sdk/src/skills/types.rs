@@ -216,7 +216,7 @@ impl SkillPackage {
     /// Save the skill package to a file in JSON format
     pub fn save_to_file<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
         let json = serde_json::to_string_pretty(self)
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+            .map_err(|e| io::Error::other(e))?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(json.as_bytes())?;
@@ -235,7 +235,7 @@ impl SkillPackage {
     #[cfg(feature = "yaml")]
     pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
         let yaml =
-            serde_yaml::to_string(self).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+            serde_yaml::to_string(self).map_err(|e| io::Error::other(e))?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(yaml.as_bytes())?;

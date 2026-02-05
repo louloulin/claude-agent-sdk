@@ -291,7 +291,7 @@ impl SkillMdFile {
         let path = skill_md_path.as_ref();
         let skill_dir = path
             .parent()
-            .ok_or_else(|| SkillMdError::InvalidFormat)?;
+            .ok_or(SkillMdError::InvalidFormat)?;
 
         // Read the file
         let content = std::fs::read_to_string(path)?;
@@ -300,10 +300,10 @@ impl SkillMdFile {
         let (metadata, content) = Self::parse_frontmatter(&content)?;
 
         // Discover associated files
-        let scripts = Self::discover_scripts(&skill_dir);
-        let resources = Self::discover_resources(&skill_dir);
-        let reference = Self::check_file_exists(&skill_dir, "reference.md");
-        let forms = Self::check_file_exists(&skill_dir, "forms.md");
+        let scripts = Self::discover_scripts(skill_dir);
+        let resources = Self::discover_resources(skill_dir);
+        let reference = Self::check_file_exists(skill_dir, "reference.md");
+        let forms = Self::check_file_exists(skill_dir, "forms.md");
 
         // Build resource cache for progressive disclosure
         let resource_cache = Self::build_resource_cache(&resources);
@@ -650,10 +650,10 @@ impl SkillsDirScanner {
 
         // Read entries in skills directory
         let entries = std::fs::read_dir(&self.base_dir)
-            .map_err(|e| SkillMdError::IoError(e))?;
+            .map_err(SkillMdError::IoError)?;
 
         for entry in entries {
-            let entry = entry.map_err(|e| SkillMdError::IoError(e))?;
+            let entry = entry.map_err(SkillMdError::IoError)?;
             let skill_dir = entry.path();
 
             // Skip if not a directory
@@ -736,7 +736,7 @@ impl SkillsDirScanner {
 
         // Read entries in skills directory
         let entries = std::fs::read_dir(&self.base_dir)
-            .map_err(|e| SkillMdError::IoError(e))?;
+            .map_err(SkillMdError::IoError)?;
 
         // Collect all skill directory paths
         let skill_dirs: Vec<PathBuf> = entries
@@ -762,8 +762,7 @@ impl SkillsDirScanner {
                                 "Task failed for {:?}: {}",
                                 skill_md_clone, e
                             );
-                            Err(SkillMdError::IoError(std::io::Error::new(
-                                std::io::ErrorKind::Other,
+                            Err(SkillMdError::IoError(std::io::Error::other(
                                 "Task execution failed"
                             )))
                         })

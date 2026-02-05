@@ -93,6 +93,12 @@ pub struct ExecutionTrace {
     pub duration_ms: Option<u64>,
 }
 
+impl Default for ExecutionTrace {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ExecutionTrace {
     /// Create a new execution trace
     pub fn new() -> Self {

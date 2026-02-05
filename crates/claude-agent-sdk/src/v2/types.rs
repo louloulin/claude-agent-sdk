@@ -29,6 +29,7 @@ use typed_builder::TypedBuilder;
 ///     .build();
 /// ```
 #[derive(Debug, Clone, TypedBuilder, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct SessionOptions {
     /// Model to use (None = system default)
     #[builder(default, setter(strip_option))]
@@ -59,19 +60,6 @@ pub struct SessionOptions {
     pub include_partial_messages: bool,
 }
 
-impl Default for SessionOptions {
-    fn default() -> Self {
-        Self {
-            model: None,
-            permission_mode: None,
-            max_budget_usd: None,
-            max_turns: None,
-            max_thinking_tokens: None,
-            system_prompt: None,
-            include_partial_messages: false,
-        }
-    }
-}
 
 impl From<SessionOptions> for crate::types::config::ClaudeAgentOptions {
     fn from(options: SessionOptions) -> Self {
@@ -81,7 +69,7 @@ impl From<SessionOptions> for crate::types::config::ClaudeAgentOptions {
 
         // Convert system_prompt to SystemPrompt if present
         let system_prompt: Option<crate::types::config::SystemPrompt> =
-            options.system_prompt.map(|text| crate::types::config::SystemPrompt::Text(text));
+            options.system_prompt.map(crate::types::config::SystemPrompt::Text);
 
         // Build ClaudeAgentOptions using builder with conditional field setting
         // Since we can't use if-else with builder reassignment due to TypedBuilder's type system,

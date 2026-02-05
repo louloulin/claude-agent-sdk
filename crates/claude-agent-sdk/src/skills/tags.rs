@@ -175,12 +175,12 @@ impl TagQueryBuilder {
             if tags.contains(&tag.to_string()) {
                 groups
                     .entry(tag.to_string())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(item);
             } else {
                 groups
                     .entry(no_tag.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(item);
             }
         }
@@ -276,8 +276,7 @@ pub struct TagUtils;
 impl TagUtils {
     /// Normalize tag names (lowercase, trim, replace spaces with hyphens, remove special chars)
     pub fn normalize_tag(tag: &str) -> String {
-        tag.trim()
-            .split_whitespace()
+        tag.split_whitespace()
             .collect::<Vec<&str>>()
             .join("-")
             .to_lowercase()
@@ -300,7 +299,7 @@ impl TagUtils {
     pub fn parse_tags(tags_str: &str) -> Vec<String> {
         tags_str
             .split(',')
-            .map(|s| Self::normalize_tag(s))
+            .map(Self::normalize_tag)
             .filter(|s| !s.is_empty() && Self::is_valid_tag(s))
             .collect()
     }
