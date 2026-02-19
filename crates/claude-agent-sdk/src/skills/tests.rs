@@ -3,6 +3,7 @@
 use super::*;
 use async_trait::async_trait;
 
+#[derive(Debug)]
 struct TestSkill {
     name: String,
     description: String,
@@ -18,14 +19,14 @@ impl Skill for TestSkill {
         self.description.clone()
     }
 
-    async fn execute(&self, input: SkillInput) -> SkillResult {
+    async fn execute(&self, input: SkillInput) -> error::Result<SkillOutput> {
         Ok(SkillOutput::ok(format!(
             "Executed with params: {:?}",
             input.params
         )))
     }
 
-    fn validate(&self) -> std::result::Result<(), SkillError> {
+    fn validate(&self) -> error::Result<()> {
         if self.name.is_empty() {
             return Err(SkillError::Validation("Skill name cannot be empty".into()));
         }

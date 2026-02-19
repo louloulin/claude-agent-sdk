@@ -2,6 +2,7 @@
 
 use async_trait::async_trait;
 use std::fmt;
+use std::sync::Arc;
 use super::{SkillInput};
 use crate::skills::error::{Result, SkillError, SkillOutput};
 
@@ -62,15 +63,18 @@ pub trait Skill: fmt::Debug + Send + Sync {
 }
 
 /// Wrapper to convert any type implementing Skill into a trait object
+///
+/// Uses `Arc<dyn Skill>` internally for efficient cloning and sharing
+/// across async contexts.
 pub struct SkillBox {
-    pub inner: Box<dyn Skill>,
+    pub inner: Arc<dyn Skill>,
 }
 
 impl SkillBox {
     /// Create a new boxed skill
     pub fn new<S: Skill + 'static>(skill: S) -> Self {
         SkillBox {
-            inner: Box::new(skill),
+            inner: Arc::new(skill),
         }
     }
 }
@@ -137,9 +141,8 @@ impl fmt::Debug for SkillBox {
 
 impl Clone for SkillBox {
     fn clone(&self) -> Self {
-        // Note: This is a simplified clone
         SkillBox {
-            inner: Box::new(*self.inner.name()),
+            inner: Arc::clone(&self.inner),
         }
     }
 }

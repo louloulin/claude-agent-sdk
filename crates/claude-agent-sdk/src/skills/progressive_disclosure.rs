@@ -311,7 +311,6 @@ impl ProgressiveSkillLoader {
 mod tests {
     use super::*;
     use std::fs::{self, File};
-    use std::io::Write;
     use tempfile::TempDir;
 
     fn create_test_skill(temp_dir: &Path) {

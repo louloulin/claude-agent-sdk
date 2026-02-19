@@ -9,6 +9,9 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tracing::{info, warn};
 
+#[cfg(feature = "hot-reload")]
+use tracing::{debug, error};
+
 /// Configuration for hot reload behavior
 #[derive(Debug, Clone)]
 pub struct HotReloadConfig {
@@ -46,7 +49,9 @@ pub enum HotReloadEvent {
 /// Hot reload watcher for skill files
 #[cfg(feature = "hot-reload")]
 pub struct HotReloadWatcher {
+    #[allow(dead_code)]
     config: HotReloadConfig,
+    #[allow(dead_code)]
     event_sender: mpsc::UnboundedSender<HotReloadEvent>,
     _watcher: notify::RecommendedWatcher,
 }
@@ -67,7 +72,6 @@ impl HotReloadWatcher {
         config: HotReloadConfig,
         event_sender: mpsc::UnboundedSender<HotReloadEvent>,
     ) -> Result<Self, SkillError> {
-        use notify::EventKind;
         use notify::Watcher;
 
         let watch_path = watch_path.as_ref();

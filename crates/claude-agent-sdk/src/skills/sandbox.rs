@@ -245,6 +245,9 @@ use std::path::Path;
 use std::time::Duration;
 use tracing::warn;
 
+#[cfg(feature = "sandbox")]
+use tracing::{debug, info};
+
 /// Sandbox execution configuration
 ///
 /// This struct defines resource limits and permissions for sandboxed skill execution.
