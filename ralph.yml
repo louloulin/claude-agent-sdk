@@ -1,18 +1,16 @@
-# Code Review Preset
+# Documentation Preset
 #
-# For reviewing code changes without making modifications.
-# Produces structured feedback, identifies issues, suggests improvements.
+# For writing documentation, READMEs, guides, and technical content.
+# Includes a writer/editor/reviewer cycle for quality.
 #
 # Usage:
-#   ralph run --config presets/review.yml --prompt "Review PR #123"
-#   ralph run --config presets/review.yml --prompt "Review changes in src/auth/"
+#   ralph run --config presets/docs.yml --prompt "Write API documentation for the auth module"
 
 event_loop:
   prompt_file: "PROMPT.md"
-  completion_promise: "REVIEW_COMPLETE"
-  max_iterations: 15
-  max_runtime_seconds: 3600
-  starting_event: "review.start"  # Ralph publishes this after coordination
+  completion_promise: "DOCS_COMPLETE"
+  max_iterations: 30
+  max_runtime_seconds: 7200
 
 cli:
   backend: "claude"
@@ -21,100 +19,52 @@ core:
   specs_dir: "./specs/"
 
 hats:
-  reviewer:
-    name: "Code Reviewer"
-    description: "Reviews code for correctness, clarity, and maintainability."
-    triggers: ["review.start", "analysis.complete"]
-    publishes: ["review.section", "review.complete"]
+  writer:
+    name: "Writer"
+    description: "Writes documentation sections with clarity and precision."
+    triggers: ["write.section", "review.revision"]
+    publishes: ["write.done"]
+    default_publishes: "write.done"
     instructions: |
-      ## CODE REVIEWER MODE
+      ## WRITER MODE
 
-      Review code for correctness, clarity, and maintainability.
+      Write one documentation section with clarity and precision.
 
       ### Process
-      1. **Identify scope.** What files/changes are being reviewed?
-      2. **Read the code.** Understand what it does and why.
-      3. **Check against specs.** Does it match requirements?
-      4. **Dispatch deep analysis.** For complex sections.
-      5. **Synthesize feedback.** Compile final review.
+      1. Read the section assignment from the event
+      2. Study relevant code to ensure accuracy
+      3. Write clear, concise content
+      4. Include code examples where helpful
+      5. Commit the changes
+      6. Publish `write.done` event with section name and file path
 
-      ### Review Output Format
-      ```markdown
-      # Code Review: [Scope]
-
-      ## Files Reviewed
-      - [ ] path/to/file.rs
-      - [ ] path/to/other.rs
-
-      ## Summary
-      [Overall assessment: APPROVE / REQUEST_CHANGES / COMMENT]
-
-      ## Critical Issues (Must Fix)
-      - [ ] file:line — [issue description]
-
-      ## Suggestions (Should Consider)
-      - file:line — [suggestion]
-
-      ## Nitpicks (Optional)
-      - file:line — [minor thing]
-
-      ## Positive Notes
-      - [What's done well]
-      ```
+      ### Style Guidelines
+      - Use active voice
+      - Lead with the "what" and "why" before "how"
+      - Code examples should be copy-pasteable
+      - Link to related sections
 
       ### DON'T
-      - ❌ Modify any code
-      - ❌ Make commits
-      - ❌ Be vague ("this is bad")
-      - ❌ Nitpick style if there's a formatter
+      - ❌ Write multiple sections at once
+      - ❌ Skip code verification
+      - ❌ Use jargon without explanation
 
-      ### DONE
-      When all files reviewed and feedback compiled, output: REVIEW_COMPLETE
-
-  analyzer:
-    name: "Deep Analyzer"
-    description: "Performs thorough analysis of specific code sections."
-    triggers: ["review.section"]
-    publishes: ["analysis.complete"]
+  reviewer:
+    name: "Doc Reviewer"
+    description: "Reviews documentation for accuracy, clarity, and completeness."
+    triggers: ["write.done"]
+    publishes: ["review.done", "review.revision"]
+    default_publishes: "review.done"
     instructions: |
-      ## DEEP ANALYZER MODE
+      ## DOC REVIEWER MODE
 
-      Perform thorough analysis of a specific code section.
+      Review documentation for accuracy, clarity, and completeness.
 
-      ### Checks
-      1. **Correctness** — Does it do what it claims?
-      2. **Edge cases** — What happens with unusual input?
-      3. **Error handling** — Are failures handled gracefully?
-      4. **Security** — Any vulnerabilities? (injection, auth bypass, etc.)
-      5. **Performance** — Any obvious inefficiencies?
-      6. **Testability** — Is this code testable? Are there tests?
+      ### Checklist
+      - [ ] Technically accurate (matches code)
+      - [ ] Clear to target audience
+      - [ ] Examples work as shown
+      - [ ] No broken links
+      - [ ] Consistent terminology
+      - [ ] Grammar and spelling
 
-      ### Output
-      Add findings to the review output under the appropriate category.
-
-      ### DON'T
-      - ❌ Modify code
-      - ❌ Flag things that are fine
-      - ❌ Miss security issues
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Review Categories Reference
-# ─────────────────────────────────────────────────────────────────────────────
-#
-# Critical (Blocks Merge):
-#   - Bugs that will cause failures
-#   - Security vulnerabilities
-#   - Data loss risks
-#   - Breaking API changes without version bump
-#
-# Suggestions (Should Address):
-#   - Missing error handling
-#   - Unclear logic
-#   - Missing tests for new code
-#   - Performance issues
-#
-# Nitpicks (Optional):
-#   - Naming improvements
-#   - Minor refactoring opportunities
-#   - Documentation additions
-# ─────────────────────────────────────────────────────────────────────────────
