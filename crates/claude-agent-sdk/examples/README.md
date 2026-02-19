@@ -1,6 +1,6 @@
 # Claude Agent SDK - Examples
 
-Welcome to the Claude Agent SDK examples directory! This collection contains 56 examples demonstrating all features of the SDK.
+Welcome to the Claude Agent SDK examples directory! This collection contains 70 examples demonstrating all features of the SDK.
 
 ## 📋 Prerequisites
 
@@ -44,13 +44,16 @@ Advanced Skills features and patterns
 - 38_agent_skills_hot_reload - Hot reloading
 - ...and 10 more
 
-### 3. Advanced Patterns (42-49)
+### 3. Advanced Patterns (42-54)
 Production-ready patterns and real-world usage
 
 - 42_mcp_async_tasks - Async MCP tasks
 - 44_concurrent_queries - Concurrency patterns
 - 48_performance_benchmarking - Performance testing
-- ...and 8 more
+- 52_batch_operations - Batch processing patterns
+- 53_error_recovery - Error recovery and retry patterns
+- 54_advanced_streaming - Backpressure and stream composition
+- ...and more
 
 ### 4. Production & Integration (50-55)
 Enterprise features and deployment
@@ -58,6 +61,24 @@ Enterprise features and deployment
 - 50_production_deployment - Deployment guide
 - 51_orchestration - Orchestration patterns
 - 55_real_skill_md_verification - Verification
+
+### 5. New API Modules (56-62)
+Modern API patterns and utilities
+
+- 56_v2_api - Simplified TypeScript-style V2 API
+- 57_todos - Todo list management
+- 58_commands - Slash command registration and execution
+- 59_subagents - Specialized subagent system
+- 60_observability - Structured logging and metrics collection
+- 61_multi_modal - Comprehensive multimodal input handling
+- 62_advanced_v2_api - Advanced V2 API features and middleware
+
+### 6. Integration & CLI (63-67)
+Advanced integration patterns and CLI tools
+
+- 65_v2_middleware - Middleware patterns (retry, caching, rate limiting, metrics)
+- 66_full_integration - Combining multiple SDK features together
+- 67_cli_tools - Building interactive CLI tools with the SDK
 
 ## 📖 Learning Path
 
@@ -75,6 +96,51 @@ Enterprise features and deployment
    - 09_agents
    - 30_agent_skills
    - 42_mcp_async_tasks
+   - 52_batch_operations
+   - 53_error_recovery
+
+4. **New APIs** (Modern SDK)
+   - 56_v2_api - Simplified API
+   - 58_commands - Custom commands
+   - 60_observability - Logging and metrics
+   - 61_multi_modal - Image and multimodal handling
+   - 62_advanced_v2_api - Middleware and advanced patterns
+
+5. **Integration Patterns** (Production)
+   - 65_v2_middleware - Build middleware chains
+   - 66_full_integration - Full-stack integration example
+   - 67_cli_tools - CLI application patterns
+
+## 🆕 New Examples (65-67)
+
+### 65_v2_middleware.rs
+Demonstrates middleware patterns for the V2 API:
+- **RetryMiddleware**: Exponential backoff retry logic
+- **LoggingMiddleware**: Request/response logging
+- **CachingMiddleware**: Response caching with TTL
+- **RateLimitMiddleware**: Request rate limiting
+- **MetricsMiddleware**: Performance metrics collection
+- **TransformationMiddleware**: Request/response transformation
+
+### 66_full_integration.rs
+Shows how to combine multiple SDK features:
+- Application state management
+- Session management with persistence
+- Command registry for slash commands
+- Subagent dispatching
+- Multi-modal content building
+- Streaming response handling
+- Cost tracking
+
+### 67_cli_tools.rs
+Building interactive CLI applications:
+- Interactive REPL engine
+- Command parsing and handling
+- Progress indicators
+- Rich output formatting (Text/Markdown/JSON)
+- Session management
+- Configuration management
+- Error handling and recovery
 
 ## 🔧 Common Issues
 
