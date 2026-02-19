@@ -1,0 +1,29 @@
+# Memories
+
+## Patterns
+
+## Decisions
+
+### mem-1771460429-291f
+> Rust SDK improvement plan: Phase 1 (1-2w): connection pooling, lock optimization, error refinement. Phase 2 (2-4w): batch API, dynamic buffers, zero-copy. Phase 3 (ongoing): fix examples, Clippy warnings, doc TODOs, 80%+ test coverage.
+<!-- tags: roadmap, rust-sdk, planning | created: 2026-02-19 -->
+
+### mem-1771460427-85e9
+> Rust SDK vs Official SDKs: Rust has 100% feature parity + unique features: CLI auto-install, enhanced skills validation (12 fields), security auditor (10 risk patterns), progressive disclosure O(1) loading, hot reload support. V2 API is complete in Rust while TypeScript has only preview.
+<!-- tags: comparison, sdk-features, rust-sdk | created: 2026-02-19 -->
+
+## Fixes
+
+### mem-1771460414-2da8
+> Rust SDK known issues: 1) No connection pooling - spawns new CLI per query 2) Lock contention in client.rs hot path 3) Fixed 10MB buffer may be insufficient 4) V2 prompt() creates new client per call 5) 7 example compilation errors 6) 17 Clippy warnings
+<!-- tags: rust-sdk, issues, performance | created: 2026-02-19 -->
+
+## Context
+
+### mem-1771460413-b297
+> Rust SDK Performance: 1.5x faster than Python (300ms vs 500ms simple query), 6x faster concurrent (800ms vs 5000ms for 10 queries), 10x less memory (5MB vs 50MB idle). Bottlenecks: process spawn ~50-100ms, JSON serialization, lock contention.
+<!-- tags: performance, benchmark, rust-sdk | created: 2026-02-19 -->
+
+### mem-1771460410-b54b
+> Claude Agent SDK Rust architecture: Layered design with transport (subprocess.rs), client (client.rs), V2 API (v2/mod.rs), skills system, orchestration. Uses typed-builder, async-trait, thiserror, async_stream. Key pattern: subprocess transport spawns CLI process per query.
+<!-- tags: architecture, rust-sdk, codebase | created: 2026-02-19 -->
