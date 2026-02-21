@@ -4,6 +4,10 @@
 
 ## Decisions
 
+### mem-1771650972-6b60
+> Claude Agent SDK商业化研究: Vercel B/200M ARR (平台+AI工具), LangChain .25B/12-16M ARR (开源+企业版), Claude Code B+ ARR (按结果付费). Anthropic 70-75%收入来自API调用, 36%使用量为编程任务. 四大商业化类型: Finance/PersonalAssistant/CustomerSupport/DeepResearch Agent.
+<!-- tags: commercial, research, sdk | created: 2026-02-21 -->
+
 ### mem-1771460429-291f
 > Rust SDK improvement plan: Phase 1 (1-2w): connection pooling, lock optimization, error refinement. Phase 2 (2-4w): batch API, dynamic buffers, zero-copy. Phase 3 (ongoing): fix examples, Clippy warnings, doc TODOs, 80%+ test coverage.
 <!-- tags: roadmap, rust-sdk, planning | created: 2026-02-19 -->
