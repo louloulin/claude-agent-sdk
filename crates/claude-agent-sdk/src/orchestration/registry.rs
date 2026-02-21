@@ -308,10 +308,13 @@ impl AgentFilter {
     }
 }
 
+/// Type alias for the agent entry in the registry
+type AgentEntry = (Box<dyn Agent>, AgentMetadata);
+
 /// Centralized registry for agent definitions
 pub struct AgentRegistry {
     /// Map of agent ID to (agent, metadata) pairs
-    agents: Arc<RwLock<HashMap<String, (Box<dyn Agent>, AgentMetadata)>>>,
+    agents: Arc<RwLock<HashMap<String, AgentEntry>>>,
 
     /// Registry name for logging
     name: String,

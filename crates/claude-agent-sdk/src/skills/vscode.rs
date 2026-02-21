@@ -347,6 +347,7 @@ mod tests {
     use crate::skills::types::{SkillMetadata, SkillResources};
     use uuid::Uuid;
 
+    #[allow(dead_code)]
     fn create_test_skill(name: &str, description: &str) -> SkillPackage {
         SkillPackage {
             metadata: SkillMetadata {

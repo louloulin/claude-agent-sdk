@@ -216,7 +216,7 @@ impl SkillPackage {
     /// Save the skill package to a file in JSON format
     pub fn save_to_file<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
         let json = serde_json::to_string_pretty(self)
-            .map_err(|e| io::Error::other(e))?;
+            .map_err(io::Error::other)?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(json.as_bytes())?;
@@ -235,7 +235,7 @@ impl SkillPackage {
     #[cfg(feature = "yaml")]
     pub fn save_to_yaml<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()> {
         let yaml =
-            serde_yaml::to_string(self).map_err(|e| io::Error::other(e))?;
+            serde_yaml::to_string(self).map_err(io::Error::other)?;
 
         let mut file = fs::File::create(path)?;
         file.write_all(yaml.as_bytes())?;
@@ -474,6 +474,6 @@ mod tests {
     #[test]
     fn test_skill_input_default() {
         let input = SkillInput::default();
-        assert!(input.params.is_null() || input.params.as_object().map_or(true, |m| m.is_empty()));
+        assert!(input.params.is_null() || input.params.as_object().is_none_or(|m| m.is_empty()));
     }
 }

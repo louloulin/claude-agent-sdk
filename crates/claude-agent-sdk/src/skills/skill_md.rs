@@ -1011,7 +1011,7 @@ user_invocable: false
 "#;
 
         let (metadata1, _) = SkillMdFile::parse_frontmatter(content1).unwrap();
-        assert_eq!(metadata1.user_invocable, false);
+        assert!(!metadata1.user_invocable);
 
         // Default should be true
         let content2 = r#"---
@@ -1023,7 +1023,7 @@ description: Test default user invocable
 "#;
 
         let (metadata2, _) = SkillMdFile::parse_frontmatter(content2).unwrap();
-        assert_eq!(metadata2.user_invocable, true);
+        assert!(metadata2.user_invocable);
     }
 
     #[test]
@@ -1074,7 +1074,7 @@ This is a comprehensive test of all metadata fields.
         assert_eq!(metadata.context, Some(SkillContext::Fork));
         assert_eq!(metadata.agent, Some("general-purpose".to_string()));
         assert!(metadata.hooks.is_some());
-        assert_eq!(metadata.user_invocable, true);
+        assert!(metadata.user_invocable);
         assert_eq!(metadata.disable_model_invocation, Some(false));
         assert!(content.contains("comprehensive test"));
     }

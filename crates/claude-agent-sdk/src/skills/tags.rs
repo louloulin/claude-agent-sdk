@@ -259,7 +259,7 @@ impl TagQueryBuilder {
             .into_iter()
             .collect();
 
-        stats.sort_by(|a, b| b.1.cmp(&a.1));
+        stats.sort_by_key(|b| std::cmp::Reverse(b.1));
         stats.into_iter().take(limit).collect()
     }
 }
