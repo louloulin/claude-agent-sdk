@@ -1,11 +1,11 @@
 # Session Handoff
 
-_Generated: 2026-02-21 04:03:48 UTC_
+_Generated: 2026-02-21 04:59:45 UTC_
 
 ## Git Context
 
 - **Branch:** `main`
-- **HEAD:** 418fd53: chore: auto-commit before merge (loop primary)
+- **HEAD:** 3d3b8b5: chore: auto-commit before merge (loop primary)
 
 ## Tasks
 
@@ -67,6 +67,10 @@ _Generated: 2026-02-21 04:03:48 UTC_
 - [x] Fix example 39 missing Path import
 - [x] Fix core library Clippy warnings
 - [x] Verify all tests pass
+- [x] Fix bool_assert_comparison in skill_md.rs
+- [x] Fix int_plus_one in parallel.rs
+- [x] Fix unnecessary_sort_by in tags.rs
+- [x] Fix redundant_closure in types.rs
 
 
 ## Key Files
@@ -80,9 +84,9 @@ Recently modified:
 - `.ralph/agent/tasks.jsonl`
 - `.ralph/current-events`
 - `.ralph/current-loop-id`
-- `.ralph/events-20260220-144622.jsonl`
-- `.ralph/events-20260221-025308.jsonl`
-- `.ralph/events-20260221-035428.jsonl`
+- `.ralph/events-20260221-042057.jsonl`
+- `.ralph/events-20260221-043653.jsonl`
+- `.ralph/history.jsonl`
 
 ## Next Session
 
