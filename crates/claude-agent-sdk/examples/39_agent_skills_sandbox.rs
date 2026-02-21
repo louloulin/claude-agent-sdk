@@ -8,6 +8,9 @@ use claude_agent_sdk::skills::sandbox::{
 };
 use std::time::Duration;
 
+#[cfg(feature = "sandbox")]
+use std::path::Path;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing
