@@ -1,8 +1,21 @@
-# Claude Agent SDK 商业化计划 - 扩展包架构版 (todo1.6)
+# Claude Agent SDK 商业化计划 - 扩展包架构版 (todo1.7)
 
 ## 概述
 
 基于对 Claude Agent SDK 商业化案例的深入研究，本文档制定了 Rust SDK 的商业化路径计划。采用**扩展包架构 (Extension Crates)** 设计，保持核心 crate 精简，按需加载扩展功能。
+
+### 当前状态 (2026-02-21)
+
+**已实现并在核心 crate 中:**
+- ✅ 连接池 (`internal/pool.rs`) - 需提取到 `claude-agent-sdk-pool`
+- ✅ 零拷贝解析 (`internal/message_parser.rs`) - 保留核心，可选 feature
+- ✅ 可观测性 (`observability/`) - 需提取到 `claude-agent-sdk-observability`
+- ✅ 技能系统 (`skills/`) - 保留核心
+- ✅ 编排系统 (`orchestration/`) - 保留核心
+- ✅ 子代理系统 (`subagents/`) - 可提取到 `claude-agent-sdk-agents`
+- ✅ 动态缓冲区 - 已集成到 transport
+- ✅ 错误分类 - 已集成到 errors.rs
+- ✅ 结构化日志 - 已集成到 observability
 
 ---
 
@@ -481,88 +494,224 @@ impl Default for ClaudePricing {
 
 ---
 
-## 四、实现计划
+## 四、实现计划 (最小改造版)
 
-### Phase 0: 架构重构 (1周)
+### 设计原则: 最小改造 + 最大复用
 
-**目标**: 将现有功能拆分到独立 crate
+| 原则 | 实践 | 示例 |
+|------|------|------|
+| **复制优先** | 先复制代码到新 crate，而非直接移动 | pool.rs 复制到 pool crate |
+| **渐进迁移** | 核心 crate 保持向后兼容，使用 feature flags | `features = ["pool"]` |
+| **重新导出** | 核心 crate 重新导出扩展类型 | `pub use pool::*` |
+| **独立测试** | 每个扩展包独立测试套件 | `cargo test -p claude-agent-sdk-pool` |
+| **文档同步** | 更新所有受影响的文档和示例 | 更新 example 68 |
+
+### Phase 0: 准备工作 (2天)
+
+**目标**: 创建扩展包骨架结构，验证编译
 
 **任务**:
-- [ ] 创建 `crates/claude-agent-sdk-pool` 目录结构
-- [ ] 迁移连接池代码到 `pool` crate
-- [ ] 更新核心 crate 依赖
-- [ ] 验证所有测试通过
+- [ ] 创建 `crates/claude-agent-sdk-pool/` 目录和 Cargo.toml
+- [ ] 创建 `crates/claude-agent-sdk-batch/` 目录和 Cargo.toml
+- [ ] 创建 `crates/claude-agent-sdk-observability/` 目录和 Cargo.toml
+- [ ] 创建 `crates/claude-agent-sdk-agents/` 目录和 Cargo.toml
+- [ ] 更新 workspace Cargo.toml 添加新 members
+- [ ] 验证空 crate 编译通过
 
 **目录结构**:
 ```
 crates/
-├── claude-agent-sdk/
+├── claude-agent-sdk/              # 核心 crate (已存在)
 │   ├── Cargo.toml
 │   └── src/
 │       ├── lib.rs
 │       ├── client.rs
-│       ├── transport/
-│       ├── error.rs
-│       └── types/
+│       ├── internal/
+│       │   ├── pool.rs           # → 将移动到 pool crate
+│       │   ├── message_parser.rs # 保留 (feature flag)
+│       │   └── transport/
+│       ├── observability/         # → 将移动到 observability crate
+│       ├── skills/               # 保留
+│       ├── orchestration/         # 保留
+│       └── subagents/            # → 将移动到 agents crate
 │
-├── claude-agent-sdk-pool/
+├── claude-agent-sdk-pool/         # 新建
 │   ├── Cargo.toml
-│   └── src/
-│       ├── lib.rs
-│       ├── pool.rs
-│       └── config.rs
+│   └── src/lib.rs                # 初始为空
 │
-└── (其他扩展 crate 空目录)
+├── claude-agent-sdk-batch/        # 新建
+│   ├── Cargo.toml
+│   └── src/lib.rs                # 初始为空
+│
+├── claude-agent-sdk-observability/ # 新建
+│   ├── Cargo.toml
+│   └── src/lib.rs                # 初始为空
+│
+└── claude-agent-sdk-agents/       # 新建
+    ├── Cargo.toml
+    └── src/lib.rs                # 初始为空
 ```
 
-### Phase 1: 核心扩展包 (2-3周)
+### Phase 1: 提取连接池 (3天)
 
-**扩展包**: `pool`, `batch`, `observability`
+**目标**: 将 `internal/pool.rs` 移动到独立 crate
 
-| Crate | 周数 | 任务 |
-|-------|------|------|
-| `pool` | Week 1 | 迁移现有连接池代码，优化锁竞争 |
-| `batch` | Week 2 | 实现 BatchExecutor，并行执行 |
-| `observability` | Week 2-3 | Prometheus 导出，OpenTelemetry 集成 |
+**策略 - 最小改造**:
+```rust
+// 步骤 1: 复制而非移动 (保持向后兼容)
+// crates/claude-agent-sdk-pool/src/lib.rs
+pub use crate::pool::*;
 
-**验收标准**:
-- [ ] 所有 crate 编译通过
-- [ ] 测试覆盖率 > 80%
-- [ ] 文档完整 (rustdoc)
-- [ ] 示例代码可运行
+mod pool;
 
-### Phase 2: Agent 扩展包 (2-3周)
+// pool.rs 从核心 crate 复制过来，稍作调整导入路径
 
-**扩展包**: `agents`, `session`, `cost`
+// 步骤 2: 核心 crate 可选依赖 pool crate
+// crates/claude-agent-sdk/Cargo.toml
+[features]
+default = []
+pool = ["dep:claude-agent-sdk-pool"]
 
-| Crate | 周数 | 任务 |
-|-------|------|------|
-| `agents` | Week 4-5 | 实现 CodeReviewer, DataAnalyst, TestGenerator |
-| `session` | Week 5 | 会话管理，存储后端 |
-| `cost` | Week 6 | Token 统计，成本计算，预算管理 |
+[dependencies]
+claude-agent-sdk-pool = { path = "../claude-agent-sdk-pool", optional = true }
 
-**验收标准**:
-- [ ] 预构建 Agent 可用
-- [ ] 会话持久化正常工作
-- [ ] 成本追踪准确
-
-### Phase 3: MCP 扩展包 (2周)
-
-**扩展包**: `mcp`
+// 步骤 3: 核心 crate 重新导出 (feature 启用时)
+// crates/claude-agent-sdk/src/lib.rs
+#[cfg(feature = "pool")]
+pub use claude_agent_sdk_pool::{ConnectionPool, PoolConfig, PoolStats, PooledWorker, WorkerGuard};
+```
 
 **任务**:
-- [ ] MCP 服务器注册
-- [ ] 工具发现与调用
-- [ ] 资源访问
-- [ ] 提示词模板
+- [ ] 复制 `internal/pool.rs` 到 `claude-agent-sdk-pool/src/pool.rs`
+- [ ] 调整 pool.rs 中的导入路径
+- [ ] 配置 pool crate 的 Cargo.toml 依赖
+- [ ] 在核心 crate 添加可选依赖和 feature flag
+- [ ] 更新核心 crate 的 re-exports
+- [ ] 验证 `cargo test --features pool` 通过
+- [ ] 更新示例 68_connection_pool.rs 使用新 crate
 
-### Phase 4: 文档与示例 (持续)
+**验收标准**:
+- [ ] `claude-agent-sdk-pool` 独立编译通过
+- [ ] 核心 crate 带 `pool` feature 编译通过
+- [ ] 核心 crate 不带 `pool` feature 编译通过
+- [ ] 所有测试通过
+- [ ] 文档更新
+
+### Phase 2: 提取可观测性 (3天)
+
+**目标**: 将 `observability/` 模块移动到独立 crate
+
+**策略 - 分层提取**:
+```rust
+// 基础层保留在核心 crate (简单日志)
+// crates/claude-agent-sdk/src/internal/tracing_basic.rs
+pub fn init_default() { ... }
+pub fn generate_request_id() -> String { ... }
+
+// 扩展层移到独立 crate
+// crates/claude-agent-sdk-observability/src/lib.rs
+pub use crate::{
+    metrics::*,
+    prometheus::*,
+    opentelemetry::*,
+    tracing::*,
+};
+
+// 核心 crate 可选依赖
+[features]
+default = []
+observability = ["dep:claude-agent-sdk-observability"]
+```
 
 **任务**:
-- [ ] 每个 crate 的 README
-- [ ] API 参考文档 (rustdoc)
-- [ ] 示例项目 (至少 10 个)
-- [ ] 迁移指南
+- [ ] 创建 `claude-agent-sdk-observability/src/metrics.rs`
+- [ ] 创建 `claude-agent-sdk-observability/src/prometheus.rs`
+- [ ] 创建 `claude-agent-sdk-observability/src/opentelemetry.rs`
+- [ ] 移动 `observability/` 目录内容
+- [ ] 添加 Prometheus 依赖 (可选 feature)
+- [ ] 添加 OpenTelemetry 依赖 (可选 feature)
+- [ ] 核心 crate 添加 feature flag
+- [ ] 验证编译和测试
+
+### Phase 3: 创建批量操作扩展 (4天)
+
+**目标**: 新建 `claude-agent-sdk-batch` crate
+
+**实现**:
+```rust
+// crates/claude-agent-sdk-batch/src/lib.rs
+use claude_agent_sdk::{ClaudeClient, ClaudeError, Message};
+use futures::{stream, StreamExt};
+
+pub struct BatchExecutor {
+    client: ClaudeClient,
+    parallelism: usize,
+    retry_count: u32,
+}
+
+impl BatchExecutor {
+    pub fn new(client: ClaudeClient) -> Self { ... }
+
+    pub async fn batch_query(
+        &self,
+        queries: &[&str],
+    ) -> Vec<Result<Vec<Message>, ClaudeError>> {
+        stream::iter(queries)
+            .map(|q| self.execute_with_retry(q))
+            .buffer_unordered(self.parallelism)
+            .collect()
+            .await
+    }
+}
+```
+
+**任务**:
+- [ ] 创建 BatchExecutor 结构
+- [ ] 实现 batch_query 方法
+- [ ] 实现 batch_analyze 方法
+- [ ] 添加重试逻辑
+- [ ] 添加进度回调
+- [ ] 编写单元测试
+- [ ] 创建示例代码
+
+### Phase 4: 提取 Agent 扩展 (5天)
+
+**目标**: 将 `subagents/` 移动到 `claude-agent-sdk-agents`
+
+**策略**:
+```rust
+// crates/claude-agent-sdk-agents/src/lib.rs
+pub mod subagents;  // 从核心 crate 移动
+pub mod prebuilt;   // 新增预构建 Agent
+
+// prebuilt/mod.rs
+pub mod code_reviewer;
+pub mod data_analyst;
+pub mod doc_generator;
+pub mod test_generator;
+
+// prebuilt/code_reviewer.rs
+pub struct CodeReviewer { ... }
+impl CodeReviewer {
+    pub async fn review_pr(&self, diff: &str) -> Result<ReviewResult, AgentError> { ... }
+    pub async fn detect_vulnerabilities(&self, code: &str) -> Result<Vec<Vulnerability>, AgentError> { ... }
+}
+```
+
+**任务**:
+- [ ] 移动 `subagents/` 到 agents crate
+- [ ] 实现 CodeReviewer 预构建 Agent
+- [ ] 实现 DataAnalyst 预构建 Agent
+- [ ] 实现 DocGenerator 预构建 Agent
+- [ ] 实现 TestGenerator 预构建 Agent
+- [ ] 为每个 Agent 编写测试
+- [ ] 创建使用示例
+
+### Phase 5: 其他扩展包 (后续)
+
+**扩展包**: `session`, `cost`, `mcp`
+
+这些扩展包在核心功能稳定后实现，按需添加。
 
 ---
 
@@ -634,19 +783,143 @@ crates/
 
 ---
 
-## 七、执行时间线
+## 七、执行时间线 (更新版)
 
 ```
-Week 1:    Phase 0 - 架构重构
-Week 2-4:  Phase 1 - 核心扩展包 (pool, batch, observability)
-Week 5-7:  Phase 2 - Agent 扩展包 (agents, session, cost)
-Week 8-9:  Phase 3 - MCP 扩展包
-Week 10+:  Phase 4 - 文档与示例
+Week 1 Day 1-2:  Phase 0 - 创建扩展包骨架
+Week 1 Day 3-5:  Phase 1 - 提取连接池 (pool crate)
+Week 2 Day 1-3:  Phase 2 - 提取可观测性 (observability crate)
+Week 2 Day 4-5:  Phase 3 开始 - 创建批量操作 (batch crate)
+Week 3:          Phase 3 完成 + Phase 4 开始 (agents crate)
+Week 4:          Phase 4 完成 - Agent 扩展包
+Week 5+:         Phase 5 - session, cost, mcp 扩展包 (按需)
+```
+
+### 里程碑检查点
+
+| 里程碑 | 预计完成 | 验收标准 |
+|--------|----------|----------|
+| **M1: 骨架就绪** | Day 2 | 4个空 crate 编译通过 |
+| **M2: Pool 独立** | Day 5 | pool crate 独立可用 |
+| **M3: Observability 独立** | Day 8 | observability crate 独立可用 |
+| **M4: Batch 可用** | Day 12 | batch crate + 示例完成 |
+| **M5: Agents 可用** | Day 19 | 4个预构建 Agent 可用 |
+
+---
+
+## 八、迁移指南
+
+### 从核心 crate 迁移到扩展包
+
+**场景 1: 使用连接池**
+```toml
+# 之前 (所有功能在核心 crate)
+[dependencies]
+claude-agent-sdk = { version = "0.2", features = ["pool"] }
+
+# 之后 (推荐: 使用独立 crate)
+[dependencies]
+claude-agent-sdk = "0.2"
+claude-agent-sdk-pool = "0.1"
+
+# 之后 (兼容: 继续使用 feature flag)
+[dependencies]
+claude-agent-sdk = { version = "0.2", features = ["pool"] }
+```
+
+**场景 2: 使用可观测性**
+```rust
+// 之前
+use claude_agent_sdk::{init_tracing, MetricsCollector};
+
+// 之后 (独立 crate)
+use claude_agent_sdk_observability::{init_tracing, MetricsCollector, PrometheusExporter};
+```
+
+**场景 3: 使用批量操作**
+```rust
+// 新功能，需要添加依赖
+use claude_agent_sdk_batch::BatchExecutor;
+
+// Cargo.toml
+[dependencies]
+claude-agent-sdk-batch = "0.1"
+```
+
+### API 兼容性承诺
+
+| 版本 | 兼容性策略 |
+|------|-----------|
+| **0.x** | 可能破坏性变更，feature flags 保持稳定 |
+| **1.0+** | 语义化版本，核心 API 稳定 |
+
+### 废弃计划
+
+| 功能 | 废弃版本 | 移除版本 | 替代方案 |
+|------|----------|----------|----------|
+| 核心 crate 内 pool 模块 | 0.3 | 1.0 | `claude-agent-sdk-pool` crate |
+| 核心 crate 内完整 observability | 0.3 | 1.0 | `claude-agent-sdk-observability` crate |
+
+---
+
+## 8.5 代码复用示例
+
+### 核心 crate 到扩展包的代码迁移
+
+**示例: pool.rs 迁移**
+
+```rust
+// === 之前: crates/claude-agent-sdk/src/internal/pool.rs ===
+use crate::errors::ClaudeError;
+use crate::internal::transport::SubprocessTransport;
+
+pub struct ConnectionPool { ... }
+
+// === 之后: crates/claude-agent-sdk-pool/src/pool.rs ===
+use claude_agent_sdk::{ClaudeError, ClaudeAgentOptions};  // 从核心 crate 导入
+
+// SubprocessTransport 需要公开或创建 trait
+pub struct ConnectionPool { ... }
+
+// === 核心 crate: 保持重新导出 (向后兼容) ===
+// crates/claude-agent-sdk/src/lib.rs
+#[cfg(feature = "pool")]
+pub use claude_agent_sdk_pool::{
+    ConnectionPool, PoolConfig, PoolStats, PooledWorker, WorkerGuard
+};
+
+// 同时保留内部模块 (废弃警告)
+#[deprecated(since = "0.3.0", note = "Use claude-agent-sdk-pool crate instead")]
+pub mod internal {
+    pub mod pool {
+        #[cfg(feature = "pool")]
+        pub use claude_agent_sdk_pool::*;
+    }
+}
+```
+
+### 依赖关系管理
+
+```toml
+# crates/claude-agent-sdk-pool/Cargo.toml
+[package]
+name = "claude-agent-sdk-pool"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+claude-agent-sdk = { path = "../claude-agent-sdk", version = "0.2" }
+tokio = { version = "1", features = ["rt", "sync", "time"] }
+parking_lot = "0.12"
+thiserror = "1"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
 ```
 
 ---
 
-## 八、风险与缓解
+## 九、风险与缓解
 
 | 风险 | 概率 | 影响 | 缓解措施 |
 |------|------|------|----------|
@@ -657,7 +930,7 @@ Week 10+:  Phase 4 - 文档与示例
 
 ---
 
-## 九、成功指标 (KPI)
+## 十、成功指标 (KPI)
 
 ### 技术指标
 - 扩展包数量: **8个**
@@ -690,7 +963,8 @@ Week 10+:  Phase 4 - 文档与示例
 
 ---
 
-*文档版本: 1.7*
+*文档版本: 1.8*
 *创建日期: 2026-02-21*
 *最后更新: 2026-02-21*
 *架构变更: 采用扩展包架构，核心 crate 保持精简*
+*新增内容: 当前状态分析、最小改造策略、代码复用示例、迁移指南*

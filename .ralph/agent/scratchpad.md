@@ -1,35 +1,61 @@
-# Scratchpad: PROMPT.md 扩展包重构计划
+# Scratchpad - Extension Crate Architecture Refinement
 
-## 2026-02-21 - 完成更新
+## Current Analysis
 
-### ✅ 任务完成
+### What's Already Implemented (In Core)
+1. **internal/pool.rs** - ConnectionPool, PoolConfig, PooledWorker
+2. **internal/message_parser.rs** - ZeroCopyMessageParser, MessageKind
+3. **observability/** - TracingConfig, MetricsCollector, histogram support
+4. **skills/** - Skill trait, SkillRegistry, discovery
+5. **orchestration/** - Agent, Orchestrator, SequentialOrchestrator, ParallelOrchestrator
+6. **subagents/** - Subagent, SubagentExecutor
 
-已将 PROMPT.md 完全重构为**扩展包架构**设计:
+### Objective
+Update PROMPT.md to add separate extension crates instead of implementing in current crate. Focus on:
+1. Minimal changes - extract existing code, not rewrite
+2. Maximize code reuse
+3. Clear migration path
 
-#### 新架构设计
-- **核心 crate**: `claude-agent-sdk` - 只包含基础 API (query/prompt/Agent/Transport/Error)
-- **7 个扩展包**:
-  1. `claude-agent-sdk-pool` - 连接池
-  2. `claude-agent-sdk-batch` - 批量操作
-  3. `claude-agent-sdk-agents` - 预构建 Agent (CodeReviewer, DataAnalyst, etc.)
-  4. `claude-agent-sdk-mcp` - MCP 协议
-  5. `claude-agent-sdk-observability` - 可观测性 (Prometheus, OpenTelemetry)
-  6. `claude-agent-sdk-session` - 会话管理
-  7. `claude-agent-sdk-cost` - 成本追踪
+### Plan: Minimal Extraction
 
-#### 架构优势
-- 核心精简: 快速编译、小二进制
-- 按需加载: 用户只引入需要的扩展
-- 版本独立: 各扩展包可独立迭代
+**Phase 0: Create Extension Crate Skeletons**
+- Create directory structure for each extension crate
+- Empty Cargo.toml with dependencies
 
-#### 文档内容
-- 详细的 crate 结构和依赖关系图
-- 每个扩展包的 API 设计示例
-- 验证指标和测试要求
-- 更新的实现时间线 (Phase 0-4)
+**Phase 1: Extract pool → claude-agent-sdk-pool**
+- Move internal/pool.rs to new crate
+- Update core to depend on pool crate (optional dep)
+- Minimal changes, just re-export
 
-### 提交信息
-```
-docs(plan): refactor to extension crate architecture
-commit: 4106231
-```
+**Phase 2: Extract observability → claude-agent-sdk-observability**
+- Move observability/ directory to new crate
+- Keep tracing basics in core, advanced metrics in extension
+
+**Phase 3: Extract batch → claude-agent-sdk-batch** (New)
+- Create BatchExecutor using existing pool
+- Parallel query execution
+
+**Phase 4: Extract agents → claude-agent-sdk-agents** (New)
+- Move subagents/ to new crate
+- Add prebuilt agents (CodeReviewer, etc.)
+
+**Phase 5: session, cost, mcp crates** (Future)
+
+### Key Decisions
+1. **Feature flags in core for backward compatibility**: Users can still use `features=["pool"]` in core crate
+2. **Re-exports from extensions**: Core re-exports extension types when feature enabled
+3. **Independent versioning**: Each crate can version independently
+
+### Updated PROMPT.md Section
+Need to update:
+1. Phase 0 task list - already have pool.rs, observability in core
+2. Make extraction plan clearer - what moves, what stays
+3. Add code reuse strategy
+4. Update timeline based on current state
+
+## Current Task
+Update PROMPT.md with refined plan showing:
+1. What already exists in core
+2. What needs to be extracted
+3. Minimal extraction approach
+4. Code reuse strategy
