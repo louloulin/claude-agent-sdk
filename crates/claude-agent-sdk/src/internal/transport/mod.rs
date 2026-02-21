@@ -3,5 +3,5 @@
 pub mod subprocess;
 mod trait_def;
 
-pub use subprocess::SubprocessTransport;
+pub use subprocess::{BufferMetricsSnapshot, SubprocessTransport};
 pub use trait_def::Transport;

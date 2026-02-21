@@ -293,6 +293,9 @@ pub use types::{
 pub use client::ClaudeClient;
 pub use query::{query, query_stream, query_stream_with_content, query_with_content};
 
+// Re-export transport types for buffer metrics
+pub use internal::transport::BufferMetricsSnapshot;
+
 // Re-export V2 API
 pub use v2::{
     create_session, prompt, resume_session, Message as V2Message, PermissionMode as V2PermissionMode,
