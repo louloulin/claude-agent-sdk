@@ -5,6 +5,7 @@ use futures::stream::Stream;
 use std::pin::Pin;
 
 use crate::errors::Result;
+use super::subprocess::BufferMetricsSnapshot;
 
 /// Transport trait for communicating with Claude Code CLI
 #[async_trait]
@@ -59,4 +60,21 @@ pub trait Transport: Send + Sync {
 
     /// End input stream (close stdin)
     async fn end_input(&mut self) -> Result<()>;
+
+    /// Get buffer metrics snapshot (if supported by this transport)
+    ///
+    /// Returns `None` for transports that don't support buffer metrics.
+    /// For `SubprocessTransport`, this returns actual metrics about buffer usage.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// if let Some(metrics) = transport.get_buffer_metrics() {
+    ///     println!("Peak buffer size: {} bytes", metrics.peak_size);
+    ///     println!("Messages processed: {}", metrics.message_count);
+    /// }
+    /// ```
+    fn get_buffer_metrics(&self) -> Option<BufferMetricsSnapshot> {
+        None
+    }
 }

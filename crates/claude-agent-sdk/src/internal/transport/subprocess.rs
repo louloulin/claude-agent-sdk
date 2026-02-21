@@ -100,7 +100,7 @@ impl AtomicBufferMetrics {
 }
 
 /// Snapshot of buffer metrics at a point in time
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct BufferMetricsSnapshot {
     /// Peak buffer size used during the session
     pub peak_size: usize,
@@ -1148,6 +1148,10 @@ impl Transport for SubprocessTransport {
             }
         }
         Ok(())
+    }
+
+    fn get_buffer_metrics(&self) -> Option<BufferMetricsSnapshot> {
+        Some(self.buffer_metrics.snapshot())
     }
 }
 

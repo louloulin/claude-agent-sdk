@@ -238,6 +238,14 @@ pub struct PromptResult {
 
     /// Model used for generation (if known)
     pub model: Option<String>,
+
+    /// Buffer metrics from the transport layer (if available)
+    ///
+    /// This provides insight into buffer usage during the query,
+    /// including peak size, message count, and resize operations.
+    /// Only available when using `SubprocessTransport` without pooling.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub buffer_metrics: Option<crate::internal::transport::BufferMetricsSnapshot>,
 }
 
 impl PromptResult {
@@ -395,6 +403,7 @@ mod tests {
             input_tokens: 100,
             output_tokens: 50,
             model: None,
+            buffer_metrics: None,
         };
 
         assert_eq!(result.total_tokens(), 150);
@@ -442,6 +451,7 @@ mod tests {
             input_tokens: 1_000_000, // 1M input tokens
             output_tokens: 1_000_000, // 1M output tokens
             model: None,
+            buffer_metrics: None,
         };
 
         // 1M input * $3/M = $3

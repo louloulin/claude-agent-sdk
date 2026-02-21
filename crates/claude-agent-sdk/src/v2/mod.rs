@@ -220,6 +220,7 @@ pub async fn prompt(
         input_tokens,
         output_tokens,
         model: None, // Model info not available from current client implementation
+        buffer_metrics: client.get_buffer_metrics().await,
     })
 }
 
@@ -237,6 +238,7 @@ mod tests {
             input_tokens: 10,
             output_tokens: 20,
             model: Some("claude-sonnet-4-20250514".to_string()),
+            buffer_metrics: None,
         };
 
         assert_eq!(result.content, "Test response");

@@ -515,4 +515,13 @@ impl QueryFull {
             .await
             .map_err(|e| ClaudeError::ControlProtocol(format!("MCP server error: {}", e)))
     }
+
+    /// Get buffer metrics from the underlying transport
+    ///
+    /// Returns `None` if the transport doesn't support buffer metrics.
+    /// For `SubprocessTransport`, this returns actual metrics about buffer usage.
+    pub async fn get_buffer_metrics(&self) -> Option<crate::internal::transport::BufferMetricsSnapshot> {
+        let transport = self.transport.lock().await;
+        transport.get_buffer_metrics()
+    }
 }

@@ -918,6 +918,37 @@ impl ClaudeClient {
         self.connected = false;
         Ok(())
     }
+
+    /// Get buffer metrics from the underlying transport
+    ///
+    /// Returns `None` if the transport doesn't support buffer metrics
+    /// (e.g., PooledTransport) or if the client is not connected.
+    ///
+    /// For `SubprocessTransport`, this returns actual metrics about buffer usage
+    /// including peak size, message count, and resize operations.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use claude_agent_sdk::{ClaudeClient, ClaudeAgentOptions};
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// # let mut client = ClaudeClient::new(ClaudeAgentOptions::default());
+    /// # client.connect().await?;
+    /// # client.query("Hello").await?;
+    /// if let Some(metrics) = client.get_buffer_metrics().await {
+    ///     println!("Peak buffer size: {} bytes", metrics.peak_size);
+    ///     println!("Messages processed: {}", metrics.message_count);
+    ///     println!("Average message size: {} bytes", metrics.average_message_size());
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn get_buffer_metrics(&self) -> Option<crate::internal::transport::BufferMetricsSnapshot> {
+        let query = self.query.as_ref()?;
+        let query_guard = query.lock().await;
+        query_guard.get_buffer_metrics().await
+    }
 }
 
 impl Drop for ClaudeClient {
