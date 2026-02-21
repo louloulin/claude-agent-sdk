@@ -14,6 +14,10 @@
 
 ## Fixes
 
+### mem-1771646335-5a58
+> Example 39 Path import: Fixed missing conditional import. Use #[cfg(feature = "sandbox")] use std::path::Path when Path is only used in sandbox feature code.
+<!-- tags: examples, rust-sdk | created: 2026-02-21 -->
+
 ### mem-1771460414-2da8
 > Rust SDK known issues: 1) No connection pooling - spawns new CLI per query 2) Lock contention in client.rs hot path 3) Fixed 10MB buffer may be insufficient 4) V2 prompt() creates new client per call 5) 7 example compilation errors 6) 17 Clippy warnings
 <!-- tags: rust-sdk, issues, performance | created: 2026-02-19 -->
