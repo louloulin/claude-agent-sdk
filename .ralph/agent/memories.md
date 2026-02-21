@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1771673628-0748
+> PROMPT.md v2.0 更新: 聚焦于非pool模块的扩展包架构。分析了核心crate的9个主要模块(skills/orchestration/observability/agents/mcp-tasks/commands/todos/partnership/v2)，设计了10个扩展包，制定了最小改造策略(复制优先/渐进迁移/重新导出)，提供了详细的Phase 0-6实现计划和迁移指南。核心模块代码量从~12000行减少到<4000行。
+<!-- tags: planning, rust-sdk, architecture | created: 2026-02-21 -->
+
 ### mem-1771657857-12e0
 > Zero-copy JSON parsing: Added ZeroCopyMessageParser with parse() and parse_bytes() methods. Added MessageKind enum for fast type detection using substring matching. Eliminates intermediate serde_json::Value allocation. 14 tests passing in message_parser.rs.
 <!-- tags: rust-sdk, performance, json | created: 2026-02-21 -->
