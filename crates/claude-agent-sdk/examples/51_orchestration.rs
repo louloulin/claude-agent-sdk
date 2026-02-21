@@ -243,7 +243,7 @@ async fn parallel_with_limit_example() -> Result<(), Box<dyn std::error::Error>>
                 // Update max
                 loop {
                     let current_max = max_clone.load(Ordering::SeqCst);
-                    if current + 1 <= current_max {
+                    if current < current_max {
                         break;
                     }
                     if max_clone
