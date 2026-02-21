@@ -119,6 +119,12 @@ impl ClaudeClient {
     /// This establishes the connection to the Claude Code CLI and initializes
     /// the bidirectional communication channel.
     ///
+    /// # Connection Pool
+    ///
+    /// When `pool_config` is enabled in options, this method uses a pooled
+    /// worker from the connection pool instead of spawning a new process.
+    /// This can significantly reduce latency for repeated connections.
+    ///
     /// # Errors
     ///
     /// Returns an error if:
@@ -130,6 +136,98 @@ impl ClaudeClient {
             return Ok(());
         }
 
+        // Check if connection pooling is enabled
+        let use_pool = self.options.pool_config.as_ref().is_some_and(|c| c.enabled);
+
+        if use_pool {
+            self.connect_pooled().await?;
+        } else {
+            self.connect_direct().await?;
+        }
+
+        self.connected = true;
+        Ok(())
+    }
+
+    /// Connect using the connection pool
+    async fn connect_pooled(&mut self) -> Result<()> {
+        use crate::internal::pool::{get_global_pool, init_global_pool};
+        use crate::internal::transport::pooled::PooledTransport;
+
+        // Initialize global pool if not already done
+        let pool_config = self.options.pool_config.clone().unwrap_or_default();
+        if get_global_pool().await.is_none() {
+            init_global_pool(pool_config.clone(), self.options.clone()).await?;
+        }
+
+        // Get pool and acquire worker
+        let pool = get_global_pool().await.ok_or_else(|| {
+            ClaudeError::Connection(crate::errors::ConnectionError::new(
+                "Failed to get connection pool".to_string(),
+            ))
+        })?;
+
+        // Create pooled transport
+        let mut transport = PooledTransport::from_pool(pool, self.options.clone());
+        transport.connect().await?;
+
+        // Create Query with hooks
+        let mut query = QueryFull::new(Box::new(transport));
+
+        // For pooled transport, we need to set up stdin for direct writes
+        // The pooled transport doesn't support take_stdin_arc, so we'll use
+        // a different approach - create a channel-based stdin wrapper
+        // For now, create a placeholder stdin that won't be used
+        // (Pooled transport writes directly through the guard)
+
+        // Extract SDK MCP servers from options
+        let sdk_mcp_servers =
+            if let crate::types::mcp::McpServers::Dict(servers_dict) = &self.options.mcp_servers {
+                servers_dict
+                    .iter()
+                    .filter_map(|(name, config)| {
+                        if let crate::types::mcp::McpServerConfig::Sdk(sdk_config) = config {
+                            Some((name.clone(), sdk_config.clone()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            } else {
+                std::collections::HashMap::new()
+            };
+        query.set_sdk_mcp_servers(sdk_mcp_servers).await;
+
+        // Convert hooks to internal format
+        let hooks = self.options.hooks.as_ref().map(|hooks_map| {
+            hooks_map
+                .iter()
+                .map(|(event, matchers)| {
+                    let event_name = match event {
+                        HookEvent::PreToolUse => "PreToolUse",
+                        HookEvent::PostToolUse => "PostToolUse",
+                        HookEvent::UserPromptSubmit => "UserPromptSubmit",
+                        HookEvent::Stop => "Stop",
+                        HookEvent::SubagentStop => "SubagentStop",
+                        HookEvent::PreCompact => "PreCompact",
+                    };
+                    (event_name.to_string(), matchers.clone())
+                })
+                .collect()
+        });
+
+        // Start reading messages in background FIRST
+        query.start().await?;
+
+        // Initialize with hooks (sends control request)
+        query.initialize(hooks).await?;
+
+        self.query = Some(Arc::new(Mutex::new(query)));
+        Ok(())
+    }
+
+    /// Connect directly (without connection pool)
+    async fn connect_direct(&mut self) -> Result<()> {
         // Create transport in streaming mode (no initial prompt)
         let prompt = QueryPrompt::Streaming;
         let mut transport = SubprocessTransport::new(prompt, self.options.clone())?;
@@ -192,8 +290,6 @@ impl ClaudeClient {
         query.initialize(hooks).await?;
 
         self.query = Some(Arc::new(Mutex::new(query)));
-        self.connected = true;
-
         Ok(())
     }
 
