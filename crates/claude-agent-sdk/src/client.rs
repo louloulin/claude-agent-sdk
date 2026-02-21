@@ -137,8 +137,11 @@ impl ClaudeClient {
         // Don't send initial prompt - we'll use query() for that
         transport.connect().await?;
 
-        // Extract stdin for direct access (avoids transport lock deadlock)
-        let stdin = Arc::clone(&transport.stdin);
+        // Extract stdin for direct access using the new take_stdin_arc() method
+        // This transfers stdin ownership to a shared reference for concurrent access
+        let stdin = transport
+            .take_stdin_arc()
+            .ok_or_else(|| ClaudeError::Transport("Failed to get stdin from transport".to_string()))?;
 
         // Create Query with hooks
         let mut query = QueryFull::new(Box::new(transport));
