@@ -44,6 +44,10 @@
 
 ## Context
 
+### mem-1771651507-3598
+> Claude Agent SDK commercialization examples: Claude Cowork (2h=2months work), v0.dev-like web builder, Design System UI generator, Excalidraw (10min feature). Enterprise: Cognizant multi-agent, ServiceNow 44xM ACV, Salesforce AgentForce /conversation 213% ROI. Validation: SWE-bench Verified, Terminal-Bench, Azure AI Evaluation SDK.
+<!-- tags: commercial, research, sdk | created: 2026-02-21 -->
+
 ### mem-1771460413-b297
 > Rust SDK Performance: 1.5x faster than Python (300ms vs 500ms simple query), 6x faster concurrent (800ms vs 5000ms for 10 queries), 10x less memory (5MB vs 50MB idle). Bottlenecks: process spawn ~50-100ms, JSON serialization, lock contention.
 <!-- tags: performance, benchmark, rust-sdk | created: 2026-02-19 -->
