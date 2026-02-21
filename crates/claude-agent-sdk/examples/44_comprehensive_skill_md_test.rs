@@ -507,7 +507,7 @@ fn print_statistics(skills: &[SkillMdFile]) {
     }
 
     let mut sorted_tags: Vec<_> = tag_counts.into_iter().collect();
-    sorted_tags.sort_by(|a, b| b.1.cmp(&a.1));
+    sorted_tags.sort_by_key(|b| std::cmp::Reverse(b.1));
 
     for (tag, count) in sorted_tags.iter().take(10) {
         println!("   {:20} : {}", tag, count);
