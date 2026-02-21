@@ -406,7 +406,7 @@ impl ProductionService {
                             None
                         }
                     })
-                    .unwrap_or_else(|| String::new());
+                    .unwrap_or_else(String::new);
 
                 (true, text)
             },
