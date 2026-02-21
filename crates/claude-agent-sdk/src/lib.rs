@@ -249,7 +249,9 @@ pub mod version;
 pub mod v2;
 
 // Re-export commonly used types
-pub use errors::{ClaudeError, ImageValidationError, Result};
+pub use errors::{
+    ClaudeError, ErrorCategory, ErrorContext, HttpStatus, ImageValidationError, Result,
+};
 pub use mcp::{
     TaskHandle, TaskHint, TaskId, TaskManager, TaskPriority, TaskProgress, TaskRequest, TaskResult,
     TaskState, TaskStatus, TaskUri,
