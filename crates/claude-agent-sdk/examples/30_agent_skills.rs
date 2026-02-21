@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use claude_agent_sdk::skills::*;
 
 /// A simple skill that calculates Fibonacci numbers
+#[derive(Debug)]
 struct FibonacciSkill;
 
 #[async_trait]
