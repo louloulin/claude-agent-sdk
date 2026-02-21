@@ -258,6 +258,10 @@ pub use mcp::{
 };
 pub use observability::{
     Histogram, HistogramBuckets, LogLevel, LogObserver, Logger, MetricsCollector,
+    // Tracing support
+    init_default, init_tracing, is_initialized, generate_request_id, generate_span_id,
+    log_counter, log_gauge, log_timing,
+    OutputFormat, TracingConfig,
 };
 pub use orchestration::{
     Agent, AgentFilter, AgentInput, AgentMetadata, AgentOutput, AgentRegistry,

@@ -5,6 +5,7 @@
 //! - **Structured Logging**: Context-aware logging with multiple output formats
 //! - **Metrics Collection**: Counters, gauges, histograms for performance monitoring
 //! - **Tracing Support**: Integration with the tracing ecosystem
+//! - **Request Tracing IDs**: Automatic generation and propagation of trace IDs
 //!
 //! ## Features
 //!
@@ -12,11 +13,15 @@
 //! - Prometheus-compatible metrics export
 //! - JSON and text log formats
 //! - Timer utilities for measuring code execution time
+//! - Structured spans for SDK operations
 //!
 //! ## Example
 //!
 //! ```no_run
-//! use claude_agent_sdk::observability::{Logger, MetricsCollector};
+//! use claude_agent_sdk::observability::{Logger, MetricsCollector, init_tracing, TracingConfig};
+//!
+//! // Initialize tracing at startup
+//! init_tracing(TracingConfig::production());
 //!
 //! let logger = Logger::new("MyAgent");
 //! let metrics = MetricsCollector::new();
@@ -30,6 +35,7 @@
 
 pub mod logger;
 pub mod metrics;
+pub mod tracing_setup;
 
 // Re-export commonly used types
 pub use logger::{
@@ -38,4 +44,8 @@ pub use logger::{
 pub use metrics::{
     Histogram, HistogramBuckets, LabeledMetric, MetricKind, MetricStorage, MetricsCollector,
     TimerGuard,
+};
+pub use tracing_setup::{
+    generate_request_id, generate_span_id, init_default, init_tracing, is_initialized, log_counter,
+    log_gauge, log_timing, OutputFormat, TracingConfig,
 };
