@@ -2,6 +2,30 @@
 
 ## Patterns
 
+### mem-1771657857-12e0
+> Zero-copy JSON parsing: Added ZeroCopyMessageParser with parse() and parse_bytes() methods. Added MessageKind enum for fast type detection using substring matching. Eliminates intermediate serde_json::Value allocation. 14 tests passing in message_parser.rs.
+<!-- tags: rust-sdk, performance, json | created: 2026-02-21 -->
+
+### mem-1771655310-f1c6
+> Structured logging with tracing: Added tracing_setup.rs module with TracingConfig (production/development/testing presets), init_tracing(), generate_request_id(), span macros (query_span!, skill_span!, etc.), error category logging macros, metrics logging helpers. Added tracing-subscriber dependency. 9 tests passing.
+<!-- tags: rust-sdk, observability, tracing | created: 2026-02-21 -->
+
+### mem-1771654452-b5fd
+> Error type categories: Added ErrorCategory enum (Network, Process, Parsing, Configuration, Validation, Permission, Resource, Internal, External), HttpStatus enum (12 codes), ErrorContext struct. Methods on ClaudeError: category(), error_code(), is_retryable(), http_status(), to_error_context(). Error codes format: ENET001, EPROC001, etc. Enables structured logging, metrics aggregation, retry logic, and HTTP API error responses.
+<!-- tags: rust-sdk, error-handling, observability | created: 2026-02-21 -->
+
+### mem-1771654114-4571
+> Dynamic buffer implementation: Added DynamicBufferConfig with initial_size (64KB), max_message_size (50MB), growth_factor (2x). Uses AtomicBufferMetrics for thread-safe metrics tracking. Per-message size check instead of cumulative tracking. Backward compatible with max_buffer_size option. Access metrics via transport.get_buffer_metrics().
+<!-- tags: rust-sdk, performance, buffer | created: 2026-02-21 -->
+
+### mem-1771653309-f14f
+> Lock contention optimization: SubprocessTransport now uses direct Option<T> for stdin/stdout instead of Arc<Mutex<Option<T>>>. For bidirectional mode (QueryFull), use take_stdin_arc() to get shared reference. Saves ~50-100ns per operation, no cache line bouncing.
+<!-- tags: performance, rust-sdk, optimization | created: 2026-02-21 -->
+
+### mem-1771652651-4b58
+> Connection pool implementation: Created internal/pool.rs with PoolConfig, PooledWorker, WorkerGuard, ConnectionPool. Uses channel-based distribution with semaphore control. Pool disabled by default. Added pool_config to ClaudeAgentOptions. Target: reduce query latency from 300ms to <100ms by reusing CLI processes.
+<!-- tags:  | created: 2026-02-21 -->
+
 ## Decisions
 
 ### mem-1771650972-6b60
