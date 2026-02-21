@@ -163,6 +163,16 @@ pub struct ClaudeAgentOptions {
     /// Provides real-time updates during automatic CLI installation.
     #[builder(default, setter(strip_option))]
     pub cli_install_callback: Option<Arc<dyn Fn(crate::internal::cli_installer::InstallProgress) + Send + Sync>>,
+    /// Connection pool configuration for reusing CLI processes
+    ///
+    /// When enabled, the SDK maintains a pool of CLI worker processes
+    /// to reduce the overhead of spawning new processes for each query.
+    /// This can significantly improve latency from ~300ms to <100ms for
+    /// repeated queries.
+    ///
+    /// Default: `None` (pool disabled, spawns new process per query)
+    #[builder(default, setter(strip_option))]
+    pub pool_config: Option<crate::internal::pool::PoolConfig>,
 }
 
 impl Default for ClaudeAgentOptions {
