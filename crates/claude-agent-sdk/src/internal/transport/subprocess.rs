@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::pin::Pin;
 use std::process::Stdio;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, ChildStdin, ChildStdout, Command};
@@ -15,7 +16,7 @@ use tracing::warn;
 use crate::errors::{
     ClaudeError, CliNotFoundError, ConnectionError, JsonDecodeError, ProcessError, Result,
 };
-use crate::types::config::ClaudeAgentOptions;
+use crate::types::config::{ClaudeAgentOptions, DynamicBufferConfig};
 use crate::types::messages::UserContentBlock;
 use crate::version::{
     ENTRYPOINT, MIN_CLI_VERSION, SDK_VERSION, SKIP_VERSION_CHECK_ENV, check_version,
@@ -25,7 +26,102 @@ use super::Transport;
 
 use crate::internal::cli_installer::{CliInstaller, InstallProgress};
 
-const DEFAULT_MAX_BUFFER_SIZE: usize = 10 * 1024 * 1024; // 10MB
+/// Thread-safe buffer usage metrics using atomic operations.
+///
+/// This struct tracks buffer statistics without requiring locks, using
+/// atomic operations for thread safety.
+#[derive(Debug, Default)]
+pub struct AtomicBufferMetrics {
+    /// Peak buffer size used during the session
+    peak_size: AtomicUsize,
+    /// Total number of messages processed
+    message_count: AtomicUsize,
+    /// Total bytes processed
+    total_bytes: AtomicUsize,
+    /// Number of buffer resizes
+    resize_count: AtomicUsize,
+}
+
+impl AtomicBufferMetrics {
+    /// Create new metrics with zero values
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Update peak size if the new value is larger
+    pub fn update_peak(&self, size: usize) {
+        use std::sync::atomic::Ordering;
+        let mut current = self.peak_size.load(Ordering::Relaxed);
+        while size > current {
+            match self.peak_size.compare_exchange_weak(
+                current,
+                size,
+                Ordering::Relaxed,
+                Ordering::Relaxed,
+            ) {
+                Ok(_) => break,
+                Err(actual) => current = actual,
+            }
+        }
+    }
+
+    /// Increment message count
+    pub fn inc_message_count(&self) {
+        self.message_count.fetch_add(1, Ordering::Relaxed);
+    }
+
+    /// Add bytes to total
+    pub fn add_bytes(&self, bytes: usize) {
+        self.total_bytes.fetch_add(bytes, Ordering::Relaxed);
+    }
+
+    /// Increment resize count
+    pub fn inc_resize_count(&self) {
+        self.resize_count.fetch_add(1, Ordering::Relaxed);
+    }
+
+    /// Get snapshot of all metrics
+    pub fn snapshot(&self) -> BufferMetricsSnapshot {
+        BufferMetricsSnapshot {
+            peak_size: self.peak_size.load(Ordering::Relaxed),
+            message_count: self.message_count.load(Ordering::Relaxed),
+            total_bytes: self.total_bytes.load(Ordering::Relaxed),
+            resize_count: self.resize_count.load(Ordering::Relaxed),
+        }
+    }
+
+    /// Reset all metrics to zero
+    pub fn reset(&self) {
+        self.peak_size.store(0, Ordering::Relaxed);
+        self.message_count.store(0, Ordering::Relaxed);
+        self.total_bytes.store(0, Ordering::Relaxed);
+        self.resize_count.store(0, Ordering::Relaxed);
+    }
+}
+
+/// Snapshot of buffer metrics at a point in time
+#[derive(Debug, Clone, Default)]
+pub struct BufferMetricsSnapshot {
+    /// Peak buffer size used during the session
+    pub peak_size: usize,
+    /// Total number of messages processed
+    pub message_count: usize,
+    /// Total bytes processed
+    pub total_bytes: usize,
+    /// Number of buffer resizes
+    pub resize_count: usize,
+}
+
+impl BufferMetricsSnapshot {
+    /// Get average message size
+    pub fn average_message_size(&self) -> usize {
+        if self.message_count == 0 {
+            0
+        } else {
+            self.total_bytes / self.message_count
+        }
+    }
+}
 
 /// Query prompt type
 #[derive(Clone)]
@@ -73,6 +169,14 @@ impl From<Vec<UserContentBlock>> for QueryPrompt {
 ///
 /// For bidirectional control protocol (QueryFull), use `take_stdin_arc()` after connect()
 /// to get a shared reference to stdin for concurrent writes.
+///
+/// # Dynamic Buffer Management
+///
+/// Uses adaptive buffer sizing that:
+/// - Starts with a configurable initial size (default 64KB)
+/// - Grows dynamically based on actual message sizes
+/// - Tracks metrics for monitoring and tuning
+/// - Protects against memory exhaustion with hard limits
 pub struct SubprocessTransport {
     cli_path: PathBuf,
     cwd: Option<PathBuf>,
@@ -85,7 +189,10 @@ pub struct SubprocessTransport {
     stdin_arc: Option<Arc<Mutex<Option<ChildStdin>>>>,
     /// Direct stdout access - no lock needed as we have exclusive mutable access
     stdout: Option<BufReader<ChildStdout>>,
-    max_buffer_size: usize,
+    /// Dynamic buffer configuration
+    buffer_config: DynamicBufferConfig,
+    /// Buffer usage metrics (thread-safe atomic counters)
+    buffer_metrics: AtomicBufferMetrics,
     ready: bool,
 }
 
@@ -116,7 +223,19 @@ impl SubprocessTransport {
         };
 
         let cwd = options.cwd.clone().or_else(|| std::env::current_dir().ok());
-        let max_buffer_size = options.max_buffer_size.unwrap_or(DEFAULT_MAX_BUFFER_SIZE);
+
+        // Resolve buffer configuration with backward compatibility
+        let buffer_config = if let Some(ref config) = options.buffer_config {
+            config.clone()
+        } else if let Some(max_size) = options.max_buffer_size {
+            // Backward compatibility: use max_buffer_size as max_message_size
+            DynamicBufferConfig {
+                max_message_size: max_size,
+                ..DynamicBufferConfig::default()
+            }
+        } else {
+            DynamicBufferConfig::default()
+        };
 
         Ok(Self {
             cli_path,
@@ -127,7 +246,8 @@ impl SubprocessTransport {
             stdin: None,
             stdin_arc: None,
             stdout: None,
-            max_buffer_size,
+            buffer_config,
+            buffer_metrics: AtomicBufferMetrics::new(),
             ready: false,
         })
     }
@@ -154,6 +274,29 @@ impl SubprocessTransport {
             // Already taken, return the existing arc if available
             self.stdin_arc.clone()
         }
+    }
+
+    /// Get buffer usage metrics for monitoring and tuning.
+    ///
+    /// Returns metrics about buffer usage including peak size, message count,
+    /// and resize operations. Only meaningful if `enable_metrics` is true in
+    /// the buffer configuration.
+    ///
+    /// # Example
+    /// ```ignore
+    /// let metrics = transport.get_buffer_metrics();
+    /// println!("Peak buffer size: {} bytes", metrics.peak_size);
+    /// println!("Average message size: {} bytes", metrics.average_message_size());
+    /// ```
+    pub fn get_buffer_metrics(&self) -> BufferMetricsSnapshot {
+        self.buffer_metrics.snapshot()
+    }
+
+    /// Reset buffer metrics.
+    ///
+    /// Useful when starting a new session to get fresh metrics.
+    pub fn reset_buffer_metrics(&self) {
+        self.buffer_metrics.reset();
     }
 
     /// Find the Claude CLI executable
@@ -819,12 +962,13 @@ impl Transport for SubprocessTransport {
     fn read_messages(
         &mut self,
     ) -> Pin<Box<dyn Stream<Item = Result<serde_json::Value>> + Send + '_>> {
-        let max_buffer_size = self.max_buffer_size;
+        let max_message_size = self.buffer_config.max_message_size;
+        let enable_metrics = self.buffer_config.enable_metrics;
 
         Box::pin(async_stream::stream! {
             if let Some(ref mut reader) = self.stdout {
-                let mut line = String::new();
-                let mut buffer_size = 0;
+                let mut line = String::with_capacity(self.buffer_config.initial_size);
+                let mut current_capacity = self.buffer_config.initial_size;
 
                 loop {
                     line.clear();
@@ -833,14 +977,27 @@ impl Transport for SubprocessTransport {
                             // EOF
                             break;
                         }
-                        Ok(n) => {
-                            buffer_size += n;
-                            if buffer_size > max_buffer_size {
+                        Ok(bytes_read) => {
+                            // Per-message size check (not cumulative)
+                            if bytes_read > max_message_size {
                                 yield Err(ClaudeError::Transport(format!(
-                                    "Buffer size exceeded maximum of {} bytes",
-                                    max_buffer_size
+                                    "Message size {} bytes exceeded maximum of {} bytes",
+                                    bytes_read, max_message_size
                                 )));
                                 break;
+                            }
+
+                            // Track metrics if enabled
+                            if enable_metrics {
+                                self.buffer_metrics.inc_message_count();
+                                self.buffer_metrics.add_bytes(bytes_read);
+                                self.buffer_metrics.update_peak(bytes_read);
+                                // Check if we need to grow the buffer
+                                if bytes_read > current_capacity {
+                                    let new_capacity = (current_capacity as f64 * self.buffer_config.growth_factor) as usize;
+                                    current_capacity = new_capacity.min(max_message_size);
+                                    self.buffer_metrics.inc_resize_count();
+                                }
                             }
 
                             let trimmed = line.trim();

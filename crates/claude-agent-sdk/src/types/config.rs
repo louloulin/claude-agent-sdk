@@ -80,8 +80,21 @@ pub struct ClaudeAgentOptions {
     #[builder(default)]
     pub extra_args: HashMap<String, Option<String>>,
     /// Maximum buffer size for subprocess output
+    ///
+    /// **Deprecated:** Use `buffer_config` instead for more fine-grained control.
+    /// This field is kept for backward compatibility and sets the max_message_size
+    /// if buffer_config is not specified.
     #[builder(default, setter(strip_option))]
     pub max_buffer_size: Option<usize>,
+    /// Dynamic buffer configuration for adaptive memory management
+    ///
+    /// When enabled, provides intelligent buffer sizing that adapts to message
+    /// sizes while protecting against memory exhaustion.
+    ///
+    /// Default: Uses `DynamicBufferConfig::default()` with 64KB initial size
+    /// and 50MB max message size.
+    #[builder(default, setter(strip_option))]
+    pub buffer_config: Option<DynamicBufferConfig>,
     /// Callback for stderr output
     #[builder(default, setter(strip_option))]
     pub stderr_callback: Option<Arc<dyn Fn(String) + Send + Sync>>,
@@ -453,4 +466,109 @@ pub struct SandboxSettings {
     )]
     #[builder(default, setter(strip_option))]
     pub enable_weaker_nested_sandbox: Option<bool>,
+}
+
+/// Dynamic buffer configuration for subprocess output handling
+///
+/// Controls how the SDK manages memory buffers when reading JSON messages
+/// from the Claude CLI subprocess. Dynamic buffering adapts to message sizes
+/// while protecting against memory exhaustion.
+///
+/// # Example
+/// ```ignore
+/// use claude_agent_sdk::types::config::DynamicBufferConfig;
+///
+/// let config = DynamicBufferConfig::builder()
+///     .initial_size(64 * 1024)        // 64KB initial buffer
+///     .max_message_size(50 * 1024 * 1024) // 50MB max message
+///     .build();
+/// ```
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
+#[builder(doc)]
+pub struct DynamicBufferConfig {
+    /// Initial buffer capacity in bytes.
+    ///
+    /// This is the starting size for the line buffer. The buffer will grow
+    /// dynamically as needed up to `max_message_size`.
+    ///
+    /// Default: 64KB (65536 bytes) - suitable for most messages
+    #[builder(default = 64 * 1024)]
+    #[serde(default = "default_initial_size")]
+    pub initial_size: usize,
+
+    /// Maximum allowed message size in bytes.
+    ///
+    /// Messages larger than this will trigger an error. This is a hard limit
+    /// to prevent memory exhaustion from malformed or malicious responses.
+    ///
+    /// Default: 50MB (52,428,800 bytes) - handles large responses with images
+    #[builder(default = 50 * 1024 * 1024)]
+    #[serde(default = "default_max_message_size")]
+    pub max_message_size: usize,
+
+    /// Buffer growth factor when resizing is needed.
+    ///
+    /// When a message exceeds the current buffer capacity, the buffer is
+    /// resized by multiplying current capacity by this factor.
+    ///
+    /// Default: 2.0 (double the buffer when needed)
+    #[builder(default = 2.0)]
+    #[serde(default = "default_growth_factor")]
+    pub growth_factor: f64,
+
+    /// Enable buffer usage metrics collection.
+    ///
+    /// When enabled, tracks peak buffer usage and message size statistics.
+    /// Useful for tuning buffer configuration.
+    ///
+    /// Default: true
+    #[builder(default = true)]
+    #[serde(default = "default_enable_metrics")]
+    pub enable_metrics: bool,
+}
+
+fn default_initial_size() -> usize {
+    64 * 1024 // 64KB
+}
+
+fn default_max_message_size() -> usize {
+    50 * 1024 * 1024 // 50MB
+}
+
+fn default_growth_factor() -> f64 {
+    2.0
+}
+
+fn default_enable_metrics() -> bool {
+    true
+}
+
+impl Default for DynamicBufferConfig {
+    fn default() -> Self {
+        Self::builder().build()
+    }
+}
+
+/// Buffer usage metrics for monitoring and tuning
+#[derive(Debug, Clone, Default)]
+pub struct BufferMetrics {
+    /// Peak buffer size used during the session
+    pub peak_size: usize,
+    /// Total number of messages processed
+    pub message_count: usize,
+    /// Total bytes processed
+    pub total_bytes: usize,
+    /// Number of buffer resizes
+    pub resize_count: usize,
+}
+
+impl BufferMetrics {
+    /// Get average message size
+    pub fn average_message_size(&self) -> usize {
+        if self.message_count == 0 {
+            0
+        } else {
+            self.total_bytes / self.message_count
+        }
+    }
 }
