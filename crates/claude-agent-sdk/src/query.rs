@@ -2,7 +2,7 @@
 
 use crate::errors::Result;
 use crate::internal::client::InternalClient;
-use crate::internal::message_parser::MessageParser;
+use crate::internal::message_parser::{MessageParser, ParsingMode, parse_with_mode};
 use crate::internal::transport::subprocess::QueryPrompt;
 use crate::internal::transport::{SubprocessTransport, Transport};
 use crate::types::config::ClaudeAgentOptions;
@@ -95,27 +95,52 @@ pub async fn query_stream(
 ) -> Result<Pin<Box<dyn Stream<Item = Result<Message>> + Send>>> {
     let query_prompt = QueryPrompt::Text(prompt.into());
     let opts = options.unwrap_or_default();
+    let parsing_mode = opts.parsing_mode;
 
     let mut transport = SubprocessTransport::new(query_prompt, opts)?;
     transport.connect().await?;
 
     // Move transport into the stream to extend its lifetime
     let stream = async_stream::stream! {
-        let mut message_stream = transport.read_messages();
-        while let Some(json_result) = message_stream.next().await {
-            match json_result {
-                Ok(json) => {
-                    match MessageParser::parse(json) {
-                        Ok(message) => yield Ok(message),
+        match parsing_mode {
+            ParsingMode::ZeroCopy => {
+                let mut message_stream = transport.read_raw_messages();
+                while let Some(json_result) = message_stream.next().await {
+                    match json_result {
+                        Ok(json) => {
+                            match parse_with_mode(&json, ParsingMode::ZeroCopy) {
+                                Ok(message) => yield Ok(message),
+                                Err(e) => {
+                                    yield Err(e);
+                                    break;
+                                }
+                            }
+                        }
                         Err(e) => {
                             yield Err(e);
                             break;
                         }
                     }
                 }
-                Err(e) => {
-                    yield Err(e);
-                    break;
+            }
+            ParsingMode::Traditional => {
+                let mut message_stream = transport.read_messages();
+                while let Some(json_result) = message_stream.next().await {
+                    match json_result {
+                        Ok(json) => {
+                            match MessageParser::parse(json) {
+                                Ok(message) => yield Ok(message),
+                                Err(e) => {
+                                    yield Err(e);
+                                    break;
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            yield Err(e);
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -231,26 +256,51 @@ pub async fn query_stream_with_content(
 
     let query_prompt = QueryPrompt::Content(content_blocks);
     let opts = options.unwrap_or_default();
+    let parsing_mode = opts.parsing_mode;
 
     let mut transport = SubprocessTransport::new(query_prompt, opts)?;
     transport.connect().await?;
 
     let stream = async_stream::stream! {
-        let mut message_stream = transport.read_messages();
-        while let Some(json_result) = message_stream.next().await {
-            match json_result {
-                Ok(json) => {
-                    match MessageParser::parse(json) {
-                        Ok(message) => yield Ok(message),
+        match parsing_mode {
+            ParsingMode::ZeroCopy => {
+                let mut message_stream = transport.read_raw_messages();
+                while let Some(json_result) = message_stream.next().await {
+                    match json_result {
+                        Ok(json) => {
+                            match parse_with_mode(&json, ParsingMode::ZeroCopy) {
+                                Ok(message) => yield Ok(message),
+                                Err(e) => {
+                                    yield Err(e);
+                                    break;
+                                }
+                            }
+                        }
                         Err(e) => {
                             yield Err(e);
                             break;
                         }
                     }
                 }
-                Err(e) => {
-                    yield Err(e);
-                    break;
+            }
+            ParsingMode::Traditional => {
+                let mut message_stream = transport.read_messages();
+                while let Some(json_result) = message_stream.next().await {
+                    match json_result {
+                        Ok(json) => {
+                            match MessageParser::parse(json) {
+                                Ok(message) => yield Ok(message),
+                                Err(e) => {
+                                    yield Err(e);
+                                    break;
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            yield Err(e);
+                            break;
+                        }
+                    }
                 }
             }
         }

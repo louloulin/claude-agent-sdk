@@ -299,6 +299,9 @@ pub use internal::transport::BufferMetricsSnapshot;
 // Re-export connection pool types
 pub use internal::pool::{PoolConfig, PoolStats};
 
+// Re-export parsing mode for performance tuning
+pub use internal::message_parser::ParsingMode;
+
 // Re-export V2 API
 pub use v2::{
     create_session, prompt, resume_session, Message as V2Message, PermissionMode as V2PermissionMode,

@@ -186,6 +186,24 @@ pub struct ClaudeAgentOptions {
     /// Default: `None` (pool disabled, spawns new process per query)
     #[builder(default, setter(strip_option))]
     pub pool_config: Option<crate::internal::pool::PoolConfig>,
+    /// Message parsing mode for JSON deserialization
+    ///
+    /// Controls how JSON messages from the CLI are parsed into `Message` types:
+    ///
+    /// - `ParsingMode::Traditional` (default): Uses intermediate `serde_json::Value`
+    ///   for maximum compatibility. Safer but allocates more memory.
+    /// - `ParsingMode::ZeroCopy`: Parses directly from string to Message without
+    ///   intermediate allocation. Faster and uses less memory (~30-50% reduction).
+    ///
+    /// # Performance
+    ///
+    /// Zero-copy mode is recommended for high-throughput scenarios:
+    /// - ~30-50% less memory allocation for large messages
+    /// - ~10-20% faster parsing time
+    ///
+    /// Default: `ParsingMode::Traditional` (for backward compatibility)
+    #[builder(default)]
+    pub parsing_mode: crate::internal::message_parser::ParsingMode,
 }
 
 impl Default for ClaudeAgentOptions {

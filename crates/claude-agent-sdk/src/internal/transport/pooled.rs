@@ -133,6 +133,43 @@ impl Transport for PooledTransport {
         })
     }
 
+    fn read_raw_messages(
+        &mut self,
+    ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
+        Box::pin(async_stream::stream! {
+            loop {
+                let guard = match self.guard.as_mut() {
+                    Some(g) => g,
+                    None => {
+                        yield Err(ClaudeError::Transport("Transport not connected".to_string()));
+                        break;
+                    }
+                };
+
+                let mut line = String::new();
+                match guard.read_line(&mut line).await {
+                    Ok(0) => {
+                        // EOF
+                        break;
+                    }
+                    Ok(_) => {
+                        let trimmed = line.trim();
+                        if trimmed.is_empty() {
+                            continue;
+                        }
+
+                        // Return raw string for zero-copy parsing
+                        yield Ok(trimmed.to_string());
+                    }
+                    Err(e) => {
+                        yield Err(e);
+                        break;
+                    }
+                }
+            }
+        })
+    }
+
     async fn close(&mut self) -> Result<()> {
         // Drop the guard to return worker to pool
         self.guard = None;

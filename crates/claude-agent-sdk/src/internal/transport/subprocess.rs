@@ -1027,6 +1027,65 @@ impl Transport for SubprocessTransport {
         })
     }
 
+    fn read_raw_messages(
+        &mut self,
+    ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
+        let max_message_size = self.buffer_config.max_message_size;
+        let enable_metrics = self.buffer_config.enable_metrics;
+
+        Box::pin(async_stream::stream! {
+            if let Some(ref mut reader) = self.stdout {
+                let mut line = String::with_capacity(self.buffer_config.initial_size);
+                let mut current_capacity = self.buffer_config.initial_size;
+
+                loop {
+                    line.clear();
+                    match reader.read_line(&mut line).await {
+                        Ok(0) => {
+                            // EOF
+                            break;
+                        }
+                        Ok(bytes_read) => {
+                            // Per-message size check (not cumulative)
+                            if bytes_read > max_message_size {
+                                yield Err(ClaudeError::Transport(format!(
+                                    "Message size {} bytes exceeded maximum of {} bytes",
+                                    bytes_read, max_message_size
+                                )));
+                                break;
+                            }
+
+                            // Track metrics if enabled
+                            if enable_metrics {
+                                self.buffer_metrics.inc_message_count();
+                                self.buffer_metrics.add_bytes(bytes_read);
+                                self.buffer_metrics.update_peak(bytes_read);
+                                // Check if we need to grow the buffer
+                                if bytes_read > current_capacity {
+                                    let new_capacity = (current_capacity as f64 * self.buffer_config.growth_factor) as usize;
+                                    current_capacity = new_capacity.min(max_message_size);
+                                    self.buffer_metrics.inc_resize_count();
+                                }
+                            }
+
+                            let trimmed = line.trim();
+                            if trimmed.is_empty() {
+                                continue;
+                            }
+
+                            // Return the raw string - caller will parse
+                            yield Ok(trimmed.to_string());
+                        }
+                        Err(e) => {
+                            yield Err(ClaudeError::Transport(format!("Failed to read line: {}", e)));
+                            break;
+                        }
+                    }
+                }
+            }
+        })
+    }
+
     async fn close(&mut self) -> Result<()> {
         // Close direct stdin (simple mode)
         if let Some(mut stdin) = self.stdin.take() {
