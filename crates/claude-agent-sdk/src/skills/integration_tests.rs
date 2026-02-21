@@ -279,7 +279,7 @@ Internal company standards skill.
         let skill = SkillMdFile::parse(&skill_path).expect("Failed to parse test skill");
 
         // Verify settings
-        assert_eq!(skill.metadata.user_invocable, false);
+        assert!(!skill.metadata.user_invocable);
         assert_eq!(skill.metadata.disable_model_invocation, Some(false));
 
         // Cleanup
