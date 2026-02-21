@@ -3,6 +3,7 @@
 use async_trait::async_trait;
 use claude_agent_sdk::skills::*;
 
+#[derive(Debug)]
 struct HelloSkill;
 
 #[async_trait]
