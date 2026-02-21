@@ -1,51 +1,35 @@
-# Scratchpad - Claude Agent SDK Commercialization
+# Scratchpad: PROMPT.md 扩展包重构计划
 
-## Current Status (2026-02-21)
+## 2026-02-21 - 完成更新
 
-### Phase 1: COMPLETE ✅
+### ✅ 任务完成
 
-All Phase 1 features implemented:
-1. **Connection Pool** - `internal/pool.rs` with PoolConfig, PooledWorker, ConnectionPool
-2. **Lock Optimization** - Direct Option<T> in SubprocessTransport
-3. **Dynamic Buffer** - DynamicBufferConfig with configurable limits
-4. **Zero-Copy JSON** - ZeroCopyMessageParser with MessageKind enum
-5. **Error Categories** - ErrorCategory enum, HttpStatus, ErrorContext
-6. **Structured Logging** - tracing_setup.rs with TracingConfig
-7. **Request Tracing** - generate_request_id(), span macros
+已将 PROMPT.md 完全重构为**扩展包架构**设计:
 
-### Progress on Wiring Phase 1 to API
+#### 新架构设计
+- **核心 crate**: `claude-agent-sdk` - 只包含基础 API (query/prompt/Agent/Transport/Error)
+- **7 个扩展包**:
+  1. `claude-agent-sdk-pool` - 连接池
+  2. `claude-agent-sdk-batch` - 批量操作
+  3. `claude-agent-sdk-agents` - 预构建 Agent (CodeReviewer, DataAnalyst, etc.)
+  4. `claude-agent-sdk-mcp` - MCP 协议
+  5. `claude-agent-sdk-observability` - 可观测性 (Prometheus, OpenTelemetry)
+  6. `claude-agent-sdk-session` - 会话管理
+  7. `claude-agent-sdk-cost` - 成本追踪
 
-#### ✅ Completed
-- **BufferMetricsSnapshot** - Now exported from public API (`use claude_agent_sdk::BufferMetricsSnapshot`)
-  - Reduced Clippy warnings from 24 to 20
-- **Connection Pool Integration** - ✅ WIRED INTO ClaudeAgentOptions
-  - Created `internal/transport/pooled.rs` with `PooledTransport` implementing the `Transport` trait
-  - Modified `ClaudeClient::connect()` to use pooled transport when `pool_config.enabled=true`
-  - Added `connect_pooled()` and `connect_direct()` methods for clear separation
-  - Exported `PoolConfig` and `PoolStats` from public API (`use claude_agent_sdk::{PoolConfig, PoolStats}`)
-  - Pool is initialized lazily on first connect when enabled
-  - Usage example:
-    ```rust
-    let options = ClaudeAgentOptions::builder()
-        .pool_config(PoolConfig::new().enabled())
-        .build();
-    let mut client = ClaudeClient::new(options);
-    client.connect().await?; // Uses pooled worker
-    ```
+#### 架构优势
+- 核心精简: 快速编译、小二进制
+- 按需加载: 用户只引入需要的扩展
+- 版本独立: 各扩展包可独立迭代
 
-#### 🔄 In Progress
-- **Zero-Copy Parser** - Need to make it optional in message parsing path
-  - Current MessageParser uses serde_json::Value
-  - ZeroCopyMessageParser exists but is unused
+#### 文档内容
+- 详细的 crate 结构和依赖关系图
+- 每个扩展包的 API 设计示例
+- 验证指标和测试要求
+- 更新的实现时间线 (Phase 0-4)
 
-### Remaining Clippy Warnings (16)
-Most are "never constructed/used" for Phase 1 features not yet fully wired:
-- ZeroCopyMessageParser, MessageKind (zero-copy parser - next task)
-- PooledTransport methods (pooled transport - new methods)
-- BufferMetricsSnapshot methods (partially addressed)
-- Some pool methods: stdout(), stats(), shutdown_global_pool()
-
-### Next Session Recommendations
-1. Integrate Zero-Copy Parser as optional parsing mode (task-1771666954-14a5)
-2. Integrate BufferMetricsSnapshot into V2 PromptResult for user access
-3. Add example for connection pool usage
+### 提交信息
+```
+docs(plan): refactor to extension crate architecture
+commit: 4106231
+```
