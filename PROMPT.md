@@ -1,14 +1,138 @@
-# Claude Agent SDK 商业化计划 (todo1.5.md)
+# Claude Agent SDK 商业化计划 - 扩展包架构版 (todo1.6)
 
 ## 概述
 
-基于对 Claude Agent SDK 商业化案例的深入研究，本文档制定了 Rust SDK 的商业化路径计划，包含**实现功能**和**验证功能**两个维度。
+基于对 Claude Agent SDK 商业化案例的深入研究，本文档制定了 Rust SDK 的商业化路径计划。采用**扩展包架构 (Extension Crates)** 设计，保持核心 crate 精简，按需加载扩展功能。
 
 ---
 
-## 一、市场研究与竞品分析
+## 一、扩展包架构设计
 
-### 1.1 成功案例参考
+### 1.1 架构原则
+
+| 原则 | 说明 | 收益 |
+|------|------|------|
+| **核心精简** | `claude-agent-sdk` 只包含基础 API | 快速编译、小二进制 |
+| **按需加载** | 用户只引入需要的扩展包 | 减少依赖树 |
+| **特性标志** | 通过 feature flags 控制功能 | 编译时优化 |
+| **版本独立** | 各扩展包可独立版本迭代 | 灵活升级 |
+
+### 1.2 Crate 结构
+
+```
+crates/
+├── claude-agent-sdk/              # 核心 crate (必需)
+│   ├── 核心 API: query(), prompt(), Agent
+│   ├── Transport 层: SubprocessTransport
+│   ├── 错误处理: ClaudeError, ClaudeResult
+│   ├── 基础配置: ClaudeAgentOptions
+│   └── 基础类型: Message, Content, Tool
+│
+├── claude-agent-sdk-pool/         # 连接池扩展 (可选)
+│   ├── ConnectionPool<T>
+│   ├── PoolConfig
+│   ├── PooledWorker
+│   └── WorkerGuard
+│
+├── claude-agent-sdk-batch/        # 批量操作扩展 (可选)
+│   ├── BatchExecutor
+│   ├── batch_query()
+│   ├── batch_analyze()
+│   └── BatchResult<T>
+│
+├── claude-agent-sdk-agents/       # 预构建 Agent 扩展 (可选)
+│   ├── CodeReviewer
+│   ├── DataAnalyst
+│   ├── DocGenerator
+│   └── TestGenerator
+│
+├── claude-agent-sdk-mcp/          # MCP 协议扩展 (可选)
+│   ├── McpServer
+│   ├── McpToolRegistry
+│   ├── McpResourceManager
+│   └── McpPromptTemplate
+│
+├── claude-agent-sdk-observability/  # 可观测性扩展 (可选)
+│   ├── PrometheusExporter
+│   ├── OpenTelemetryIntegration
+│   ├── MetricsCollector
+│   └── RequestTracing
+│
+├── claude-agent-sdk-session/      # 会话管理扩展 (可选)
+│   ├── SessionManager
+│   ├── SessionStore (trait)
+│   ├── MemorySessionStore
+│   └── FileSessionStore
+│
+└── claude-agent-sdk-cost/         # 成本追踪扩展 (可选)
+    ├── CostTracker
+    ├── TokenCounter
+    ├── BudgetManager
+    └── UsageReport
+```
+
+### 1.3 依赖关系图
+
+```
+                    ┌─────────────────────────┐
+                    │   claude-agent-sdk      │
+                    │      (核心 crate)        │
+                    │  - query/prompt API     │
+                    │  - Transport layer      │
+                    │  - Error types          │
+                    └─────────────────────────┘
+                              │
+        ┌─────────────┬───────┼───────┬─────────────┐
+        │             │       │       │             │
+        ▼             ▼       ▼       ▼             ▼
+┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐
+│   pool    │ │   batch   │ │  session  │ │   mcp     │ │observability│
+│ 连接池     │ │ 批量操作   │ │ 会话管理  │ │ MCP协议   │ │ 可观测性    │
+└───────────┘ └───────────┘ └───────────┘ └───────────┘ └───────────┘
+        │             │                               │
+        ▼             ▼                               ▼
+┌───────────┐ ┌───────────┐                   ┌───────────┐
+│  agents   │ │  (apps)   │                   │   cost    │
+│ 预构建Agent│ │ 应用层     │                   │ 成本追踪   │
+└───────────┘ └───────────┘                   └───────────┘
+```
+
+### 1.4 Cargo.toml 配置示例
+
+```toml
+# workspace Cargo.toml
+[workspace]
+members = [
+    "crates/claude-agent-sdk",
+    "crates/claude-agent-sdk-pool",
+    "crates/claude-agent-sdk-batch",
+    "crates/claude-agent-sdk-agents",
+    "crates/claude-agent-sdk-mcp",
+    "crates/claude-agent-sdk-observability",
+    "crates/claude-agent-sdk-session",
+    "crates/claude-agent-sdk-cost",
+]
+resolver = "2"
+```
+
+```toml
+# 用户项目 Cargo.toml
+[dependencies]
+# 核心 (必需)
+claude-agent-sdk = "0.2"
+
+# 按需添加扩展
+claude-agent-sdk-pool = "0.1"        # 需要连接池
+claude-agent-sdk-batch = "0.1"       # 需要批量操作
+claude-agent-sdk-agents = "0.1"      # 需要预构建 Agent
+claude-agent-sdk-observability = "0.1"  # 需要监控
+```
+
+---
+
+## 二、市场研究与竞品分析
+
+### 2.1 成功案例参考
 
 | 公司/产品 | 估值/ARR | 商业模式 | 核心成功因素 |
 |-----------|----------|----------|--------------|
@@ -17,14 +141,14 @@
 | **Claude Code** | $5B+ ARR | 按结果付费 | 编程场景杀手应用、低幻觉率 |
 | **Cursor** | $500M ARR | 订阅制 | Claude 模型驱动、IDE集成 |
 
-### 1.2 Anthropic 商业模式洞察
+### 2.2 Anthropic 商业模式洞察
 
 - **70-75% 收入来自 API 调用付费**
 - **按结果付费 (Outcome-based)** 模式正在颠覆传统 SaaS
 - **企业级集成** (Notion, Slack, GitHub, VS Code) 是关键增长点
 - **36% Claude 使用量为编程任务** - 编程是核心场景
 
-### 1.3 四大商业化 Agent 类型
+### 2.3 四大商业化 Agent 类型
 
 | Agent 类型 | 能力 | 技术栈 | 已验证案例 |
 |------------|------|--------|-----------|
@@ -35,198 +159,459 @@
 
 ---
 
-## 二、Rust SDK 商业化功能实现计划
+## 三、扩展包详细设计
 
-### Phase 1: 核心能力强化 (1-2周)
+### 3.1 核心 Crate: `claude-agent-sdk`
 
-#### 2.1.1 连接池与性能优化
-**目标**: 解决当前每查询启动新 CLI 进程的性能瓶颈
+**职责**: 提供最小可用的 SDK 核心功能
 
-**实现功能**:
-- [ ] 实现连接池机制，复用 CLI 进程
-- [ ] 优化锁竞争 (`client.rs` 热路径)
-- [ ] 添加动态缓冲区支持 (替代固定10MB)
-- [ ] 实现零拷贝 JSON 解析
+**功能清单**:
+- [x] `query()` / `prompt()` API
+- [x] `Agent` 基础结构
+- [x] `SubprocessTransport` 通信层
+- [x] `ClaudeError` 错误类型
+- [x] `ClaudeAgentOptions` 配置
+- [x] 基础类型: `Message`, `Content`, `Tool`
+- [x] 动态缓冲区 (已集成到核心)
+- [x] 零拷贝 JSON 解析 (可选 feature)
+- [x] 错误分类 (已集成)
+- [x] 结构化日志 (已集成)
 
-**验证功能**:
-- [ ] 基准测试: 简单查询 < 100ms (当前 ~300ms)
-- [ ] 并发测试: 10个查询 < 500ms (当前 ~800ms)
-- [ ] 内存测试: 空闲 < 5MB (当前 ~5MB)
-- [ ] 压力测试: 100个连续查询无内存泄漏
-
-**成功指标**:
+**Feature Flags**:
+```toml
+[features]
+default = ["json"]
+json = ["serde", "serde_json"]
+zero-copy = []  # 零拷贝解析
+tracing = ["dep:tracing"]  # 结构化日志
 ```
-性能提升: 1.5x → 3x
-吞吐量: 10并发/秒 → 50并发/秒
+
+### 3.2 扩展 Crate: `claude-agent-sdk-pool`
+
+**职责**: 提供连接池功能，复用 CLI 进程
+
+**API 设计**:
+```rust
+use claude_agent_sdk_pool::{ConnectionPool, PoolConfig};
+
+let config = PoolConfig {
+    max_workers: 5,
+    idle_timeout: Duration::from_secs(60),
+    max_message_size: 50 * 1024 * 1024,  // 50MB
+};
+
+let pool = ConnectionPool::new(config)?;
+let result = pool.query("What is 2+2?").await?;
 ```
 
-#### 2.1.2 错误处理与可观测性
-**目标**: 企业级错误处理和监控能力
+**依赖**:
+- `claude-agent-sdk` (核心)
+- `tokio` (async runtime)
+- `parking_lot` (高效锁)
 
-**实现功能**:
-- [ ] 细化错误类型 (网络、超时、权限、解析等)
-- [ ] 添加结构化日志 (tracing 集成)
-- [ ] 实现指标导出 (Prometheus 格式)
-- [ ] 添加请求追踪 ID
+**验证指标**:
+| 指标 | 当前 (无池) | 目标 (有池) |
+|------|------------|------------|
+| 简单查询延迟 | ~300ms | < 100ms |
+| 10并发延迟 | ~800ms | < 500ms |
+| 进程复用率 | 0% | > 90% |
 
-**验证功能**:
-- [ ] 错误覆盖测试: 所有错误路径有明确错误码
-- [ ] 日志完整性测试: 关键操作有日志
-- [ ] 指标准确性测试: 与实际调用次数一致
-- [ ] 追踪完整性测试: 跨调用链可追踪
+### 3.3 扩展 Crate: `claude-agent-sdk-batch`
 
-### Phase 2: API 丰富与易用性 (2-4周)
+**职责**: 提供批量操作 API
 
-#### 2.2.1 批量 API 支持
-**目标**: 支持批量操作，提高企业场景效率
+**API 设计**:
+```rust
+use claude_agent_sdk_batch::{BatchExecutor, BatchResult};
 
-**实现功能**:
-- [ ] `batch_query()` API: 批量执行多个查询
-- [ ] `batch_analyze()` API: 批量分析多个文件
-- [ ] 并行执行 + 结果聚合
-- [ ] 失败重试机制
+let executor = BatchExecutor::new(agent);
 
-**验证功能**:
+let queries = vec![
+    "分析这段代码的安全性",
+    "生成单元测试",
+    "添加文档注释",
+];
+
+let results: BatchResult<Vec<Analysis>> = executor
+    .batch_query(&queries)
+    .parallelism(3)  // 并行数
+    .retry(2)        // 重试次数
+    .await?;
+
+for (query, result) in results {
+    println!("{}: {:?}", query, result);
+}
+```
+
+**依赖**:
+- `claude-agent-sdk` (核心)
+- `tokio` (并发)
+- `futures` (Future 组合)
+
+**验证指标**:
 - [ ] 批量正确性: 10个查询结果与单独执行一致
 - [ ] 性能提升: 批量执行比顺序快 > 50%
 - [ ] 容错性: 部分失败不影响其他查询
-- [ ] 边界测试: 空批量、超大批量处理
 
-#### 2.2.2 高级 API 封装
-**目标**: 提供开箱即用的业务场景 API
+### 3.4 扩展 Crate: `claude-agent-sdk-agents`
 
-**实现功能**:
-- [ ] `CodeReviewer`: 代码审查 Agent
-- [ ] `DataAnalyst`: 数据分析 Agent
-- [ ] `DocGenerator`: 文档生成 Agent
-- [ ] `TestGenerator`: 测试生成 Agent
+**职责**: 提供开箱即用的预构建 Agent
 
-**验证功能**:
-- [ ] 代码审查: 检测已知漏洞 (OWASP Top 10)
-- [ ] 数据分析: 准确解析 CSV/JSON 数据
-- [ ] 文档生成: Markdown 格式正确
-- [ ] 测试生成: 生成的测试可执行
+**API 设计**:
+```rust
+use claude_agent_sdk_agents::{
+    CodeReviewer, DataAnalyst, DocGenerator, TestGenerator
+};
 
-### Phase 3: 企业级特性 (4-8周)
+// 代码审查
+let reviewer = CodeReviewer::new(agent);
+let review = reviewer.review_pr(&pr_diff).await?;
+// review.vulnerabilities, review.suggestions, review.rating
 
-#### 2.3.1 成本追踪与计费 API
-**目标**: 支持企业成本管理和按使用计费
+// 数据分析
+let analyst = DataAnalyst::new(agent);
+let analysis = analyst.analyze_csv(&csv_path).await?;
+// analysis.summary, analysis.statistics, analysis.anomalies
 
-**实现功能**:
-- [ ] 实时 Token 使用统计
-- [ ] 成本估算 API (基于 Claude 定价)
-- [ ] 预算限制与告警
-- [ ] 使用量报表生成
+// 文档生成
+let docgen = DocGenerator::new(agent);
+let docs = docgen.generate_readme(&source_dir).await?;
 
-**验证功能**:
-- [ ] Token 计数与 Anthropic API 一致 (误差 < 1%)
-- [ ] 成本计算准确 (基于官方定价)
-- [ ] 预算超限正确触发告警
-- [ ] 报表数据与日志一致
+// 测试生成
+let testgen = TestGenerator::new(agent);
+let tests = testgen.generate_tests(&source_file).await?;
+```
 
-#### 2.3.2 会话持久化与恢复
-**目标**: 支持长期运行的多轮对话场景
+**依赖**:
+- `claude-agent-sdk` (核心)
+- `claude-agent-sdk-pool` (推荐)
+- `serde`, `serde_json` (序列化)
 
-**实现功能**:
-- [ ] 会话序列化/反序列化
-- [ ] 会话存储后端抽象 (内存/文件/数据库)
-- [ ] 会话恢复与继续
-- [ ] 会话过期与清理
+**验证指标**:
+| Agent | 验证标准 |
+|-------|----------|
+| CodeReviewer | 检测 OWASP Top 10 漏洞 |
+| DataAnalyst | 准确解析 CSV/JSON 数据 |
+| DocGenerator | Markdown 格式正确 |
+| TestGenerator | 生成的测试可执行 |
 
-**验证功能**:
-- [ ] 持久化完整性: 恢复后会话状态一致
-- [ ] 跨平台兼容: 不同系统间可迁移
-- [ ] 大会话支持: 1000+ 轮对话正确处理
-- [ ] 清理有效性: 过期会话自动清理
+### 3.5 扩展 Crate: `claude-agent-sdk-mcp`
 
-#### 2.3.3 MCP 协议完整支持
-**目标**: 完整支持 Model Context Protocol 工具扩展
+**职责**: 完整支持 Model Context Protocol
 
-**实现功能**:
-- [ ] MCP 服务器注册与管理
-- [ ] 工具发现与调用
-- [ ] 资源访问 (文件、数据库、API)
-- [ ] 提示词模板管理
+**API 设计**:
+```rust
+use claude_agent_sdk_mcp::{
+    McpServer, McpToolRegistry, McpResourceManager
+};
 
-**验证功能**:
+// 注册 MCP 服务器
+let registry = McpToolRegistry::new();
+registry.register_server("filesystem", &fs_server_config).await?;
+registry.register_server("database", &db_server_config).await?;
+
+// 发现和调用工具
+let tools = registry.list_tools().await?;
+let result = registry.call_tool("read_file", &args).await?;
+
+// 资源管理
+let resource_mgr = McpResourceManager::new();
+let content = resource_mgr.read_resource("file:///path/to/file").await?;
+```
+
+**依赖**:
+- `claude-agent-sdk` (核心)
+- `tokio` (进程通信)
+- `serde_json` (JSON-RPC)
+
+**验证指标**:
 - [ ] 工具调用正确性: 标准工具 (Read, Write, Bash)
 - [ ] 资源访问安全性: 权限控制有效
 - [ ] 性能: 工具调用延迟 < 100ms
-- [ ] 扩展性: 支持自定义 MCP 工具
+
+### 3.6 扩展 Crate: `claude-agent-sdk-observability`
+
+**职责**: 提供企业级可观测性
+
+**API 设计**:
+```rust
+use claude_agent_sdk_observability::{
+    PrometheusExporter, MetricsCollector, RequestTracing
+};
+
+// Prometheus 指标导出
+let exporter = PrometheusExporter::new("0.0.0.0:9090");
+exporter.start().await?;
+
+// 指标收集
+let metrics = MetricsCollector::new();
+metrics.record_query(&query, duration, tokens);
+metrics.record_error(&error);
+
+// 请求追踪
+let trace = RequestTracing::new();
+let span = trace.start_span("query");
+// ... query execution ...
+span.end();
+```
+
+**导出指标**:
+```
+# HELP claude_queries_total Total number of queries
+# TYPE claude_queries_total counter
+claude_queries_total{status="success"} 1234
+
+# HELP claude_query_duration_seconds Query duration
+# TYPE claude_query_duration_seconds histogram
+claude_query_duration_seconds_bucket{le="0.1"} 100
+claude_query_duration_seconds_bucket{le="0.5"} 500
+
+# HELP claude_tokens_used_total Total tokens used
+# TYPE claude_tokens_used_total counter
+claude_tokens_used_total{type="input"} 50000
+claude_tokens_used_total{type="output"} 25000
+```
+
+**依赖**:
+- `claude-agent-sdk` (核心)
+- `prometheus` (指标导出)
+- `tracing`, `tracing-subscriber` (追踪)
+- `opentelemetry` (可选)
+
+### 3.7 扩展 Crate: `claude-agent-sdk-session`
+
+**职责**: 支持会话持久化和恢复
+
+**API 设计**:
+```rust
+use claude_agent_sdk_session::{
+    SessionManager, SessionStore, FileSessionStore
+};
+
+// 会话管理
+let store = FileSessionStore::new("./sessions");
+let manager = SessionManager::new(store);
+
+// 创建会话
+let session = manager.create_session("user-123").await?;
+
+// 添加消息
+session.add_message(Message::user("Hello")).await?;
+
+// 持久化
+session.save().await?;
+
+// 恢复会话
+let restored = manager.load_session("session-id").await?;
+```
+
+**存储后端 Trait**:
+```rust
+#[async_trait]
+pub trait SessionStore: Send + Sync {
+    async fn save(&self, session: &Session) -> Result<()>;
+    async fn load(&self, id: &str) -> Result<Option<Session>>;
+    async fn delete(&self, id: &str) -> Result<()>;
+    async fn list(&self, user_id: &str) -> Result<Vec<SessionMeta>>;
+}
+```
+
+**内置实现**:
+- `MemorySessionStore`: 内存存储 (测试用)
+- `FileSessionStore`: 文件系统存储
+- `RedisSessionStore`: Redis 存储 (需 feature)
+
+**验证指标**:
+- [ ] 持久化完整性: 恢复后会话状态一致
+- [ ] 大会话支持: 1000+ 轮对话正确处理
+- [ ] 清理有效性: 过期会话自动清理
+
+### 3.8 扩展 Crate: `claude-agent-sdk-cost`
+
+**职责**: 成本追踪和预算管理
+
+**API 设计**:
+```rust
+use claude_agent_sdk_cost::{
+    CostTracker, TokenCounter, BudgetManager, UsageReport
+};
+
+// 成本追踪
+let tracker = CostTracker::new(ClaudePricing::default());
+tracker.record_usage("query-1", input_tokens, output_tokens);
+
+let cost = tracker.calculate_cost(input_tokens, output_tokens);
+// cost: $0.003 (基于 Claude 3.5 Sonnet 定价)
+
+// 预算管理
+let budget = BudgetManager::new(MonthlyBudget {
+    limit: 100.0,  // $100/月
+    alert_thresholds: vec![0.5, 0.8, 0.95],
+});
+
+budget.check_before_query().await?;  // 超预算会报错
+budget.record_usage(cost);
+
+// 使用报告
+let report = UsageReport::generate(&tracker, Period::Last30Days);
+println!("{}", report.to_markdown());
+```
+
+**定价配置**:
+```rust
+pub struct ClaudePricing {
+    pub input_per_million: f64,   // $3.00 for Sonnet
+    pub output_per_million: f64,  // $15.00 for Sonnet
+}
+
+impl Default for ClaudePricing {
+    fn default() -> Self {
+        Self {
+            input_per_million: 3.0,
+            output_per_million: 15.0,
+        }
+    }
+}
+```
+
+**验证指标**:
+- [ ] Token 计数与 Anthropic API 一致 (误差 < 1%)
+- [ ] 成本计算准确 (基于官方定价)
+- [ ] 预算超限正确触发告警
 
 ---
 
-## 三、商业化产品路线图
+## 四、实现计划
 
-### 3.1 产品定位
+### Phase 0: 架构重构 (1周)
+
+**目标**: 将现有功能拆分到独立 crate
+
+**任务**:
+- [ ] 创建 `crates/claude-agent-sdk-pool` 目录结构
+- [ ] 迁移连接池代码到 `pool` crate
+- [ ] 更新核心 crate 依赖
+- [ ] 验证所有测试通过
+
+**目录结构**:
+```
+crates/
+├── claude-agent-sdk/
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs
+│       ├── client.rs
+│       ├── transport/
+│       ├── error.rs
+│       └── types/
+│
+├── claude-agent-sdk-pool/
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs
+│       ├── pool.rs
+│       └── config.rs
+│
+└── (其他扩展 crate 空目录)
+```
+
+### Phase 1: 核心扩展包 (2-3周)
+
+**扩展包**: `pool`, `batch`, `observability`
+
+| Crate | 周数 | 任务 |
+|-------|------|------|
+| `pool` | Week 1 | 迁移现有连接池代码，优化锁竞争 |
+| `batch` | Week 2 | 实现 BatchExecutor，并行执行 |
+| `observability` | Week 2-3 | Prometheus 导出，OpenTelemetry 集成 |
+
+**验收标准**:
+- [ ] 所有 crate 编译通过
+- [ ] 测试覆盖率 > 80%
+- [ ] 文档完整 (rustdoc)
+- [ ] 示例代码可运行
+
+### Phase 2: Agent 扩展包 (2-3周)
+
+**扩展包**: `agents`, `session`, `cost`
+
+| Crate | 周数 | 任务 |
+|-------|------|------|
+| `agents` | Week 4-5 | 实现 CodeReviewer, DataAnalyst, TestGenerator |
+| `session` | Week 5 | 会话管理，存储后端 |
+| `cost` | Week 6 | Token 统计，成本计算，预算管理 |
+
+**验收标准**:
+- [ ] 预构建 Agent 可用
+- [ ] 会话持久化正常工作
+- [ ] 成本追踪准确
+
+### Phase 3: MCP 扩展包 (2周)
+
+**扩展包**: `mcp`
+
+**任务**:
+- [ ] MCP 服务器注册
+- [ ] 工具发现与调用
+- [ ] 资源访问
+- [ ] 提示词模板
+
+### Phase 4: 文档与示例 (持续)
+
+**任务**:
+- [ ] 每个 crate 的 README
+- [ ] API 参考文档 (rustdoc)
+- [ ] 示例项目 (至少 10 个)
+- [ ] 迁移指南
+
+---
+
+## 五、商业化产品路线图
+
+### 5.1 产品定位
 
 **Rust Agent SDK** 定位为:
 - **高性能**: 比 Python SDK 快 1.5-6x
 - **低资源**: 内存占用降低 10x
+- **模块化**: 按需加载扩展包
 - **企业级**: 完整的可观测性和成本管理
-- **跨平台**: 支持嵌入式和边缘场景
 
-### 3.2 定价策略建议
+### 5.2 定价策略建议
 
 | 层级 | 价格 | 包含 |
 |------|------|------|
-| **开源版** | 免费 | 核心 SDK、社区支持 |
-| **Pro** | $99/月 | 高级 API、优先支持、示例库 |
-| **Enterprise** | 按需 | 私有部署、SLA、定制开发 |
+| **开源版** | 免费 | 核心 SDK + 基础扩展 (pool, batch) |
+| **Pro** | $99/月 | 所有扩展包 + 优先支持 |
+| **Enterprise** | 按需 | 私有部署 + SLA + 定制开发 |
 
-### 3.3 差异化优势
+### 5.3 差异化优势
 
 | 维度 | Rust SDK | TypeScript SDK | Python SDK |
 |------|----------|----------------|------------|
 | 性能 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
 | 内存 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| 模块化 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
 | 生态 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 学习曲线 | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | 嵌入式 | ⭐⭐⭐⭐⭐ | ⭐ | ⭐ |
-
-### 3.4 目标客户
-
-1. **高频调用场景**: 金融分析、实时监控
-2. **资源受限场景**: 边缘计算、嵌入式设备
-3. **高性能要求**: 游戏、实时系统
-4. **成本敏感企业**: 大规模部署需要优化成本
 
 ---
 
-## 四、验证与测试计划
+## 六、验证与测试计划
 
-### 4.1 单元测试覆盖
+### 6.1 每个 Crate 的测试要求
 
-**目标**: 80%+ 代码覆盖率
+| Crate | 单元测试 | 集成测试 | 文档测试 |
+|-------|----------|----------|----------|
+| 核心 | 90%+ | 必须 | 必须 |
+| pool | 85%+ | 必须 | 必须 |
+| batch | 85%+ | 必须 | 必须 |
+| agents | 80%+ | 必须 | 必须 |
+| mcp | 80%+ | 必须 | 必须 |
+| observability | 80%+ | 可选 | 必须 |
+| session | 85%+ | 必须 | 必须 |
+| cost | 85%+ | 可选 | 必须 |
 
-```
-覆盖率要求:
-- 核心 API: 90%+
-- 工具集成: 80%+
-- 错误处理: 100%
-- 边界条件: 100%
-```
-
-### 4.2 集成测试
-
-**测试场景**:
-- [ ] 与 Anthropic API 真实集成
-- [ ] 与 MCP 工具集成
-- [ ] 多轮对话场景
-- [ ] 并发压力测试
-
-### 4.3 示例项目验证
-
-**必须完成的示例**:
-
-| 示例 | 验证标准 |
-|------|----------|
-| Code Reviewer | 检测 10+ 种代码问题 |
-| Data Analyst | 正确分析 CSV/JSON 数据集 |
-| Doc Generator | 生成格式正确的文档 |
-| Test Generator | 生成的测试通过执行 |
-
-### 4.4 性能基准
+### 6.2 性能基准
 
 **对比基准** (vs Python SDK):
 
@@ -237,441 +622,54 @@
 | 内存占用(空闲) | 50MB | < 5MB |
 | 内存占用(峰值) | 200MB | < 50MB |
 
-### 4.5 文档完整性
+### 6.3 示例项目验证
 
-**必须文档**:
-- [ ] API 参考文档 (rustdoc)
-- [ ] 入门教程
-- [ ] 示例代码 (至少 10 个)
-- [ ] 最佳实践指南
-- [ ] 迁移指南 (从 Python/TS SDK)
-
----
-
-## 五、执行时间线
-
-```
-Week 1-2:  Phase 1.1 - 连接池与性能优化
-Week 3-4:  Phase 1.2 - 错误处理与可观测性
-Week 5-6:  Phase 2.1 - 批量 API 支持
-Week 7-8:  Phase 2.2 - 高级 API 封装
-Week 9-12: Phase 3 - 企业级特性
-Week 13+:  持续优化与文档完善
-```
+| 示例 | 使用扩展包 | 验证标准 |
+|------|------------|----------|
+| 基础查询 | 核心 | 正确返回结果 |
+| 并发查询 | pool, batch | 10并发 < 500ms |
+| 代码审查 | agents | 检测 10+ 种问题 |
+| 数据分析 | agents, batch | 正确分析 CSV/JSON |
+| 生产部署 | observability, cost | 指标可观测，成本可控 |
 
 ---
 
-## 六、风险与缓解
+## 七、执行时间线
+
+```
+Week 1:    Phase 0 - 架构重构
+Week 2-4:  Phase 1 - 核心扩展包 (pool, batch, observability)
+Week 5-7:  Phase 2 - Agent 扩展包 (agents, session, cost)
+Week 8-9:  Phase 3 - MCP 扩展包
+Week 10+:  Phase 4 - 文档与示例
+```
+
+---
+
+## 八、风险与缓解
 
 | 风险 | 概率 | 影响 | 缓解措施 |
 |------|------|------|----------|
-| API 变更 | 中 | 高 | 版本锁定、变更检测 |
-| 性能不达预期 | 低 | 高 | 增量优化、基准监控 |
-| 文档不足 | 中 | 中 | 优先文档、示例驱动 |
-| 生态竞争 | 高 | 中 | 差异化定位、快速迭代 |
+| 架构复杂度增加 | 中 | 中 | 清晰的依赖关系，详细文档 |
+| 版本兼容性 | 中 | 高 | 语义化版本，兼容性测试 |
+| 依赖冲突 | 低 | 中 | Workspace 依赖管理 |
+| 生态竞争 | 高 | 中 | 差异化定位，快速迭代 |
 
 ---
 
-## 七、成功指标 (KPI)
+## 九、成功指标 (KPI)
 
 ### 技术指标
-- 性能提升: **> 2x** vs Python SDK
-- 内存优化: **> 5x** vs Python SDK
+- 扩展包数量: **8个**
 - 测试覆盖率: **> 80%**
 - 示例数量: **> 10** 个
+- 编译时间: 核心 crate < 30s
 
 ### 业务指标 (6个月目标)
 - GitHub Stars: **> 500**
 - 周下载量: **> 1000**
 - 企业客户: **> 5**
 - 社区贡献者: **> 10**
-
----
-
-## 八、真实商业案例与验证 (新增)
-
-### 8.1 已验证的商业化应用案例
-
-#### 案例一: Claude Cowork 自动化平台
-**公司**: 匿名初创公司
-**产品**: Claude Cowork 克隆版
-**验证结果**:
-- ✅ 2小时完成原本需要2个月的内容生成工作
-- ✅ 计划于2026年1月开源
-- ✅ 预测将成为2026年AI应用开发主流趋势
-
-**技术验证**:
-```python
-# 核心实现示例
-from claude_agent_sdk import query
-
-async def content_automation():
-    async for message in query(prompt="批量生成营销内容"):
-        # 处理内容生成
-        pass
-```
-
-#### 案例二: Web 开发 Agent (类似 v0.dev)
-**产品**: Prompt驱动的网页生成器
-**核心功能**:
-- 输入自然语言描述 → 生成完整网页
-- 实时预览支持
-- 基于 Claude Agent SDK
-
-**验证指标**:
-| 指标 | 结果 |
-|------|------|
-| 生成速度 | < 60秒/页面 |
-| 代码质量 | 生产可用 |
-| 可定制性 | 支持后续修改 |
-
-#### 案例三: Design System UI 生成器
-**开发时间**: 几小时内完成
-**核心能力**:
-- 输入: 提示词或截图
-- 搜索数百个 Design System 文档
-- 使用内置 GREP 工具检索组件 API
-- 输出: 完整的 UI 页面代码
-
-**验证场景**:
-```
-输入: "创建一个用户注册表单，使用 Material Design"
-处理: 检索 Material Design 文档 → 识别组件 → 生成代码
-输出: 完整的 React 组件代码
-```
-
-#### 案例四: Excalidraw 功能开发 (Anthropic 官方演示)
-**产品**: 开源白板工具
-**开发任务**: 添加表格组件
-**验证结果**:
-| 维度 | 传统开发 | Claude Code |
-|------|----------|-------------|
-| 时间 | 数小时 | **10分钟** |
-| 代码质量 | 手写 | AI生成 |
-| 测试 | 手动 | 自动运行 |
-| 文档 | 手动更新 | GitHub Actions 自动更新 |
-
-### 8.2 企业级生产部署案例
-
-#### Cognizant 企业 AI 转型
-**规模**: 全球性企业
-**方案**: Claude + Orchestration + Agent SDK
-**应用场景**:
-- 多 Agent 系统协同
-- 显式策略和审批流程
-- 从试点到生产的快速迁移
-
-**验证指标**:
-- 部署周期: 缩短 60%
-- 人工干预: 减少 40%
-- ROI: 正向收益
-
-#### ServiceNow 客户成功
-**数据**: 2025年财报
-| 客户层级 | 数量 | ACV 范围 |
-|----------|------|----------|
-| $1M+ | 44 | $1M - $5M |
-| $5M+ | 6 | $5M - $10M |
-| $10M+ | 2 | $10M+ |
-
-#### Salesforce AgentForce
-**客户案例**: Wiley (教育出版)
-**验证数据**:
-- ROI: **213%**
-- 坐席培训效率: 提升 **50%**
-- 成本节省: **$230,000**
-- 定价模式: **$2/对话**
-
-### 8.3 验证框架与基准测试
-
-#### 官方推荐基准
-| 基准名称 | 用途 | 验证场景 |
-|----------|------|----------|
-| **SWE-bench Verified** | 代码生成 | 软件工程任务 |
-| **Terminal-Bench** | 终端操作 | CLI 命令执行 |
-| **Azure AI Evaluation** | 企业评测 | 综合能力评估 |
-
-#### 验证方法对比
-| SDK | 测试方法 | 特点 |
-|-----|----------|------|
-| **Claude Agent SDK** | 子进程 CLI | 需要真实 API 调用 |
-| **Google ADK** | Mock + Real API | 轨迹评估 |
-| **OpenAI Agents JS** | Guardrails | 输入输出验证 |
-
-#### 推荐验证架构
-```rust
-// Rust SDK 验证框架设计
-struct AgentValidator {
-    benchmarks: Vec<Benchmark>,
-    mock_tools: HashMap<String, MockTool>,
-    evaluation_metrics: Vec<Metric>,
-}
-
-impl AgentValidator {
-    async fn validate(&self, agent: &Agent) -> ValidationResult {
-        // 1. Mock 工具测试
-        // 2. 真实 API 调用测试
-        // 3. 轨迹评估
-        // 4. 性能指标收集
-    }
-}
-```
-
-### 8.4 商业模式验证数据
-
-#### 定价模式效果分析
-| 模式 | 采用率 | 平均收入 | 适用场景 |
-|------|--------|----------|----------|
-| 按使用量 | 35% | $0.01-0.03/调用 | API 服务 |
-| 按结果 | 25% | $2/对话 | 客服场景 |
-| 订阅+用量 | 40% | $99-399/月 | 混合模式 |
-
-#### 行业应用 ROI
-| 行业 | 典型 ROI | 关键指标 |
-|------|----------|----------|
-| 客服 | 213% | 首次解决率 ↑40% |
-| 开发 | 155% | 代码速度 ↑55% |
-| 营销 | 180% | 内容产出 ↑3x |
-| 金融 | 160% | 分析准确率 ↑60% |
-
----
-
-## 九、Rust SDK 特有验证计划 (新增)
-
-### 9.1 性能基准验证
-
-#### 与 Python SDK 对比测试
-```rust
-#[cfg(test)]
-mod benchmarks {
-    use criterion::{black_box, criterion_group, criterion_main, Criterion};
-
-    fn bench_simple_query(c: &mut Criterion) {
-        // 目标: < 200ms (Python: 500ms)
-        c.bench_function("simple_query", |b| {
-            b.iter(|| async {
-                query(black_box("What is 2+2?")).await
-            })
-        });
-    }
-
-    fn bench_concurrent_10(c: &mut Criterion) {
-        // 目标: < 800ms (Python: 5000ms)
-        c.bench_function("concurrent_10", |b| {
-            b.iter(|| async {
-                futures::future::join_all((0..10).map(|_| {
-                    query(black_box("Generate hello world"))
-                })).await
-            })
-        });
-    }
-}
-```
-
-### 9.2 功能验证清单
-
-#### 必须通过的验证场景
-- [ ] **代码审查 Agent**: 检测 OWASP Top 10 漏洞
-- [ ] **数据分析 Agent**: 正确解析 CSV/JSON/Parquet
-- [ ] **文档生成 Agent**: Markdown 格式正确率 100%
-- [ ] **测试生成 Agent**: 生成的测试可执行通过
-- [ ] **MCP 集成**: 标准工具调用成功率 100%
-
-### 9.3 企业级验证
-
-#### 生产环境验证项
-| 验证项 | 标准 | 测试方法 |
-|--------|------|----------|
-| 并发稳定性 | 1000 请求无崩溃 | 压力测试 |
-| 内存泄漏 | 24h 运行无增长 | 长期运行测试 |
-| 错误恢复 | 自动重连成功 | 故障注入测试 |
-| 日志完整性 | 100% 操作可追踪 | 审计日志检查 |
-
----
-
-## 十、Claude Agent SDK 应用模式 (新增)
-
-### 10.1 核心应用架构模式
-
-#### 模式一: 子进程 CLI 架构 (当前 Rust SDK)
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   应用层    │────▶│  Rust SDK   │────▶│  Claude CLI │
-└─────────────┘     └─────────────┘     └─────────────┘
-                          │                    │
-                          ▼                    ▼
-                    ┌─────────────┐     ┌─────────────┐
-                    │  Transport  │     │   Claude    │
-                    │   Layer     │     │    API      │
-                    └─────────────┘     └─────────────┘
-```
-**优点**: 简单、稳定
-**缺点**: 每次查询启动新进程 (~50-100ms 开销)
-
-#### 模式二: 连接池架构 (优化目标)
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   应用层    │────▶│ Connection  │────▶│  Claude CLI │
-│             │     │    Pool     │     │  (复用)     │
-└─────────────┘     └─────────────┘     └─────────────┘
-                          │
-                    ┌─────┴─────┐
-                    │  Worker 1 │
-                    │  Worker 2 │
-                    │  Worker N │
-                    └───────────┘
-```
-**优点**: 减少进程启动开销
-**目标**: 延迟从 300ms → 100ms
-
-### 10.2 工具集成模式
-
-#### 内置工具
-| 工具 | 用途 | 验证场景 |
-|------|------|----------|
-| **Read** | 文件读取 | 读取项目配置 |
-| **Write** | 文件写入 | 生成代码文件 |
-| **Bash** | 命令执行 | 运行测试 |
-| **Grep** | 内容搜索 | 搜索代码模式 |
-| **WebFetch** | 网页获取 | 获取 API 文档 |
-| **Task** | 任务委托 | 子任务分发 |
-
-#### MCP 扩展模式
-```rust
-// Rust MCP 工具定义
-use claude_agent_sdk::{tool, ToolResult};
-
-#[tool("database_query", "Query database", {
-    "query" => String,
-    "limit" => Option<u32>
-})]
-async fn database_query(query: String, limit: Option<u32>) -> ToolResult {
-    // 实现数据库查询
-    ToolResult::success(json!({"result": "data"}))
-}
-```
-
-### 10.3 常见应用场景实现
-
-#### 场景一: 代码审查 Agent
-```rust
-use claude_agent_sdk::{Agent, Tool};
-
-struct CodeReviewer {
-    agent: Agent,
-}
-
-impl CodeReviewer {
-    async fn review(&self, pr_diff: &str) -> ReviewResult {
-        let prompt = format!(
-            "审查以下代码变更，检查:\n\
-             1. 安全漏洞 (OWASP Top 10)\n\
-             2. 性能问题\n\
-             3. 代码风格\n\
-             4. 测试覆盖\n\n\
-             代码:\n{}", pr_diff
-        );
-
-        self.agent.query(&prompt).await
-    }
-}
-```
-
-**验证指标**:
-- OWASP 漏洞检出率: > 90%
-- 误报率: < 10%
-- 审查速度: < 30秒/1000行
-
-#### 场景二: 数据分析 Agent
-```rust
-struct DataAnalyst {
-    agent: Agent,
-    supported_formats: Vec<&'static str>,
-}
-
-impl DataAnalyst {
-    async fn analyze(&self, data_path: &str) -> AnalysisResult {
-        // 1. 自动检测格式
-        // 2. 读取数据
-        // 3. 生成分析报告
-        let prompt = format!(
-            "分析数据文件 {}，提供:\n\
-             1. 数据概览\n\
-             2. 统计摘要\n\
-             3. 异常检测\n\
-             4. 可视化建议", data_path
-        );
-        self.agent.query(&prompt).await
-    }
-}
-```
-
-**验证指标**:
-- 格式支持: CSV, JSON, Parquet, Excel
-- 准确性: 统计结果与 Pandas 一致
-- 速度: < 5秒/100MB
-
-#### 场景三: 测试生成 Agent
-```rust
-struct TestGenerator {
-    agent: Agent,
-}
-
-impl TestGenerator {
-    async fn generate_tests(&self, source_file: &str) -> TestCode {
-        let prompt = format!(
-            "为以下代码生成单元测试:\n\
-             - 覆盖所有公共方法\n\
-             - 包含边界条件\n\
-             - 包含错误处理\n\n\
-             源码:\n{}", source_file
-        );
-        self.agent.query(&prompt).await
-    }
-}
-```
-
-**验证指标**:
-- 生成测试可编译: 100%
-- 测试通过率: > 95%
-- 覆盖率提升: +30%
-
-### 10.4 企业集成模式
-
-#### 模式一: API 网关集成
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐
-│  前端    │───▶│ API 网关 │───▶│ Rust SDK │
-└──────────┘    └──────────┘    └──────────┘
-                     │
-                     ▼
-              ┌──────────────┐
-              │ 认证/限流/监控 │
-              └──────────────┘
-```
-
-#### 模式二: 消息队列集成
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐
-│  生产者  │───▶│  Kafka   │───▶│ Rust SDK │
-└──────────┘    │  队列    │    │  消费者  │
-                └──────────┘    └──────────┘
-```
-
-#### 模式三: 微服务集成
-```yaml
-# docker-compose.yml
-services:
-  claude-agent:
-    build: ./rust-sdk
-    environment:
-      - ANTHROPIC_API_KEY=${API_KEY}
-    deploy:
-      replicas: 3
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-```
 
 ---
 
@@ -685,16 +683,14 @@ services:
 - [Vercel AI SDK 成功案例](https://m.blog.csdn.net/gitblog_00277/article/details/150967592)
 - [LangChain 商业化路径](https://baijiahao.baidu.com/s?id=1846641411349754201)
 - [Anthropic 商业模式分析](https://m.36kr.com/p/3566639203810436)
-- [25个AI Agent落地案例](https://m.blog.csdn.net/m0_59235945/article/details/155969203)
-- [AI Agent商业化分析](https://baijiahao.baidu.com/s?id=1857088434884282644)
 
-### 技术评测
-- [Anthropic AI Agent 评估体系](https://www.53ai.com/news/LargeLanguageModel/2026011315308.html)
-- [Claude Code集成方式](https://m.blog.csdn.net/m0_53117338/article/details/149785255)
-- [OpenHands Agent SDK 论文](https://arxiv.org/html/2511.03690v1)
+### Rust 最佳实践
+- [The Cargo Book - Workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html)
+- [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
 
 ---
 
-*文档版本: 1.6*
+*文档版本: 1.7*
 *创建日期: 2026-02-21*
 *最后更新: 2026-02-21*
+*架构变更: 采用扩展包架构，核心 crate 保持精简*
