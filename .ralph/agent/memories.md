@@ -28,6 +28,10 @@
 
 ## Decisions
 
+### mem-1771672960-5c7b
+> PROMPT.md extension crate architecture updated (v1.8): Added current state analysis, minimal migration strategy (copy-first, feature flags, re-exports), detailed Phase 0-4 task lists, code reuse examples (pool.rs migration pattern), migration guide with backward compatibility, milestone checkpoints. Key principle: extract existing code to extension crates while maintaining backward compatibility via feature flags and re-exports.
+<!-- tags: planning, rust-sdk, architecture | created: 2026-02-21 -->
+
 ### mem-1771650972-6b60
 > Claude Agent SDK商业化研究: Vercel B/200M ARR (平台+AI工具), LangChain .25B/12-16M ARR (开源+企业版), Claude Code B+ ARR (按结果付费). Anthropic 70-75%收入来自API调用, 36%使用量为编程任务. 四大商业化类型: Finance/PersonalAssistant/CustomerSupport/DeepResearch Agent.
 <!-- tags: commercial, research, sdk | created: 2026-02-21 -->
