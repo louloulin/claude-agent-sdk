@@ -1,68 +1,32 @@
-# Claude Agent SDK Rust - Roadmap Implementation
+# Claude Agent SDK Rust Roadmap Implementation
 
-## Understanding
+## Progress (2026-02-21)
 
-The objective is to implement the Chinese roadmap for Claude Agent SDK Rust v0.1.6. The roadmap identifies:
+### Completed Tasks
+- ✅ Fix bool_assert_comparison in integration_tests.rs (committed: f52d58b)
+- ✅ Fix int_plus_one in 51_orchestration.rs (committed: 24225f3)
+- ✅ Fix unnecessary_sort_by in examples (committed: 70e3da1)
+- ✅ Fix redundant_closure in 50_production_deployment.rs (committed: 9644543)
 
-### Critical Issues (P0)
-- 2 example files with missing Debug trait (96% compilation success rate)
-  - `30_agent_skills_simple.rs` - HelloSkill
-  - `30_agent_skills.rs` - FibonacciSkill
+### Current State
+- ✅ `cargo build --all-targets --all-features` - SUCCESS
+- ✅ `cargo test --lib` - 390 tests pass
+- ✅ Core library Clippy warnings - 0 (all fixed!)
+- ⚠️ Example Clippy warnings remain (~171, mostly dead_code)
 
-### Important Issues (P1)
-- ~10 core library Clippy warnings
-- Performance: No connection pooling (50-100ms process spawn overhead)
-- Lock contention in client.rs hot path
+### Core Library Clippy Warnings Status
+1. ~~`int_plus_one` - parallel.rs:246~~ ✅ FIXED
+2. ~~`unnecessary_sort_by` - tags.rs:510, tags.rs:104~~ ✅ FIXED
+3. ~~`redundant_closure` - types.rs:409~~ ✅ FIXED (was in example file)
+4. `type_complexity` - vscode.rs:349, 351 - may use allow
 
-### Architecture (P2)
-- Fixed 10MB buffer
-- V2 prompt() creates new client per call
+### Notes
+- The redundant_closure warning was in examples/50_production_deployment.rs, not types.rs
+- Core library now has 0 Clippy warnings
+- All 171 remaining warnings are in examples (mostly dead_code)
 
-## Approach
-
-Starting with Phase 1: Code Quality Fixes
-1. Fix the 2 example compilation errors (add Debug derive)
-2. Fix core library Clippy warnings
-3. Verify all tests pass
-
-## Progress
-
-### 2026-02-21 Initial Analysis
-- No ready tasks exist
-- Need to create tasks for the roadmap items
-- Starting with P0 items (example compilation errors)
-
-### 2026-02-21 Task 1 Completed: Fix example 39 Path import
-- **Issue**: Example 39 (39_agent_skills_sandbox.rs) had `Path::new()` used inside a `#[cfg(feature = "sandbox")]` block but `std::path::Path` was not imported
-- **Fix**: Added conditional import `#[cfg(feature = "sandbox")] use std::path::Path;`
-- **Verification**: `cargo build --all-targets --all-features` now succeeds (Finished dev profile)
-- **Note**: The roadmap mentioned examples 30 (HelloSkill/FibonacciSkill missing Debug) but these already have `#[derive(Debug)]` - likely fixed since roadmap was created on 2026-02-20
-
-### 2026-02-21 Task 2 Completed: Core library Clippy warnings
-- **Status**: Already fixed in commit b080d50 (fix(clippy): resolve all core library Clippy warnings)
-- **Verification**: `cargo clippy --package cc-agent-sdk --lib -- -W clippy::all` passes with no warnings
-- **Result**: Task closed, no changes needed
-
-### 2026-02-21 Task 3 Completed: Verify all tests pass
-- **Command**: `cargo test --all`
-- **Result**: 139 passed, 0 failed, 3 ignored
-- **Status**: All tests pass successfully
-
-## Phase 1 Complete
-
-All Phase 1 (Code Quality Fixes) tasks from the roadmap are complete:
-- ✅ Example compilation errors fixed (previous iterations)
-- ✅ Core library Clippy warnings resolved
-- ✅ All tests pass
-
-### Remaining Roadmap Items (Future Phases)
-
-**Phase 2: Performance Optimization**
-- Connection pooling implementation
-- Lock contention optimization
-- Dynamic buffer sizing
-
-**Phase 3: Advanced Features**
-- Query caching
-- Batch processing API
-- Server mode
+### Remaining Tasks
+- [x] Fix int_plus_one → Fixed in examples/51_orchestration.rs
+- [x] Fix unnecessary_sort_by → Fixed in tags.rs
+- [x] Fix redundant_closure → Fixed in examples/50_production_deployment.rs
+- [ ] Optionally clean up dead_code warnings in examples (~62 warnings)

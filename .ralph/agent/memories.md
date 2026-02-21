@@ -14,6 +14,22 @@
 
 ## Fixes
 
+### mem-1771649925-bbb6
+> Fixed redundant_closure Clippy warning: use unwrap_or_else(String::new) instead of unwrap_or_else(|| String::new()) - pass the function directly instead of wrapping in closure
+<!-- tags: clippy, rust-sdk, code-quality | created: 2026-02-21 -->
+
+### mem-1771649691-8385
+> Fixed unnecessary_sort_by Clippy warning: use sort_by_key(|b| std::cmp::Reverse(b.1)) instead of sort_by(|a, b| b.1.cmp(&a.1)) for descending sort by value - more idiomatic
+<!-- tags: clippy, rust-sdk, code-quality | created: 2026-02-21 -->
+
+### mem-1771649314-52af
+> Fixed int_plus_one Clippy warning: change `current + 1 <= current_max` to `current < current_max` for simpler idiomatic comparison - mathematically equivalent and clearer
+<!-- tags: clippy, rust-sdk, code-quality | created: 2026-02-21 -->
+
+### mem-1771648950-be23
+> Fixed bool_assert_comparison Clippy warning: use assert!(!x) instead of assert_eq!(x, false) for boolean assertions - better readability and Clippy compliant
+<!-- tags: clippy, rust-sdk, code-quality | created: 2026-02-21 -->
+
 ### mem-1771646335-5a58
 > Example 39 Path import: Fixed missing conditional import. Use #[cfg(feature = "sandbox")] use std::path::Path when Path is only used in sandbox feature code.
 <!-- tags: examples, rust-sdk | created: 2026-02-21 -->
